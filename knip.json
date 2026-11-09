@@ -1,0 +1,31 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": [
+        "src/main.ts",
+        "vite.config.ts",
+        "svelte.config.js",
+        "eslint.config.js",
+        "playwright.config.ts",
+        "tests/**/*.ts",
+        "scripts/*.mjs"
+      ],
+      "project": [
+        "src/**/*.{ts,svelte}",
+        "tests/**/*.ts",
+        "scripts/*.mjs"
+      ],
+      "ignoreDependencies": [
+        "tailwindcss"
+      ]
+    },
+    "backend": {
+      "entry": [
+        "src/app.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    }
+  }
+}
