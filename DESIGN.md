@@ -85,4 +85,6 @@ Don't: add raw hex/rgb/hsl values, duplicate near-identical colors, attach click
 
 ## Accessibility
 
+Keyboard focus uses the app-wide `:focus-visible` highlighter in `app.css`, colored by `--focus-highlight`. Dark Forest uses sage; Classic uses black, with white on its black toolbars. Keep component focus styling limited to supporting feedback rather than replacing this indicator. The main typing areas stay outline-free and use the typing caret as their focus cue. Native outlines remain suppressed only for their hidden inputs; forced-color mode uses the system Highlight color on other controls. Tab and Shift+Tab follow document order in prose practice; code practice retains Tab for indentation and Shift+Tab to leave the editor. Mobile navigation closes with Escape and returns focus to its toggle.
+
 Both themes retain distinct text, error, caret and chart roles. Errors also use underlines; chart series include labels and dashed variants. Settings close controls are now keyboard-accessible buttons. Legacy muted/brand colors are preserved, so this refactor does not claim full WCAG compliance; contrast remediation should be reviewed as an explicit visual change.

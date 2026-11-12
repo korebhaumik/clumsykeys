@@ -486,7 +486,7 @@
 		{#if !ready}
 			<div class="typing-cover" role="status">Reconnecting…</div>
 		{:else if isBlur && $game === "playing"}
-			<button class="typing-cover" onclick={() => inputEl.focus()}>
+			<button class="typing-cover" tabindex="-1" onclick={() => inputEl.focus()}>
 				<span>Click to focus and type</span>
 			</button>
 		{/if}

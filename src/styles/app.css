@@ -28,6 +28,23 @@ body {
 	margin: 0;
 }
 
+/* One keyboard highlighter for every route, dialog and focusable control.
+   Outlines follow the element through scrolling/resizing without an overlay
+   intercepting clicks or falling behind a dialog's top layer. */
+:focus-visible {
+	outline: var(--dimension-2px) solid var(--focus-highlight);
+	outline-offset: var(--dimension-3px);
+}
+
+/* The typing caret is the focus cue for the main typing area. */
+.sr-only:focus-visible { outline: none; }
+
+@media (forced-colors: active) {
+	:focus-visible {
+		outline-color: Highlight;
+	}
+}
+
 @media (prefers-reduced-motion: no-preference) {
 	.route-content:not(:empty), .practice-results {
 		animation: page-enter var(--motion-180ms) ease-out;

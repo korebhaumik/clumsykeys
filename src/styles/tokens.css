@@ -260,6 +260,7 @@
 	--ink: var(--palette-silver-200);
 	--muted: var(--palette-stone-400);
 	--accent: var(--palette-sage-300);
+	--focus-highlight: var(--accent);
 	--accent-ink: var(--palette-forest-950);
 	--accent-wash: var(--palette-forest-800);
 	--caret: var(--palette-teal-200);

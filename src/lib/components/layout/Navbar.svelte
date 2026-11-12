@@ -31,8 +31,20 @@
 	let isVisible = $state(false);
 
 	let menuIsVisible = $state(false);
+	let menuToggle: HTMLButtonElement;
+	const navigationId = $props.id();
+
+	function handleNavigationKey(event: KeyboardEvent) {
+		if (event.key === "Escape" && menuIsVisible && !document.querySelector("dialog[open]")) {
+			event.preventDefault();
+			menuIsVisible = false;
+			menuToggle.focus();
+		}
+	}
 
 </script>
+
+<svelte:window onkeydown={handleNavigationKey} />
 
 <header class="flex items-end justify-between px-5 mt-5 big:px-10" class:practice-header={mode} class:active-test={active}>
 	<div class="flex items-end">
@@ -146,6 +158,7 @@
 		{:else}
 			
 			<button
+				aria-label="Language"
 				class={cn("border rounded-full border-dark-forest-accent-main p-2", {
 					"border-dark-forest-accent-main": $theme === "dark-forest",
 					"border-black": $theme === "classic",
@@ -178,6 +191,7 @@
 		</a>
 		
 		<button
+			aria-label="Notifications"
 			class="hidden p-2 rounded-full sm:inline-block"
 			onclick={() => {
 				isVisible = !isVisible;
@@ -187,9 +201,11 @@
 		</button>
 		
 		<button
+			bind:this={menuToggle}
 			class="inline-block md:hidden"
 			aria-label="Open navigation"
 			aria-expanded={menuIsVisible}
+			aria-controls={navigationId}
 			onclick={() => {
 				menuIsVisible = !menuIsVisible;
 			}}
@@ -198,7 +214,7 @@
 		</button>
 	</div>
 	{#if menuIsVisible && !active}
-		<nav aria-label="Mobile navigation" class="mobile-navigation absolute right-5 top-24 z-30 grid gap-3 rounded-lg bg-dark-forest-fade p-4 text-dark-forest-highlighted md:hidden">
+		<nav id={navigationId} aria-label="Mobile navigation" class="mobile-navigation absolute right-5 top-24 z-30 grid gap-3 rounded-lg bg-dark-forest-fade p-4 text-dark-forest-highlighted md:hidden">
 			<a href="#/" onclick={() => (menuIsVisible = false)}>Prose practice</a>
 			<a href="#/game" onclick={() => (menuIsVisible = false)}>Code practice</a>
 			<a href="#/leaderboard" onclick={() => (menuIsVisible = false)}>Leaderboard</a>

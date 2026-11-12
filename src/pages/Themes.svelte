@@ -64,7 +64,6 @@
 <style>
 	.appearance-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); align-items: start; gap: var(--dimension-1rem); }
 	.theme-picker p { margin-top: var(--dimension-0_8rem); font-size: var(--text-0_82rem); }
-	.theme-picker select:focus-visible { outline: var(--dimension-2px) solid var(--accent); outline-offset: var(--dimension-3px); }
 	.theme-preview { overflow: hidden; }
 	.theme-sample { padding: clamp(var(--dimension-1_15rem), var(--dimension-4vw), var(--dimension-1_8rem)) var(--dimension-1_15rem); font-family: inherit; font-size: clamp(var(--text-1rem), var(--text-2_4vw), var(--text-1_25rem)); line-height: var(--leading-1_65); }
 	.caret-word .text-zinc-600 { position: relative; }

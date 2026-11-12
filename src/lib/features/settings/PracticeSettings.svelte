@@ -184,5 +184,5 @@
 		color: var(--accent-ink);
 		text-decoration: underline;
 	}
-	:global([data-theme="classic"]) .config-options :global(button:focus-visible) { outline-color: var(--accent-ink); }
+	:global([data-theme="classic"]) .config-options { --focus-highlight: var(--accent-ink); }
 </style>

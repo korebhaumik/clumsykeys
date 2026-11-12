@@ -134,7 +134,6 @@
 		scrollbar-width: thin;
 		scrollbar-color: var(--line) transparent;
 	}
-	.race-settings-preview:focus-visible { outline: var(--dimension-2px) solid var(--accent); outline-offset: var(--dimension-3px); }
 	.race-settings-preview > :is(h2, dl) { flex: none; }
 	.race-settings-preview .settings-label { justify-content: center; text-align: center; }
 	.preview-values {

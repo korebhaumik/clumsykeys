@@ -7,7 +7,6 @@
 .result-metrics dd { color: var(--result-accent); font-size: clamp(var(--text-1_35rem), var(--text-2_5vw), var(--text-2rem)); }
 .result-replay { display: flex; margin: var(--dimension-1_25rem) auto; padding: var(--dimension-0_35rem); color: var(--result-muted); border-radius: var(--radius-0_3rem); }
 .result-replay:hover { color: var(--result-accent); }
-.result-replay:focus-visible { outline: var(--dimension-2px) solid var(--result-accent); }
 
 @media (max-width: 38rem) {
 	.result-overview { grid-template-columns: minmax(0, 1fr); }

@@ -3,11 +3,6 @@
 .engine-page { width: min(100% - var(--dimension-2_5rem), var(--dimension-72rem)); margin: var(--dimension-2_5rem) auto; }
 .practice-shell { --typing-muted: var(--palette-stone-500); }
 
-[data-theme="classic"] :is(a, button, input:not(:where(.sr-only)), select):focus-visible {
-	outline: var(--dimension-2px) solid var(--ink);
-	outline-offset: var(--dimension-3px);
-}
-
 .page-heading { margin-bottom: var(--dimension-1_8rem); }
 .eyebrow { font: 600 var(--text-0_72rem) var(--mono); text-transform: uppercase; letter-spacing: var(--tracking-0_13em); color: var(--accent); margin: 0 0 var(--dimension-0_65rem); }
 .page-heading h1 {
@@ -63,10 +58,6 @@
 .button-secondary { color: var(--ink); border-color: var(--line); background: var(--inset); }
 .button-secondary:hover, .button-secondary[aria-current="page"] { background: var(--accent-wash); }
 .button:disabled { cursor: not-allowed; opacity: .55; }
-.engine-page :is(a, button, input, select):focus-visible {
-	outline: var(--dimension-2px) solid var(--accent);
-	outline-offset: var(--dimension-3px);
-}
 .field { display: grid; gap: var(--dimension-0_45rem); font-size: var(--text-0_9rem); font-weight: var(--weight-600); }
 .field :is(input, select) {
 	width: 100%;
