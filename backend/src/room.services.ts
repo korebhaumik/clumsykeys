@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Server, Socket } from "socket.io";
 import { type Room, rooms } from "./store";
 import { applyRaceSettings, defaultRaceSettings } from "./race.settings";
-import { makeRacePassage, standardPassage } from "./race.passage";
+import { makeRacePassage } from "./race.passage";
 
 type JoinRoomReq = {
 	username: string;
@@ -123,7 +123,7 @@ export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, 
 		isPlaying: false,
 	};
 	const joinedRoom: Room = room ?? {
-		text: standardPassage,
+		text: "",
 		roundId: null,
 		settings: { ...defaultRaceSettings },
 		users: [],

@@ -7,6 +7,7 @@ export const raceModes = {
 
 export const raceLanguages = {
 	english: "English",
+	"english-1k": "English 1k",
 	"english-2k": "English 2k",
 	"english-5k": "English 5k",
 	hinglish: "Hinglish",

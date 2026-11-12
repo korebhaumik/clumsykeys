@@ -94,12 +94,13 @@ test('two browsers join, configure, vote, race, reconnect, see results and repla
     await a.getByRole('button', { name: 'Vote to start' }).click();
     await b.getByRole('button', { name: 'Vote to start' }).click();
     await expect(a.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled({ timeout: 10000 });
-    await a.keyboard.type('The ');
+    const words = await a.locator('.race-passage .typing-word').allTextContents();
+    await a.keyboard.type(words[0] + ' ');
     await a.reload();
     await expect(a.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled();
-    await a.keyboard.type('quick brown fox jumps over the lazy dog.');
+    await a.keyboard.type(words.slice(1).join(' '));
     await b.getByRole('textbox', { name: 'Type the race passage' }).focus();
-    await b.keyboard.type('The quick brown fox jumps over the lazy dog.');
+    await b.keyboard.type(words.join(' '));
     await expect(a.getByRole('heading', { name: 'Race results' })).toBeVisible();
     await expect(b.getByRole('heading', { name: 'Race results' })).toBeVisible();
     await expect(a.locator('tbody tr')).toHaveCount(2);
