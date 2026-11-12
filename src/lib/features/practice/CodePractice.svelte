@@ -384,7 +384,7 @@
 	<div class="code-layout" class:playing={game === "playing"}>
 		<div class="code-toolbar">
 			<div class="toolbar-row">
-				<TestSettingsButton onclick={openSettings} />
+				<TestSettingsButton disabled={game === "playing"} onclick={openSettings} />
 				{#if game === "waiting"}{@render modeToggle()}{/if}
 				{#if game === "waiting" && mode === "snippets"}
 					<div class="snippet-selector">

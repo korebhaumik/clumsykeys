@@ -81,6 +81,7 @@ for (const theme of ['dark-forest', 'classic']) {
         observer.observe(section, { childList: true, subtree: true });
       });
       await page.keyboard.type('X');
+      await expect(page.getByRole('button', { name: 'Test Settings', exact: true })).toBeDisabled();
       await expect(settings).toHaveAttribute('data-options-at-start', '0');
       await page.keyboard.press('Backspace');
       await expect(firstLetter).toHaveCSS('color', unfinishedColor);
@@ -94,6 +95,7 @@ for (const theme of ['dark-forest', 'classic']) {
       await expect(page.locator('.history-detail')).toContainText(passage.split(' ')[0]);
       await page.getByRole('button', { name: 'Practice again' }).click();
       await expect(input).toBeFocused();
+      await expect(page.getByRole('button', { name: 'Test Settings', exact: true })).toBeEnabled();
       expect(errors).toEqual([]);
     });
 
@@ -115,11 +117,15 @@ for (const theme of ['dark-forest', 'classic']) {
           for (const [wordIndex, word] of line.words.entries()) {
             if (wordIndex) await page.keyboard.press('Space');
             await page.keyboard.type(word);
+            if (index === 0 && wordIndex === 0) {
+              await expect(page.getByRole('button', { name: 'Test Settings', exact: true })).toBeDisabled();
+            }
           }
         }
         await expect(page.getByRole('region', { name: 'Practice results' })).toHaveCSS('animation-name', 'page-enter');
         await expect(page.locator('.result-headline')).toContainText('100%');
         await page.getByRole('button', { name: 'Practice again' }).click();
+        await expect(page.getByRole('button', { name: 'Test Settings', exact: true })).toBeEnabled();
       }
       expect(errors).toEqual([]);
     });
@@ -279,6 +285,8 @@ test('prose uses Hinglish words, applies the toggles and accepts composed text',
   await expect(words.first().locator('.text-white')).toHaveCount(first.length);
   await expect(words.first().locator('.text-red-500')).toHaveCount(0);
 
+  await expect(page.getByRole('button', { name: 'Test Settings', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'reset', exact: true }).click();
   await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Numbers', exact: true }).click();
   await page.getByRole('button', { name: 'Insane', exact: true }).click();

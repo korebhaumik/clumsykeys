@@ -28,7 +28,7 @@
 
 <section aria-label="Test settings" class:race-config={race}>
 	<div class={cn("flex flex-wrap gap-3", race ? "text-sm" : "max-w-[var(--dimension-60rem)]")}>
-		<TestSettingsButton onclick={() => {
+		<TestSettingsButton disabled={$game === "playing"} onclick={() => {
 			updateModalContent("main");
 			updateModalVisibility(true);
 		}} />
