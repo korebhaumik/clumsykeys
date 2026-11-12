@@ -1,0 +1,62 @@
+name: Build and Push Multiplayer Server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.dockerignore'
+      - '.github/workflows/docker-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Generate Timestamp Tag
+        id: tag
+        run: echo "timestamp=$(date -u +'%Y-%m-%d-%H-%M-%S')-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/clumsykeys-server:${{ steps.tag.outputs.timestamp }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/clumsykeys-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Save Timestamp Tag
+        env:
+          IMAGE_TAG: ${{ steps.tag.outputs.timestamp }}
+        run: printf '%s\n' "$IMAGE_TAG" > docker-tag.txt
+
+      - name: Upload Tag Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-tag
+          path: docker-tag.txt
+          retention-days: 1

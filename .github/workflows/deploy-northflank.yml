@@ -1,0 +1,67 @@
+name: Deploy Multiplayer Server to Northflank
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Multiplayer Server"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Docker image tag to deploy (latest or a previously published timestamp tag)"
+        required: false
+        default: "latest"
+
+permissions:
+  actions: read
+
+concurrency:
+  group: northflank-multiplayer-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Update Northflank Deployment
+    runs-on: ubuntu-latest
+    # Temporarily disabled for both automatic and manual runs.
+    # To re-enable, restore the condition below:
+    # if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ false }}
+    steps:
+      - name: Download Build Tag Artifact
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-tag
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve Docker Image Tag
+        id: image
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_TAG: ${{ inputs.image_tag }}
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            TAG=$(tr -d '[:space:]' < docker-tag.txt)
+          else
+            TAG="${MANUAL_TAG:-latest}"
+          fi
+          if [[ ! "$TAG" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,127}$ ]]; then
+            echo "Invalid Docker image tag" >&2
+            exit 1
+          fi
+          test -n "$DOCKER_USER"
+          echo "image_path=${DOCKER_USER}/clumsykeys-server:${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Northflank
+        uses: northflank/deploy-to-northflank@v1
+        with:
+          northflank-api-key: ${{ secrets.NORTHFLANK_API_KEY }}
+          project-id: ${{ secrets.NORTHFLANK_PROJECT_ID }}
+          service-id: ${{ secrets.NORTHFLANK_SERVICE_ID }}
+          image-path: ${{ steps.image.outputs.image_path }}
+          credentials-id: ${{ secrets.NORTHFLANK_CREDENTIALS_ID }}

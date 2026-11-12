@@ -23,6 +23,9 @@ test('real HTTP and Socket.IO enforce validation, ownership, countdown, recovery
   let state: any;
   let token = '';
   try {
+    const health = await fetch(url + '/health');
+    assert.equal(health.status, 200);
+    assert.deepEqual(await health.json(), { ok: true });
     for (const query of ['', '?roomId=', '?roomId=a&roomId=b']) assert.equal((await fetch(url + '/rooms' + query)).status, 400);
     assert.equal((await fetch(url + '/rooms?roomId=missing')).status, 404);
     const a = io(url), b = io(url), stranger = io(url); clients.push(a, b, stranger);

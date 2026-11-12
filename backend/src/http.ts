@@ -2,6 +2,10 @@ import type { Express } from "express";
 import { rooms } from "./store";
 
 export function registerRoomRoutes(app: Express) {
+app.get("/health", (_req, res) => {
+	res.json({ ok: true });
+});
+
 app.get("/rooms", (req, res) => {
 	const { roomId } = req.query;
 	if (typeof roomId !== "string" || !roomId.trim()) {
