@@ -23,36 +23,9 @@
 			class={cn("tracking-wide", {
 				"text-dark-forest-accent-main underline":
 					$theme === "dark-forest" && quotes === "Random Quotes",
-			})}>Random</span
+			})}>Random English quote</span>
 		>
 	</button>
-	<button
-		aria-pressed={quotes === "Movie Quotes"}
-		onclick={() => {
-			updateTestConfigType("quotes", "Movie Quotes");
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline":
-					$theme === "dark-forest" && quotes === "Movie Quotes",
-			})}>Movie</span
-		>
-	</button>
-	<button
-		aria-pressed={quotes === "Famous Quotes"}
-		onclick={() => {
-			updateTestConfigType("quotes", "Famous Quotes");
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline":
-					$theme === "dark-forest" && quotes === "Famous Quotes",
-			})}>Famous</span
-		>
-	</button>
-	
 	<button
 		aria-label="Customize test type"
 		onclick={() => {

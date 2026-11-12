@@ -5,7 +5,7 @@
 	let { stats }: { stats?: PracticeStats } = $props();
 </script>
 
-<div class="practice-live-stats" role="group" aria-label="Live test stats" transition:fade={{ duration: 160 }}>
+<div class="practice-live-stats" role="group" aria-label="Live test stats" in:fade={{ duration: 160 }}>
 	<span>{Math.floor(stats?.elapsedSeconds ?? 0)}s</span>
 	<span>{stats?.wpm ?? 0} wpm</span>
 	<span>{stats?.accuracy ?? 100}%</span>

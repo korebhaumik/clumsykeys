@@ -1,7 +1,7 @@
 // Types
 
-export type QuotesParams = "Random Quotes" | "Famous Quotes" | "Movie Quotes";
-export type LangParams = "english" | "english 5k" | "english 2k" | "hinglish" | "hindi";
+export type QuotesParams = "Random Quotes";
+export type LangParams = "english" | "english 1k" | "english 5k" | "english 2k" | "hinglish";
 
 
 type Level = null | "easy" | "mid" | "hard" | "insane";

@@ -22,17 +22,6 @@
 
 
 	let { race = false }: { race?: boolean } = $props();
-
-	let showConfigOne = $state(true);
-
-	$effect(() => {
-		const status = $game;
-		if (status !== "playing" && status !== "waiting") return;
-		const timeout = setTimeout(() => {
-			showConfigOne = status === "waiting";
-		}, 200);
-		return () => clearTimeout(timeout);
-	});
 </script>
 
 
@@ -44,9 +33,9 @@
 			updateModalVisibility(true);
 		}} />
 		
-		{#if race || ($game !== "playing" && showConfigOne)}
+		{#if race || $game === "waiting"}
 			<div
-				transition:fade={{ duration: 200 }}
+				in:fade={{ duration: 200 }}
 				class={cn(
 					`config-options hidden font-semibold items-center px-4 hd:flex  max-w-[var(--dimension-55rem)] rounded-lg justify-between`,
 					{
@@ -118,7 +107,7 @@
 			</div>
 			
 			<div
-				transition:fade={{ duration: 200 }}
+				in:fade={{ duration: 200 }}
 				class={cn(`config-options hidden font-semibold px-4 hd:flex py-3 w-fit rounded-lg justify-between`, {
 					"bg-dark-forest-fade": $theme === "dark-forest",
 					"text-dark-forest-unhighlighted": $theme === "dark-forest",

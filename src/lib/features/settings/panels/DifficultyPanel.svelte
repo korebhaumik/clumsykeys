@@ -13,7 +13,7 @@
 		"bg-white": $theme === "classic",
 	})}
 >
-	<div class="flex items-center gap-3 text-sm font-bold">
+	<div class="flex flex-wrap items-center gap-3 text-sm font-bold">
 		<button
 			class={cn("settings-primary flex gap-0.5 items-center p-2 rounded-sm", {
 				"bg-dark-forest-accent-main": $theme === "dark-forest",
@@ -53,10 +53,11 @@
 	</p>
 
 	
-	<div class="flex gap-2">
-		<div class="flex gap-2">
+	<div class="flex flex-wrap gap-2">
+		<div class="flex flex-wrap gap-2">
 			<input
 				placeholder="Eg: 60"
+				aria-label="WPM limit"
 				type="number"
 				class={cn("py-2 w-32 outline-hidden border-none px-2 text-sm rounded-sm", {
 					"bg-dark-forest-primary": $theme === "dark-forest",
@@ -73,9 +74,10 @@
 				WPM Limit
 			</button>
 		</div>
-		<div class="flex gap-2">
+		<div class="flex flex-wrap gap-2">
 			<input
 				placeholder="Eg: 95%"
+				aria-label="Accuracy limit"
 				type="number"
 				class={cn("py-2 w-32 outline-hidden border-none px-2 text-sm rounded-sm", {
 					"bg-dark-forest-primary": $theme === "dark-forest",

@@ -59,15 +59,39 @@ for (const theme of ['dark-forest', 'classic']) {
 
     test('prose correction, completion, results and replay', async ({ page }) => {
       const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.goto('/');
+      await page.getByRole('button', { name: 'quotes', exact: true }).click();
+      await page.addStyleTag({ content: '.practice-results { animation-play-state: paused !important; }' });
       const input = page.getByRole('textbox', { name: 'Type the practice passage' });
+      await input.focus();
       await expect(input).toBeFocused();
-      await page.keyboard.type('X'); await page.keyboard.press('Backspace');
-      await page.keyboard.type('The quick brown fox jumps over the lazy dog.');
-      await expect(page.getByRole('heading', { name: 'Practice results' })).toBeVisible();
-      await expect(page.locator('.history-word')).toHaveCount(9);
+      const passage = (await page.locator('.typing-window .typing-word').allTextContents()).join(' ');
+      const firstLetter = page.locator('.typing-window .typing-word:first-child > span:first-child > span:first-child');
+      const unfinishedColor = theme === 'classic' ? 'rgb(102, 102, 102)' : 'rgb(132, 136, 135)';
+      await expect(firstLetter).toHaveCSS('color', unfinishedColor);
+      const settings = page.getByRole('region', { name: 'Test settings' });
+      await expect(settings.getByRole('button', { name: 'punctuations' })).toBeVisible();
+      await settings.evaluate(section => {
+        const observer = new window.MutationObserver(() => {
+          if (!section.querySelector('[aria-label="Live test stats"]')) return;
+          section.setAttribute('data-options-at-start', String(section.querySelectorAll('.config-options').length));
+          observer.disconnect();
+        });
+        observer.observe(section, { childList: true, subtree: true });
+      });
+      await page.keyboard.type('X');
+      await expect(settings).toHaveAttribute('data-options-at-start', '0');
+      await page.keyboard.press('Backspace');
+      await expect(firstLetter).toHaveCSS('color', unfinishedColor);
+      await page.keyboard.type(passage[0]);
+      await expect(firstLetter).toHaveCSS('color', theme === 'classic' ? 'rgb(0, 0, 0)' : 'rgb(218, 218, 218)');
+      await page.keyboard.type(passage.slice(1));
+      await expect(page.getByRole('heading', { name: 'Practice results' })).toBeFocused();
+      await expectEntranceFade(page.getByRole('region', { name: 'Practice results' }));
+      await expect(page.locator('.history-word')).toHaveCount(passage.split(' ').length);
       await page.locator('.history-word').first().click();
-      await expect(page.locator('.history-detail')).toContainText('The');
+      await expect(page.locator('.history-detail')).toContainText(passage.split(' ')[0]);
       await page.getByRole('button', { name: 'Practice again' }).click();
       await expect(input).toBeFocused();
       expect(errors).toEqual([]);
@@ -144,6 +168,68 @@ test('route changes and practice results skip the entrance animation with reduce
   const results = page.getByRole('region', { name: 'Practice results' });
   await expect(results).toHaveCSS('animation-name', 'none');
   await expect(results).toHaveCSS('opacity', '1');
+});
+
+test('prose uses Hinglish words, applies the toggles and accepts composed text', async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('https://fonts.googleapis.com/**', route => route.abort());
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Language', exact: true }).click();
+  await page.getByRole('button', { name: 'Hinglish', exact: true }).click();
+  const words = page.locator('.typing-window .typing-word');
+  await expect(words.first()).toHaveText(/^[a-z]+$/i);
+  const first = (await words.first().textContent())!;
+  await page.getByRole('button', { name: 'Close settings' }).click();
+  await page.getByRole('textbox', { name: 'Type the practice passage' }).focus();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.imeSetComposition', { text: first, selectionStart: first.length, selectionEnd: first.length });
+  await cdp.send('Input.insertText', { text: first });
+  await expect(words.first().locator('.text-white')).toHaveCount(first.length);
+  await expect(words.first().locator('.text-red-500')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Numbers', exact: true }).click();
+  await page.getByRole('button', { name: 'Insane', exact: true }).click();
+  await expect(words.nth(1)).toHaveText(/^\d{2}$/);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Punctuations', exact: true }).click();
+  await page.getByRole('button', { name: 'Easy', exact: true }).click();
+  await expect(words.nth(3)).toHaveText(/^\d{2}[,.!?"':;]$/);
+  await page.getByRole('button', { name: 'None', exact: true }).click();
+  await expect(words.nth(3)).toHaveText(/^\d{2}$/);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Numbers', exact: true }).click();
+  await page.getByRole('button', { name: 'None', exact: true }).click();
+  await expect(words.nth(1)).toHaveText(/^[a-z]+$/i);
+});
+
+test('prose honors a custom word count and finishes when the timer expires', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 560 });
+  await page.route('https://fonts.googleapis.com/**', route => route.abort());
+  await page.goto('/');
+  const input = page.getByRole('textbox', { name: 'Type the practice passage' });
+  await expect(input).toBeFocused();
+  await page.keyboard.press('Control+k');
+  await page.getByRole('button', { name: 'Test Type', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Test Type' });
+  await expect(dialog).toBeVisible();
+  expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+  await dialog.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByLabel('Word count', { exact: true }).fill('10');
+  await page.getByRole('button', { name: 'Set words', exact: true }).click();
+  const words = page.locator('.typing-window .typing-word');
+  await expect(words).toHaveCount(10);
+
+  await page.getByRole('button', { name: 'Timer', exact: true }).click();
+  await page.getByLabel('Seconds', { exact: true }).fill('5');
+  await page.getByRole('button', { name: 'Set timer', exact: true }).click();
+  await expect(words).toHaveCount(25);
+  await page.getByRole('button', { name: 'Close settings' }).click();
+  await expect(input).toBeFocused();
+  const first = (await words.first().textContent())![0];
+  await page.keyboard.type(first);
+  await expect(page.getByRole('heading', { name: 'Practice results' })).toBeFocused({ timeout: 8000 });
 });
 
 async function join(page: Page, username: string, room: string) {

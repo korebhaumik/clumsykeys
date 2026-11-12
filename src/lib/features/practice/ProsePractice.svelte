@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount, tick, untrack } from "svelte";
+	import { get } from "svelte/store";
 	import ResetSvg from "../../components/icons/ResetIcon.svelte";
 	import { game, practiceStats } from "../../state/app.store";
-	import { modalConfig } from "../settings/settings.store";
+	import { modalConfig, testConfig, type TestConfig } from "../settings/settings.store";
+	import { makeProsePassage } from "./prose-passage";
 	import PracticeResults from "./PracticeResults.svelte";
 	import { createPracticeSession, type PracticeResults as Results } from "./session";
 	import {
@@ -12,7 +14,8 @@
 		type PracticeState,
 	} from "./typing-dom";
 
-	const wordsArr = "The quick brown fox jumps over the lazy dog.".split(" ");
+	let passageConfig = get(testConfig);
+	let wordsArr = $state.raw(makeProsePassage(passageConfig));
 
 	let status = $state<PracticeState>("waiting");
 	let results = $state<Results>();
@@ -21,11 +24,14 @@
 	let isBlur = $state(false);
 	let caretEl = $state<HTMLDivElement>()!;
 	let linesEl = $state<HTMLDivElement>()!;
-	let resetEl = $state<HTMLButtonElement>()!;
 	let inputEl = $state<HTMLInputElement>()!;
 
 	let wordIndex = 0;
 	let letterIndex = 0;
+
+	export function focusInput() {
+		inputEl?.focus();
+	}
 
 	onMount(() => {
 		inputEl.focus();
@@ -33,19 +39,23 @@
 	});
 
 	$effect(() => {
+		const config = $testConfig;
+		untrack(() => {
+			if (config !== passageConfig) void reset(config, document.activeElement === inputEl);
+		});
+	});
+
+	$effect(() => {
 		game.set(status);
 		if (status !== "playing") return;
 		practiceStats.set(untrack(() => session.stats()));
 		const timer = window.setInterval(() => practiceStats.set(session.stats()), 1000);
-		return () => window.clearInterval(timer);
+		const deadline = passageConfig.timer === null ? undefined : window.setTimeout(finish, passageConfig.timer * 1000);
+		return () => {
+			window.clearInterval(timer);
+			window.clearTimeout(deadline);
+		};
 	});
-
-	function handleTab(event: KeyboardEvent) {
-		if (event.key !== "Tab" || event.shiftKey || results || $modalConfig.isVisible) return;
-		if (document.activeElement !== inputEl && document.activeElement !== resetEl) return;
-		event.preventDefault();
-		(document.activeElement === inputEl ? resetEl : inputEl).focus();
-	}
 
 	$effect(() => {
 		if (!linesEl || !caretEl) return;
@@ -56,15 +66,29 @@
 		return () => observer.disconnect();
 	});
 
-	async function restart() {
+	function restart() {
+		void reset(get(testConfig), true);
+	}
+
+	async function reset(config: TestConfig, focus: boolean) {
+		passageConfig = config;
+		wordsArr = makeProsePassage(config);
 		session = createPracticeSession();
 		wordIndex = 0;
 		letterIndex = 0;
 		typedLetter = "";
 		results = undefined;
 		status = "waiting";
-		await tick();
-		inputEl.focus();
+		if (focus) {
+			await tick();
+			inputEl?.focus();
+		}
+	}
+
+	function finish() {
+		if (status !== "playing") return;
+		results = session.finish();
+		status = "finished";
 	}
 
 	function positionCaret(target: HTMLElement, afterTarget = false) {
@@ -90,8 +114,7 @@
 		positionCaret(target, true);
 
 		if (correct && wordIndex === wordsArr.length - 1 && letterIndex === word.length) {
-			results = session.finish();
-			status = "finished";
+			finish();
 		}
 	}
 
@@ -117,36 +140,47 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		if ($modalConfig.isVisible || event.isComposing || event.keyCode === 229) return;
 		const { code } = event;
 		if (code === "Space" || code === "Enter" || code === "Backspace") event.preventDefault();
-		if (event.key.length !== 1 && code !== "Backspace" && code !== "Enter") return;
-		if (status === "waiting") status = "playing";
-		if (status !== "playing") return;
-
 		if (code === "Enter") {
-			void restart();
+			restart();
 		} else if (code === "Backspace") {
 			backspace();
-		} else if (
-			code === "Space" &&
-			wordIndex < wordsArr.length - 1 &&
-			letterIndex === wordsArr[wordIndex].length
-		) {
+		} else if (code === "Space") {
+			advanceWord();
+		}
+	}
+
+	function advanceWord() {
+		if (wordIndex < wordsArr.length - 1 && letterIndex === wordsArr[wordIndex].length) {
 			wordIndex += 1;
 			letterIndex = 0;
 			positionCaret(activeLetter());
 		}
 	}
-</script>
 
-<svelte:window onkeydown={handleTab} />
+	function enterText(text: string) {
+		if ($modalConfig.isVisible) return;
+		for (const letter of text.normalize("NFC")) {
+			if (status === "finished") break;
+			if (letter === " ") {
+				advanceWord();
+				continue;
+			}
+			status = "playing";
+			typedLetter = letter;
+			handleInput();
+		}
+	}
+</script>
 
 <section class="practice my-5">
 	{#if results}
 		<PracticeResults testType="Prose practice" stats={results} onRestart={restart} />
 	{:else}
 		{#key session}
-			<div class="typing-frame">
+			<div class="typing-frame" class:caret-idle={status === "waiting"}>
 				<input
 					class="sr-only"
 					id="boss"
@@ -157,9 +191,14 @@
 					spellcheck={false}
 					bind:this={inputEl}
 					oninput={(event) => {
-						typedLetter = event.currentTarget.value;
-						if (typedLetter.length === 1) handleInput();
+						if (!(event instanceof window.InputEvent) || event.isComposing) return;
+						const value = event.currentTarget.value;
 						event.currentTarget.value = "";
+						if (event.inputType === "insertText" && Array.from(value).length === 1) enterText(value);
+					}}
+					oncompositionend={(event) => {
+						event.currentTarget.value = "";
+						enterText(event.data);
 					}}
 					onkeydown={handleKeydown}
 					onblur={() => (isBlur = true)}
@@ -176,15 +215,14 @@
 				</div>
 				<div bind:this={caretEl} class="typing-caret bg-blue-300" aria-hidden="true"></div>
 				{#if isBlur}
-					<button class="typing-cover font-bold" onclick={() => inputEl.focus()}>
-						Click Here or click "Tab" to Focus
+					<button class="typing-cover font-bold" tabindex="-1" onclick={() => inputEl.focus()}>
+						Click here or Shift+Tab back to type
 					</button>
 				{/if}
 			</div>
 		{/key}
 		<button
-			bind:this={resetEl}
-			class="practice-reset mx-auto my-1 block rounded-sm outline-hidden text-dark-forest-unhighlighted focus:text-dark-forest-highlighted focus:bg-dark-forest-fade hover:bg-dark-forest-fade"
+			class="practice-reset mx-auto my-1 block rounded-sm text-dark-forest-unhighlighted focus:text-dark-forest-highlighted focus:bg-dark-forest-fade hover:bg-dark-forest-fade"
 			aria-label="reset"
 			onclick={restart}
 		>

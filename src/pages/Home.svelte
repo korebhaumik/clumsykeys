@@ -4,10 +4,12 @@
 	import EngineNormal from "../lib/features/practice/ProsePractice.svelte";
 	import Modal from "../lib/features/settings/SettingsModal.svelte";
 	import PracticeLayout from "../lib/components/layout/PracticeLayout.svelte";
+
+	let engine = $state<ReturnType<typeof EngineNormal>>();
 </script>
 
-<Modal />
+<Modal onFocusFallback={() => engine?.focusInput()} />
 <PracticeLayout mode="prose" active={$game === "playing"} finished={$game === "finished"}>
 	{#if $game !== "finished"}<Config />{/if}
-	<EngineNormal />
+	<EngineNormal bind:this={engine} />
 </PracticeLayout>
