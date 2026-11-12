@@ -147,6 +147,71 @@ for (const theme of ['dark-forest', 'classic']) {
       await page.getByRole('navigation', { name: 'Mobile navigation' }).getByText('Code practice', { exact: true }).click();
       await expect(page.getByRole('region', { name: 'Python snippet' })).toBeVisible();
     });
+    test('ClumsyDevs switches between snippets and randomized keyword practice', async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 844 });
+      await page.goto('/#/game');
+      await expect(page.getByRole('region', { name: 'Python snippet' })).toBeVisible();
+      const mode = await page.getByRole('group', { name: 'Practice mode' }).boundingBox();
+      const settings = await page.getByRole('button', { name: 'Test Settings', exact: true }).boundingBox();
+      const snippet = await page.locator('.snippet-selector').boundingBox();
+      const toolbar = await page.locator('.toolbar-row').boundingBox();
+      expect(mode!.y).toBe(settings!.y);
+      expect(mode!.x).toBeGreaterThan(settings!.x + settings!.width);
+      expect(snippet!.x).toBeGreaterThan(mode!.x + mode!.width);
+      expect(snippet!.x + snippet!.width).toBeLessThan(toolbar!.x + toolbar!.width);
+      await expect(page.getByRole('button', { name: 'Snippets', exact: true })).toHaveCSS('text-decoration-line', 'underline');
+      await page.setViewportSize({ width: 320, height: 844 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.getByRole('button', { name: 'Keywords', exact: true }).click();
+      await expect(page.getByRole('group', { name: 'Indentation' })).toHaveCount(0);
+      const input = page.getByRole('textbox', { name: 'Type the practice keywords' });
+      await expect(input).toBeFocused();
+      await page.getByRole('combobox', { name: 'Keyword language' }).selectOption({ label: 'JavaScript' });
+      const region = page.getByRole('region', { name: 'JavaScript keywords' });
+      const words = region.locator('.code-line-text > span');
+      await expect(words).toHaveCount(25);
+      const wordCount = page.getByRole('group', { name: 'Word count' });
+      await expect(page.locator('.toolbar-row').getByRole('group', { name: 'Keyword test type' })).toBeVisible();
+      await expect(page.locator('.toolbar-row').getByRole('group', { name: 'Keyword modifiers' })).toHaveCount(0);
+      await wordCount.getByRole('button', { name: '50', exact: true }).click();
+      await expect(words).toHaveCount(50);
+      await wordCount.getByRole('button', { name: '25', exact: true }).click();
+      const original = await words.allTextContents();
+      expect(original[0]).toBe('var');
+      await page.evaluate(() => { Math.random = () => 0.99; });
+      const numbers = page.getByRole('button', { name: 'Numbers', exact: true });
+      const punctuation = page.getByRole('button', { name: 'Punctuation', exact: true });
+      await numbers.click();
+      await expect(words.nth(5)).toHaveText(/^\d{2}$/);
+      await punctuation.click();
+      await expect(words.nth(3)).toHaveText(/[,.!?;:]$/);
+      const decorated = await words.allTextContents();
+      await expect(page.getByRole('button', { name: 'New keywords', exact: true })).toHaveCount(0);
+      await page.reload();
+      await expect(region).toBeVisible();
+      await expect(numbers).toHaveAttribute('aria-pressed', 'true');
+      await expect(punctuation).toHaveAttribute('aria-pressed', 'true');
+      expect(await words.allTextContents()).not.toEqual(decorated);
+      await numbers.click();
+      await punctuation.click();
+      const refreshed = await words.allTextContents();
+      expect(refreshed).toEqual(original);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+      const passage = refreshed.join(' ');
+      await page.keyboard.type(passage.slice(0, -1));
+      expect(await region.locator('.typing-window').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+      await page.keyboard.type(passage.slice(-1));
+      await expect(page.getByRole('heading', { name: 'Practice results' })).toBeFocused();
+      await expect(page.locator('.result-metrics')).toContainText('JavaScript keywords');
+      await expect(page.locator('.result-headline')).toContainText('100%');
+      await page.getByRole('button', { name: 'Practice again' }).click();
+      await expect(input).toBeFocused();
+      await page.getByRole('button', { name: 'Snippets', exact: true }).click();
+      await expect(page.getByRole('region', { name: 'JavaScript snippet' })).toBeVisible();
+      await expect(page.getByRole('group', { name: 'Indentation' })).toBeVisible();
+    });
+
   });
 }
 
@@ -168,6 +233,20 @@ test('route changes and practice results skip the entrance animation with reduce
   const results = page.getByRole('region', { name: 'Practice results' });
   await expect(results).toHaveCSS('animation-name', 'none');
   await expect(results).toHaveCSS('opacity', '1');
+});
+
+test('ClumsyDevs timed keywords finish when the selected duration expires', async ({ page }) => {
+  await page.route('https://fonts.googleapis.com/**', route => route.abort());
+  await page.clock.install();
+  await page.goto('/#/game');
+  await page.getByRole('button', { name: 'Keywords', exact: true }).click();
+  await page.getByRole('button', { name: 'Time', exact: true }).click();
+  await page.getByRole('group', { name: 'Duration in seconds' }).getByRole('button', { name: '15', exact: true }).click();
+  const first = page.locator('.keyword-passage .code-line-text > span').first();
+  await page.keyboard.type((await first.textContent())![0]);
+  await expect(page.getByRole('group', { name: 'Live test stats' })).toBeVisible();
+  await page.clock.fastForward(15_000);
+  await expect(page.getByRole('heading', { name: 'Practice results' })).toBeFocused();
 });
 
 test('prose uses Hinglish words, applies the toggles and accepts composed text', async ({ page, context }) => {

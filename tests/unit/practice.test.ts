@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createPracticeSession } from '../../src/lib/features/practice/session';
 import { parseSnippet, langData, languages } from '../../src/lib/features/practice/code-snippets';
+import { drawCodeKeywords } from '../../src/lib/features/practice/code-keywords';
 import { smoothPath } from '../../src/lib/components/charts/result-chart';
 
 test('an empty session has finite metrics and no history', () => {
@@ -55,4 +56,13 @@ test('chart paths handle empty, single, repeated x, and turning points without N
   const path = smoothPath([{ x: 0, y: 0 }, { x: 3, y: 9 }, { x: 6, y: 0 }]);
   assert.match(path, /2 9 3 9 C 4 9/);
   assert.doesNotMatch(smoothPath([{ x: 0, y: 1 }, { x: 0, y: 2 }]), /NaN|Infinity/);
+});
+
+test('keyword draws provide distinct single tokens for every snippet language', () => {
+  for (const language of Object.keys(languages) as (keyof typeof languages)[]) {
+    const words = drawCodeKeywords(language);
+    assert.equal(words.length, 25);
+    assert.equal(new Set(words).size, words.length);
+    assert.ok(words.every(word => /^[a-z_][a-z_0-9]*$/i.test(word)));
+  }
 });
