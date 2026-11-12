@@ -42,9 +42,11 @@
 	{#if router.location && !practiceLayout}
 		<Navbar mode={multiplayerLayout ? "prose" : undefined} />
 	{/if}
-	<div class:engine-page={!practiceLayout} class:page-content={multiplayerLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"}>
-		<Router {routes} />
-	</div>
+	{#key router.location}
+		<div class="route-content" class:engine-page={!practiceLayout} class:page-content={multiplayerLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"}>
+			<Router {routes} />
+		</div>
+	{/key}
 </div>
 
 <style>

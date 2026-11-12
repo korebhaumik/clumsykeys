@@ -294,7 +294,8 @@
 
 [data-theme="classic"] .test-results {
 	--result-muted: var(--palette-slate-650);
-	--result-accent: var(--palette-green-800);
+	--result-raw-wpm: var(--palette-gray-600);
+	--result-accent: var(--palette-black);
 	--result-plot: var(--palette-slate-100);
 	--result-grid: var(--palette-slate-200);
 	--result-error: var(--palette-ochre-800);

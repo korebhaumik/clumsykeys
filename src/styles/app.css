@@ -11,7 +11,8 @@
 	}
 }
 
-:root {
+html {
+	background: var(--inset);
 	line-height: var(--leading-1_5);
 	font-weight: var(--weight-400);
 	color: var(--text-default);
@@ -25,4 +26,15 @@
 
 body {
 	margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.route-content:not(:empty), .practice-results {
+		animation: page-enter var(--motion-180ms) ease-out;
 	}
+}
+
+@keyframes page-enter {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}

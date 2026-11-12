@@ -1,14 +1,12 @@
 <script lang="ts">
 	import Router from "./lib/Router.svelte";
-	import { theme, themeBackgrounds } from "./lib/state/app.store";
+	import { theme } from "./lib/state/app.store";
 
 	$effect(() => {
-		const background = themeBackgrounds[$theme];
-		document.body.classList.add(background);
-		return () => document.body.classList.remove(background);
+		document.documentElement.dataset.theme = $theme;
 	});
 </script>
 
-<main class="py-5" data-theme={$theme}>
+<main class="py-5">
 	<Router />
 </main>

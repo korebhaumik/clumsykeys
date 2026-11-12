@@ -22,7 +22,7 @@
 	let heading = $state<HTMLHeadingElement>()!;
 
 	let series = $derived([
-		{ label: "Raw WPM", color: "var(--result-muted)", points: [{ seconds: 0, wpm: 0 }, ...stats.samples.map(({ seconds, raw }) => ({ seconds, wpm: raw }))] },
+		{ label: "Raw WPM", color: "var(--result-raw-wpm, var(--result-muted))", points: [{ seconds: 0, wpm: 0 }, ...stats.samples.map(({ seconds, raw }) => ({ seconds, wpm: raw }))] },
 		{ label: "WPM", color: "var(--result-accent)", points: [{ seconds: 0, wpm: 0 }, ...stats.samples] },
 	]);
 	let errors = $derived(stats.samples.map(({ seconds, errors: count }) => ({ seconds, count })));
@@ -30,7 +30,7 @@
 	onMount(() => heading.focus());
 </script>
 
-<section class="test-results" aria-labelledby="practice-results">
+<section class="test-results practice-results" aria-labelledby="practice-results">
 	<h2 class="sr-only" id="practice-results" bind:this={heading} tabindex="-1">Practice results</h2>
 	<div class="result-overview">
 		<dl class="result-headline">
