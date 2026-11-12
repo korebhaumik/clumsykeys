@@ -269,7 +269,12 @@
 	</table>
 </dialog>
 
-<Toaster position="bottom-right" theme={$theme === "classic" ? "light" : "dark"} visibleToasts={1} />
+<Toaster
+	position="bottom-right"
+	theme={$theme === "classic" ? "light" : "dark"}
+	visibleToasts={1}
+	style="font-family: inherit; --normal-bg: var(--surface); --normal-text: var(--ink); --normal-border: var(--line); --border-radius: var(--radius-0_75rem);"
+/>
 
 <style>
 	.room-code { font: 600 var(--text-1rem) var(--mono); overflow-wrap: anywhere; }

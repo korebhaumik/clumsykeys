@@ -147,6 +147,7 @@ for (const theme of ['dark-forest', 'classic']) {
       await page.getByRole('navigation', { name: 'Mobile navigation' }).getByText('Code practice', { exact: true }).click();
       await expect(page.getByRole('region', { name: 'Python snippet' })).toBeVisible();
     });
+
     test('ClumsyDevs switches between snippets and randomized keyword practice', async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 844 });
       await page.goto('/#/game');
@@ -212,6 +213,17 @@ for (const theme of ['dark-forest', 'classic']) {
       await expect(page.getByRole('group', { name: 'Indentation' })).toBeVisible();
     });
 
+    test('multiplayer toasts use the app font and theme', async ({ page, context }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await context.grantPermissions(['clipboard-write']);
+      await join(page, 'Ada', 'toast-' + theme + '-' + Date.now());
+      await page.getByRole('button', { name: 'Copy invite link' }).click();
+      const toast = page.locator('[data-sonner-toast]').filter({ hasText: 'Invite link copied' });
+      await expect(toast).toBeVisible();
+      const appFont = await page.locator('html').evaluate(element => window.getComputedStyle(element).fontFamily);
+      await expect(toast).toHaveCSS('font-family', appFont);
+      await expect(toast).toHaveCSS('background-color', theme === 'classic' ? 'rgb(255, 255, 255)' : 'rgb(36, 42, 45)');
+    });
   });
 }
 
