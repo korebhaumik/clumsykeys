@@ -109,8 +109,10 @@ export function parsePractice(value: unknown): PracticeSubmission | undefined {
 	if (!s.history.every(word => isRecord(word) && typeof word.word === "string" && word.word.length <= 1000 &&
 		(word.wpm === null || finite(word.wpm)) && count(word.errors))) return;
 	const attempts = (s.correct as number) + (s.incorrect as number) + (s.extra as number);
-	if (!attempts || !finite(attempts * 15 / s.elapsedSeconds, 1_000_000_000)) return;
-	const samples = s.samples as PracticeSubmission["stats"]["samples"];
+	// Generous ceiling using the existing four-character WPM formula. This rejects
+	// impossible summaries, but client counters still cannot establish honest typing.
+	if (!attempts || !finite(attempts * 15 / s.elapsedSeconds, 1500)) return;
+	const samples = (s.samples as PracticeSubmission["stats"]["samples"]).map(({ seconds, wpm, raw, errors }) => ({ seconds, wpm, raw, errors }));
 	const mean = samples.reduce((sum, point) => sum + point.wpm, 0) / (samples.length || 1);
 	return {
 		id: value.id, mode: value.mode as PracticeSubmission["mode"], language: value.language,
@@ -120,6 +122,6 @@ export function parsePractice(value: unknown): PracticeSubmission | undefined {
 			wpm: Math.floor((s.correct as number) * 15 / s.elapsedSeconds), raw: Math.floor(attempts * 15 / s.elapsedSeconds),
 			accuracy: Math.round((s.correct as number) / attempts * 1000) / 10,
 			deviation: Math.sqrt(samples.reduce((sum, point) => sum + (point.wpm - mean) ** 2, 0) / (samples.length || 1)),
-			samples, history: s.history as PracticeSubmission["stats"]["history"] },
+			samples, history: (s.history as PracticeSubmission["stats"]["history"]).map(({ word, wpm, errors }) => ({ word, wpm, errors })) },
 	};
 }

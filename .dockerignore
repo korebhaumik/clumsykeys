@@ -2,8 +2,7 @@
 **/node_modules
 **/build
 **/dist
-**/.env
-**/.env.*
+**/.env*
 **/*.log
 test-results
 playwright-report

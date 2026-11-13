@@ -54,6 +54,9 @@ test('real HTTP and Socket.IO enforce validation, ownership, countdown, recovery
     await waitFor(() => !state.startsAt);
     b.emit('startVote', { roomId, userId: 'b' });
     await waitFor(() => state.progress === 'playing');
+    a.emit('finishGame', { roomId, userId: 'a' });
+    a.emit('timeData', { roomId, userId: 'a', wpm: 60, typedChars: state.text.length + 1, accuracy: 100 });
+    await delay(80); assert.equal(state.users[0].finished, false); assert.equal(state.users[0].typedChars, 0);
     a.emit('updateRaceSettings', { punctuation: true });
     a.emit('timeData', { roomId, userId: 'a', wpm: 100, typedChars: 10, accuracy: 101 });
     stranger.emit('timeData', { roomId, userId: 'a', wpm: 100, typedChars: 10, accuracy: 100 });
@@ -65,6 +68,8 @@ test('real HTTP and Socket.IO enforce validation, ownership, countdown, recovery
     await waitFor(() => state.progress === 'playing' && state.users.length === 2);
     resumed.emit('timeData', { roomId, userId: 'a', wpm: 60, typedChars: 20, accuracy: 100 });
     await waitFor(() => state.users[0].wpm === 60);
+    resumed.emit('timeData', { roomId, userId: 'a', wpm: 60, typedChars: state.text.length, accuracy: 100 });
+    b.emit('timeData', { roomId, userId: 'b', wpm: 60, typedChars: state.text.length, accuracy: 100 });
     resumed.emit('finishGame', { roomId, userId: 'a' }); b.emit('finishGame', { roomId, userId: 'b' });
     await waitFor(() => state.progress === 'finished');
     assert.ok(state.users[0].speedHistory.length > 0);

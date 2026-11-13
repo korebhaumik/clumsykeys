@@ -1,8 +1,10 @@
 import type { Express, Request, Response } from "express";
 import { isRecord, isUuid, parsePractice, parsePreferences } from "./persistence.contract";
 import { PersistenceError, type Persistence } from "./persistence";
+import { createRateLimit } from "./security";
 
 export function registerAccountRoutes(app: Express, persistence?: Persistence) {
+	const writes = createRateLimit(30, 60_000);
 	app.get("/api/status", (_req, res) => res.json({ accounts: !!persistence }));
 	function route(handler: (req: Request, res: Response, userId: string, db: Persistence) => Promise<unknown>) {
 		return async (req: Request, res: Response) => {
@@ -12,6 +14,10 @@ export function registerAccountRoutes(app: Express, persistence?: Persistence) {
 				const token = req.headers.authorization?.match(/^Bearer ([^\s]+)$/)?.[1];
 				if (!token || token.length > 8192) throw new PersistenceError(401, "Sign in to access your account.");
 				const identity = await persistence.verify(token);
+				if (req.method !== "GET") {
+					const retry = writes(identity.id);
+					if (retry) { res.set("Retry-After", String(retry)).status(429).json({ error: "Too many account updates. Please retry shortly." }); return; }
+				}
 				await handler(req, res, identity.id, persistence);
 			} catch (error) {
 				res.status(error instanceof PersistenceError ? error.status : 503)

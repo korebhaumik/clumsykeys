@@ -70,3 +70,47 @@ curl --fail http://localhost:1440/health
 The multi-stage Node 24 image compiles TypeScript with frozen pnpm dependencies, packages only the backend and production dependencies into the final image, and runs as the unprivileged `node` user. The frontend is deployed separately.
 
 [Back to README](../README.md)
+
+
+## Security configuration
+
+Set `NODE_ENV=production` and `FRONTEND_ORIGINS` to the exact HTTPS frontend
+origins (scheme, host and optional port; no path or trailing slash). Production
+no longer adds development origins automatically. Socket.IO checks this list for
+WebSocket upgrades as well as HTTP polling; native clients without Origin remain
+allowed and still need the existing account/resume-token authorization.
+
+The process limits `/api` and `/rooms` to 240 requests/minute per transport IP,
+account writes to 30/minute per verified account, connection attempts to 60/minute
+per transport IP, and events to 60/second per socket. There are at most 1,000 live
+connections, 1,000 rooms and 50 racers per room; inbound socket packets are limited
+to 16 KiB. HTTP 429 responses include `Retry-After`. Limits are process-local,
+reset on restart and are not distributed abuse prevention.
+
+**Check proxy topology before rollout.** The app deliberately ignores
+`X-Forwarded-For`; clients sharing a NAT or reverse proxy share the IP quotas.
+For a production proxy, enforce client-IP limits at the edge and review an
+explicit trusted-proxy integration and these thresholds for expected load.
+Do not enable blanket proxy trust or forward user-provided IP headers unchanged.
+Keep one backend replica until room coordination and shared quotas are designed.
+
+Express returns API-only security headers, sanitized errors and no-store
+responses. The frontend is hosted separately, so configure its response headers
+at that host: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+`Referrer-Policy: no-referrer`, and a restrictive `Permissions-Policy`.
+Set HSTS at the HTTPS termination point after confirming all affected hosts
+support HTTPS; review `includeSubDomains` before using it. Start a document CSP
+in report-only mode, allow the actual API/Supabase HTTP and WebSocket endpoints,
+self-hosted resources and required font origins, then enforce it. Hash or nonce
+the inline theme bootstrap in `index.html`; Svelte's dynamic styles also need an
+explicit style policy. The backend's `default-src 'none'` API CSP must not be
+copied to the frontend document unchanged.
+
+Keep server secrets in backend runtime variables only. Vite rejects privileged
+keys and credential-named `VITE_` variables before building. The security workflow
+checks working files, reachable history and build output for common credentials,
+audits dependencies, and runs lint, types, tests and builds. Its dependency gate
+fails on high/critical advisories; moderate/low advisories remain visible and
+require triage. Enable branch protection to require this job. Review the
+[security audit](SECURITY_AUDIT.md) for remaining score-integrity and deployment
+actions.

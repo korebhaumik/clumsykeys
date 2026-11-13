@@ -2,6 +2,7 @@ import type { Server } from "socket.io";
 import { finishGame, joinRoom, leaveRoom, resetRoom, startVote, stopVote, streamData, updateRaceSettings } from "./room.services";
 import type { Persistence } from "./persistence";
 import { createRaceWriter } from "./race.persistence";
+import { createRateLimit } from "./security";
 
 export function registerSocketHandlers(io: Server, persistence?: Persistence) {
 const writeRace = createRaceWriter(io, persistence);
@@ -17,6 +18,12 @@ io.use(async (socket, next) => {
 	} catch { next(new Error("Account session expired. Please sign in again.")); }
 });
 io.on("connection", (socket) => {
+	// Leave headroom for samples buffered during the 30-second recovery window.
+	const events = createRateLimit(60, 1000, 1);
+	socket.use((_event, next) => {
+		if (events("events")) { socket.disconnect(true); return; }
+		next();
+	});
 	let expiry: ReturnType<typeof setTimeout> | undefined;
 	if (socket.data.expiresAt) {
 		expiry = setTimeout(() => socket.disconnect(true), Math.min(2_147_483_647, Math.max(0, socket.data.expiresAt - Date.now())));
@@ -25,7 +32,9 @@ io.on("connection", (socket) => {
 	socket.on("joinRoom", (payload) => {
 		const { username, roomId, userId, resumeToken } = payload ?? {};
 		if (![username, roomId, userId].every((value) => typeof value === "string" && value.trim()) ||
-			username.length > 50 || roomId.length > 100 || userId.length > 100) {
+			username.length > 50 || roomId.length > 100 || userId.length > 100 ||
+			[username, roomId, userId].some(value => Array.from(value as string).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) ||
+			(resumeToken !== undefined && (typeof resumeToken !== "string" || resumeToken.length > 100))) {
 			socket.emit("error", { msg: "A username, room ID, and user ID are required" });
 			return;
 		}
@@ -57,7 +66,7 @@ io.on("connection", (socket) => {
 	socket.on("timeData", (payload) => {
 		const { roomId, userId, typedChars, wpm, accuracy } = payload ?? {};
 		if (![typedChars, wpm, accuracy].every((value) => Number.isFinite(value) && value >= 0) || accuracy > 100 ||
-			!Number.isSafeInteger(typedChars) || typedChars > 1_000_000 || wpm > 1_000_000) return;
+			!Number.isSafeInteger(typedChars) || typedChars > 1_000_000 || wpm > 1500) return;
 		streamData({ roomId, userId, typedChars, wpm, accuracy, socket, io });
 	});
 

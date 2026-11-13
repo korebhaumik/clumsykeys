@@ -25,7 +25,7 @@ for (const theme of ['dark-forest', 'classic']) {
     await dialog.getByRole('button', { name: 'Close settings', exact: true }).click();
     const input = page.getByRole('textbox', { name: 'Type the practice passage' });
     const passage = (await page.locator('.typing-window .typing-word').allTextContents()).join(' ');
-    await input.focus(); await page.keyboard.type(passage);
+    await input.focus(); await page.keyboard.type(passage, { delay: 20 });
     await expect(page.getByRole('status').filter({ hasText: 'Saved to your account.' })).toBeVisible();
     await page.getByRole('link', { name: 'View history', exact: true }).click();
     await expect(page.locator('.history-row')).toHaveCount(1);
@@ -90,7 +90,7 @@ test('failed result retries stay bound to the original account', async ({ page, 
   try {
     await page.goto('/'); await page.getByRole('button', { name: 'quotes', exact: true }).click();
     const passage = (await page.locator('.typing-window .typing-word').allTextContents()).join(' ');
-    await page.getByRole('textbox', { name: 'Type the practice passage' }).focus(); await page.keyboard.type(passage);
+    await page.getByRole('textbox', { name: 'Type the practice passage' }).focus(); await page.keyboard.type(passage, { delay: 20 });
     await expect(page.getByRole('status').filter({ hasText: 'Result not saved.' })).toBeVisible();
   } finally { await request.post('http://127.0.0.1:15443/__control', { data: { failWrites: false } }); }
   await page.goto('/#/account'); await page.getByRole('region', { name: 'Your account.', exact: true }).getByRole('button', { name: 'Sign out', exact: true }).click();
@@ -117,7 +117,7 @@ test('signed-in race results survive a leaderboard refresh and appear in account
     await guest.getByRole('button', { name: 'Vote to start' }).click();
     await expect(page.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled({ timeout: 10000 });
     const passage = (await page.locator('.race-passage .typing-word').allTextContents()).join(' ');
-    for (const target of [page, guest]) { await target.getByRole('textbox', { name: 'Type the race passage' }).focus(); await target.keyboard.type(passage); }
+    for (const target of [page, guest]) { await target.getByRole('textbox', { name: 'Type the race passage' }).focus(); await target.keyboard.type(passage, { delay: 20 }); }
     await expect(page.getByRole('heading', { name: 'Race results' })).toBeVisible();
     await expect(page.getByRole('status')).toContainText('Race saved to your account.');
     await page.goto('/#/ranking'); await page.reload();

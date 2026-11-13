@@ -8,7 +8,7 @@ app.get("/health", (_req, res) => {
 
 app.get("/rooms", (req, res) => {
 	const { roomId } = req.query;
-	if (typeof roomId !== "string" || !roomId.trim()) {
+	if (typeof roomId !== "string" || !roomId.trim() || roomId.length > 100) {
 		return res.status(400).json({ error: "roomId must be a single non-empty string" });
 	}
 

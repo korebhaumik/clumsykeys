@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Download Build Tag Artifact
         if: ${{ github.event_name == 'workflow_run' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: docker-tag
           run-id: ${{ github.event.workflow_run.id }}
@@ -58,7 +58,7 @@ jobs:
           echo "image_path=${DOCKER_USER}/clumsykeys-server:${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to Northflank
-        uses: northflank/deploy-to-northflank@v1
+        uses: northflank/deploy-to-northflank@179263ef163e3bb475626feee7158f609fba5ee5 # v1
         with:
           northflank-api-key: ${{ secrets.NORTHFLANK_API_KEY }}
           project-id: ${{ secrets.NORTHFLANK_PROJECT_ID }}

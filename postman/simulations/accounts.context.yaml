@@ -72,8 +72,20 @@ assumptions:
     verification: Local SQL tests cover best-per-player ranking, pagination, rolling time filtering, Dev language separation and service-only grants. The real SDK passed leaderboard reads and an upstream 503 through the Postman simulation. The additive migration was applied to hosted Supabase; the hosted backend smoke verified public reads, own rank and denied browser RPC calls, then removed its temporary users.
     source: backend/src/leaderboard.http.ts; supabase/migrations/20261113000300_solo_leaderboards.sql; supabase/tests/database/leaderboards.test.sql; tests/integration/hosted-supabase.ts
     updated_at: "2026-11-13"
+  - id: security-audit-http-boundaries
+    status: supported
+    claim: The real backend preserves account ownership, retry behavior and public projection while applying the audited HTTP and socket input and abuse boundaries.
+    reason: The full server suite used the actual SDK against the existing loopback fixture; the Postman simulation request log independently confirmed the real adapter's Auth and RPC calls. These checks do not establish hosted auth configuration or cheat resistance.
+    verification: On 2026-11-13, 34 server tests passed, including write quotas, origin rejection, sanitized errors, impossible-score rejection and timed completion ownership. The local simulation on port 15444 returned 503 for an injected write failure, accepted two retries with one stored result, and returned private dashboard/history plus public rankings. A separate hosted read-only catalog query verified six application tables with owner RLS, restricted RPC grants, locked search paths and no storage buckets. Local pgTAP tests were attempted but unavailable because the local database/Docker daemon was stopped. Plausible fabricated scores remain an open integrity finding.
+    source: tests/unit/security.test.ts; tests/unit/persistence.test.ts; tests/simulation/accounts.ts; scripts/security-database.sql; docs/SECURITY_AUDIT.md
+    updated_at: "2026-11-13"
+
 fingerprints:
   - id: integration-working-tree
     date: "2026-11-13"
     commit: 0678ce23644a94c050d163a3a37a503d11977cd5 (dirty working tree, including independently authored dropdown changes that were preserved)
     cli: Postman 1.76.0; Supabase 3.1.0; Supabase JS 2.119.0
+  - id: security-audit-working-tree
+    date: "2026-11-13"
+    commit: f3b0865 (security hardening working tree on codex/security-audit)
+    cli: Postman 1.76.0; Supabase 3.1.0; Node 24.11.1; pnpm 12.18.0 through its JavaScript entry point

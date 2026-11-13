@@ -136,6 +136,9 @@ export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, 
 		return socket.emit("error", { msg: "Game is already in progress" });
 	}
 	if (existing) return socket.emit("error", { msg: "Unable to resume this racer" });
+	if ((!room && rooms.size >= 1000) || (room && room.users.length >= 50)) {
+		return socket.emit("error", { msg: "Room capacity reached. Please try again later." });
+	}
 
 	const racer = {
 		username,
@@ -193,13 +196,17 @@ function removeRacer(room: Room, roomId: string, racer: Racer, io: Server) {
 	clearTimeout(sessions.get(racer)?.expiry);
 	sessions.delete(racer);
 	room.users.splice(index, 1);
+	if (room.users.length === 0) {
+		finalizeArchive(room, "aborted");
+		cancelCountdown(room);
+		clearTimeout(roundTimers.get(room));
+		rooms.delete(roomId);
+		return;
+	}
 
 	sendNotif({ msg: `${racer.username} left room ${roomId}`, roomId, io });
 	if (room.progress === "waiting") {
 		resetVotes(roomId);
-	} else if (room.users.length === 0) {
-		finalizeArchive(room, "aborted");
-		resetData(roomId);
 	} else if (room.progress === "playing") {
 		finishRoomIfComplete(room, roomId, io);
 	}
@@ -247,7 +254,6 @@ export const startVote = async ({ roomId, userId, socket, io }: StartVoteReq) =>
 	}
 
 	const msg = `${user.username} voted to start game in room ${roomId}`;
-	console.log(msg);
 	sendNotif({ msg, roomId, io });
 	return io.to(roomId).emit("roomData", room);
 };
@@ -263,7 +269,6 @@ export const stopVote = async ({ roomId, userId, socket, io }: StopVoteReq) => {
 	rooms.set(roomId, room);
 
 	const msg = `${user.username} stopped vote in room ${roomId}`;
-	console.log(msg);
 	sendNotif({ msg, roomId, io });
 	return io.to(roomId).emit("roomData", room);
 };
@@ -271,7 +276,8 @@ export const stopVote = async ({ roomId, userId, socket, io }: StopVoteReq) => {
 export const finishGame = async ({ roomId, userId, socket, io }: FinishGameReq) => {
 	const room = rooms.get(roomId);
 	const user = socketOwnsRacer(room, userId, socket);
-	if (!room || room.progress !== "playing" || !user || user.finished) return;
+	if (!room || room.progress !== "playing" || !user || user.finished ||
+		room.settings.mode === "time" || user.typedChars !== room.text.length) return;
 	user.finished = true;
 	const startedAt = roundStarts.get(room);
 	if (startedAt !== undefined) finishTimes.set(user, (performance.now() - startedAt) / 1000);
@@ -279,7 +285,6 @@ export const finishGame = async ({ roomId, userId, socket, io }: FinishGameReq) 
 	finishRoomIfComplete(room, roomId, io);
 
 	const msg = `${user.username} finished the game in room ${roomId}`;
-	console.log(msg);
 	sendNotif({ msg, roomId, io });
 	return io.to(roomId).emit("roomData", roomSnapshot(room));
 };
@@ -301,7 +306,7 @@ export const resetRoom = async ({ roomId, socket, io }: ResetRoomReq) => {
 export const streamData = async ({ roomId, userId, wpm, typedChars, accuracy, socket, io }: StreamData) => {
 	const room = rooms.get(roomId);
 	const user = socketOwnsRacer(room, userId, socket);
-	if (!room || room.progress !== "playing" || !user || user.finished) return;
+	if (!room || room.progress !== "playing" || !user || user.finished || typedChars > room.text.length) return;
 	user.wpm = wpm;
 	user.typedChars = typedChars;
 	user.accuracy = accuracy;

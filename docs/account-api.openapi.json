@@ -3,7 +3,7 @@
   "info": {
     "title": "Clumsy Keys account persistence API",
     "version": "1.0.0",
-    "description": "Existing guest gameplay and Socket.IO contracts remain unchanged. Account identity comes only from the verified bearer token. Requests have a 1 MiB limit; private responses use Cache-Control: no-store. See persistence.contract.ts for validated settings shapes."
+    "description": "Guest gameplay remains available. Account identity comes only from the verified bearer token. JSON requests have a 1 MiB limit; responses use Cache-Control: no-store. HTTP /api and /rooms requests are limited to 240 per minute per transport IP; authenticated writes are limited to 30 per minute per verified account. A 429 includes Retry-After in seconds. See persistence.contract.ts for validated settings and the generous 1500 raw WPM ceiling. Client counters do not prove honest typing."
   },
   "servers": [
     {
@@ -87,6 +87,25 @@
           },
           "503": {
             "description": "Request rejected or service temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -190,6 +209,25 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -265,6 +303,25 @@
           },
           "503": {
             "description": "Request rejected or service temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -378,6 +435,25 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -479,6 +555,25 @@
           },
           "503": {
             "description": "Request rejected or service temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -603,6 +698,25 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -705,6 +819,25 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -747,6 +880,25 @@
           },
           "503": {
             "description": "Account service unavailable; retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -831,6 +983,25 @@
           },
           "503": {
             "description": "Unconfigured or unavailable database"
+          },
+          "429": {
+            "description": "Request quota exceeded. Retry after the indicated delay.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }

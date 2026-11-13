@@ -142,6 +142,8 @@ test('race archives survive an immediate replay reset and expose only participan
     const roundId = snapshot().roundId;
     a.emit('timeData', { roomId, userId: roomId + '-a', wpm: 60, accuracy: 95, typedChars: 20 });
     await waitFor(() => snapshot().users.find((r: any) => r.userId === roomId + '-a')?.wpm === 60);
+    a.emit('timeData', { roomId, userId: roomId + '-a', wpm: 60, accuracy: 95, typedChars: snapshot().text.length });
+    b.emit('timeData', { roomId, userId: roomId + '-b', wpm: 60, accuracy: 100, typedChars: snapshot().text.length });
     const finished = once(a, 'roomData');
     a.emit('finishGame', { roomId, userId: roomId + '-a' }); b.emit('finishGame', { roomId, userId: roomId + '-b' });
     await finished; await waitFor(() => snapshot().progress === 'finished');
@@ -160,6 +162,10 @@ test('timed races persist the deadline outcome without fabricating passage finis
   const { a, b, snapshot } = await racingPair('archive-timed', true);
   try {
     const roundId = snapshot().roundId;
+    a.emit('timeData', { roomId: 'archive-timed', userId: 'archive-timed-a', wpm: 60, accuracy: 100, typedChars: snapshot().text.length });
+    a.emit('finishGame', { roomId: 'archive-timed', userId: 'archive-timed-a' });
+    await new Promise(resolve => setTimeout(resolve, 80));
+    assert.equal(snapshot().users.find((r: { userId: string }) => r.userId === 'archive-timed-a').finished, false);
     await waitFor(() => snapshot().progress === 'finished', 18000);
     await waitFor(async () => (await request('/api/race-results/' + roundId)).status === 200);
     const saved = await (await request('/api/race-results/' + roundId)).json();
@@ -190,3 +196,10 @@ test('abandoned races retain disconnected participants after recovery expires', 
   try { assert.equal((await fetch(base + query)).status, 503); }
   finally { await fetch(upstream + '/__control', { method: 'POST', body: JSON.stringify({ failWrites: false }) }); }
  });
+
+test('account write quota is tied to the verified account and exposes a retry delay', async () => {
+  let last: Response | undefined;
+  for (let n = 0; n < 31; n++) last = await request('/api/account/preferences', tokenB, { preferences: null }, 'PUT');
+  assert.equal(last!.status, 429); assert.ok(Number(last!.headers.get('retry-after')) > 0);
+  assert.equal((await request('/api/account', tokenB)).status, 200);
+});
