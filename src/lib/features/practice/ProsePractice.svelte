@@ -7,6 +7,9 @@
 	import { makeProsePassage } from "./prose-passage";
 	import PracticeResults from "./PracticeResults.svelte";
 	import { createPracticeSession, type PracticeResults as Results } from "./session";
+	import { account } from "../../state/account.store";
+	import { practiceBusy } from "../../state/preferences.store";
+	import { submitPracticeResult } from "./result-persistence";
 	import {
 		alignPracticeCaret,
 		markPracticeCharacter,
@@ -20,6 +23,8 @@
 	let status = $state<PracticeState>("waiting");
 	let results = $state<Results>();
 	let session = $state.raw(createPracticeSession());
+	let resultId = $state(window.crypto.randomUUID());
+	let sessionAccountId = $state(get(account).session?.user.id ?? null);
 	let typedLetter = "";
 	let isBlur = $state(false);
 	let caretEl = $state<HTMLDivElement>()!;
@@ -35,7 +40,7 @@
 
 	onMount(() => {
 		inputEl.focus();
-		return () => game.set("waiting");
+		return () => { game.set("waiting"); practiceBusy.set(false); };
 	});
 
 	$effect(() => {
@@ -47,6 +52,7 @@
 
 	$effect(() => {
 		game.set(status);
+		practiceBusy.set(status !== "waiting");
 		if (status !== "playing") return;
 		practiceStats.set(untrack(() => session.stats()));
 		const timer = window.setInterval(() => practiceStats.set(session.stats()), 1000);
@@ -74,6 +80,8 @@
 		passageConfig = config;
 		wordsArr = makeProsePassage(config);
 		session = createPracticeSession();
+		resultId = window.crypto.randomUUID();
+		sessionAccountId = get(account).session?.user.id ?? null;
 		wordIndex = 0;
 		letterIndex = 0;
 		typedLetter = "";
@@ -88,6 +96,7 @@
 	function finish() {
 		if (status !== "playing") return;
 		results = session.finish();
+		submitPracticeResult(sessionAccountId, { id: resultId, mode: "prose", language: passageConfig.language, settings: passageConfig, stats: results });
 		status = "finished";
 	}
 
@@ -168,6 +177,7 @@
 				advanceWord();
 				continue;
 			}
+			if (status === "waiting") sessionAccountId = get(account).session?.user.id ?? null;
 			status = "playing";
 			typedLetter = letter;
 			handleInput();
@@ -177,7 +187,7 @@
 
 <section class="practice my-5">
 	{#if results}
-		<PracticeResults testType="Prose practice" stats={results} onRestart={restart} />
+		<PracticeResults testType="Prose practice" stats={results} onRestart={restart} {resultId} signedIn={!!sessionAccountId} />
 	{:else}
 		{#key session}
 			<div class="typing-frame" class:caret-idle={status === "waiting"}>
@@ -222,7 +232,7 @@
 			</div>
 		{/key}
 		<button
-			class="practice-reset mx-auto my-1 block rounded-sm text-dark-forest-unhighlighted focus:text-dark-forest-highlighted focus:bg-dark-forest-fade hover:bg-dark-forest-fade"
+			class="practice-reset mx-auto mt-5 mb-1 block rounded-sm text-dark-forest-unhighlighted focus:text-dark-forest-highlighted focus:bg-dark-forest-fade hover:bg-dark-forest-fade"
 			aria-label="reset"
 			onclick={restart}
 		>

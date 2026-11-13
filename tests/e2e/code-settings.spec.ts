@@ -24,12 +24,15 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await page.goto('/');
     await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
     const dialog = page.getByRole('dialog');
+    // Compare the same idle state, regardless of which control opens beneath the pointer.
+    await page.mouse.move(0, 0);
     const proseAppearance = await appearance(dialog);
     await page.keyboard.press('Escape');
     await page.goto('/#/game');
     const opener = page.getByRole('button', { name: 'Test Settings', exact: true });
     await opener.click();
     await expect(dialog.getByRole('heading', { name: 'Test Settings', exact: true })).toBeFocused();
+    await page.mouse.move(0, 0);
     expect(await appearance(dialog)).toEqual(proseAppearance);
     await page.screenshot({ path: testInfo.outputPath('code-settings.png'), animations: 'disabled' });
     expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);

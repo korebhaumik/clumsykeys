@@ -1,7 +1,8 @@
 // Types
 
 export type QuotesParams = "Random Quotes";
-export type LangParams = "english" | "english 1k" | "english 5k" | "english 2k" | "hinglish";
+import type { proseLanguages } from "../practice/practice-options";
+export type LangParams = (typeof proseLanguages)[number]["value"];
 
 
 type Level = null | "easy" | "mid" | "hard" | "insane";

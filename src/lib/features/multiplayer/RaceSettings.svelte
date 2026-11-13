@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Dropdown from "../../components/Dropdown.svelte";
 	import TimerSvg from "../../components/icons/TimerIcon.svelte";
 	import QuotesSvg from "../../components/icons/QuotesIcon.svelte";
 	import AtSvg from "../../components/icons/AtIcon.svelte";
@@ -27,41 +28,25 @@
 		<legend class="panel-title">Race settings</legend>
 		<p class="muted settings-intro">Choose what everyone will type.</p>
 		<div class="settings-fields">
-			<label class="field">
-				Test type
-				<select value={settings.mode} onchange={(event) => onChange?.({ mode: event.currentTarget.value as RaceSettings["mode"] })}>
-					{#each Object.entries(raceModes) as [value, label] (value)}
-						<option {value}>{label}</option>
-					{/each}
-				</select>
-			</label>
+			<div class="field">
+				<span>Test type</span>
+				<Dropdown label="Test type" value={settings.mode} options={Object.entries(raceModes).map(([value, label]) => ({ value: value as RaceSettings["mode"], label }))} {disabled} onchange={(mode) => onChange?.({ mode })} />
+			</div>
 			{#if settings.mode === "time"}
-				<label class="field">
-					Time limit
-					<select value={settings.duration} onchange={(event) => onChange?.({ duration: Number(event.currentTarget.value) })}>
-						{#each raceDurations as seconds (seconds)}
-							<option value={seconds}>{seconds} seconds</option>
-						{/each}
-					</select>
-				</label>
+				<div class="field">
+					<span>Time limit</span>
+					<Dropdown label="Time limit" value={settings.duration} options={raceDurations.map(value => ({ value, label: `${value} seconds` }))} {disabled} onchange={(duration) => onChange?.({ duration })} />
+				</div>
 			{:else if settings.mode === "words"}
-				<label class="field">
-					Word count
-					<select value={settings.wordCount} onchange={(event) => onChange?.({ wordCount: Number(event.currentTarget.value) })}>
-						{#each raceWordCounts as count (count)}
-							<option value={count}>{count} words</option>
-						{/each}
-					</select>
-				</label>
+				<div class="field">
+					<span>Word count</span>
+					<Dropdown label="Word count" value={settings.wordCount} options={raceWordCounts.map(value => ({ value, label: `${value} words` }))} {disabled} onchange={(wordCount) => onChange?.({ wordCount })} />
+				</div>
 			{/if}
-			<label class="field">
-				Language
-				<select value={settings.language} onchange={(event) => onChange?.({ language: event.currentTarget.value as RaceSettings["language"] })}>
-					{#each Object.entries(raceLanguages) as [value, label] (value)}
-						<option {value}>{label}</option>
-					{/each}
-				</select>
-			</label>
+			<div class="field">
+				<span>Language</span>
+				<Dropdown label="Language" value={settings.language} options={Object.entries(raceLanguages).map(([value, label]) => ({ value: value as RaceSettings["language"], label }))} {disabled} onchange={(language) => onChange?.({ language })} />
+			</div>
 		</div>
 		<div class="settings-toggles">
 			<label>

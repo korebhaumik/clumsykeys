@@ -16,7 +16,15 @@
     "audit:dead": "knip",
     "test": "node --import tsx --test tests/unit/*.test.ts",
     "test:e2e": "playwright test",
-    "check:all": "npm run check && npm run check:server"
+    "check:all": "npm run check && npm run check:server",
+    "db:start": "supabase start",
+    "test:db": "supabase test db",
+    "db:plan": "node scripts/database.mjs --dry-run",
+    "db:push": "node scripts/database.mjs --apply",
+    "db:types": "node scripts/database.mjs --types",
+    "test:integration": "node --import tsx tests/integration/local-supabase.ts",
+    "test:simulation": "node --import tsx tests/simulation/accounts.ts",
+    "test:hosted": "node --import tsx tests/integration/hosted-supabase.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -27,15 +35,17 @@
     "eslint": "^10.14.0",
     "eslint-plugin-svelte": "^3.24.1",
     "knip": "^6.44.2",
+    "supabase": "^3.1.0",
     "svelte": "^5.57.3",
     "svelte-check": "^4.7.8",
     "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
-    "vite": "^8.3.6",
-    "tsx": "^4.23.15"
+    "vite": "^8.3.6"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "clsx": "^2.1.1",
     "socket.io-client": "^4.8.4",
     "svelte-sonner": "^1.2.3",

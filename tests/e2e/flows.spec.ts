@@ -104,7 +104,8 @@ for (const theme of ['dark-forest', 'classic']) {
       await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.goto('/#/game');
       for (const manual of [false, true]) for (const language of ['Python', 'JavaScript', 'TypeScript', 'Java', 'C++', 'C']) {
-        await page.getByRole('combobox', { name: 'Snippet language' }).selectOption({ label: language });
+        await page.getByRole('combobox', { name: 'Snippet language' }).click();
+        await page.getByRole('option', { name: language, exact: true }).click();
         await page.getByRole('button', { name: manual ? 'Manual Tabs' : 'Auto Tabs', exact: true }).click();
         const lines = await page.locator('.code-line').evaluateAll(lines => lines.map(line => ({
           indents: line.querySelectorAll(':scope > svg').length,
@@ -138,7 +139,8 @@ for (const theme of ['dark-forest', 'classic']) {
       await page.getByRole('button', { name: 'Close settings' }).click();
       await page.goto('/#/themes');
       const opposite = theme === 'classic' ? 'dark-forest' : 'classic';
-      await page.getByLabel('Color theme').selectOption(opposite);
+      await page.getByRole('combobox', { name: 'Color theme' }).click();
+      await page.getByRole('option', { name: opposite === 'classic' ? 'Classic' : 'Dark Forest', exact: true }).click();
       await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-theme', opposite);
       for (const width of [390, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
@@ -173,7 +175,8 @@ for (const theme of ['dark-forest', 'classic']) {
       await expect(page.getByRole('group', { name: 'Indentation' })).toHaveCount(0);
       const input = page.getByRole('textbox', { name: 'Type the practice keywords' });
       await expect(input).toBeFocused();
-      await page.getByRole('combobox', { name: 'Keyword language' }).selectOption({ label: 'JavaScript' });
+      await page.getByRole('combobox', { name: 'Keyword language' }).click();
+      await page.getByRole('option', { name: 'JavaScript', exact: true }).click();
       const region = page.getByRole('region', { name: 'JavaScript keywords' });
       const words = region.locator('.code-line-text > span');
       await expect(words).toHaveCount(25);

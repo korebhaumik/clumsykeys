@@ -16,9 +16,11 @@ In a second terminal, run `pnpm dev` and open http://localhost:5173.
 - `#/` opens prose practice in the official layout.
 - `#/game` opens code practice. Select a language and automatic or manual indentation.
 - `#/login` joins a multiplayer room. Use two browser profiles with distinct usernames and the same room ID.
+- `#/account` creates an account, signs in, or recovers a password using Supabase Auth. Guest practice and rooms remain available.
+- `#/history` shows the signed-in account's saved practice sessions and race results.
 - `#/race` opens the lobby or live race. Set the shared race options in the lobby, then vote to start. Settings lock during the race. The results screen offers a replay.
 
-The existing test settings are retained. The imported prose engine uses a fixed passage. Room state is held in server memory and race results are held in the browser session.
+The existing test settings and typing calculations are retained. Live rooms remain in server memory. Configured Supabase projects store account preferences, completed solo sessions, and completed or abandoned race rounds.
 
 ## Checks and production builds
 
@@ -30,7 +32,9 @@ pnpm build:server
 pnpm start:server
 ```
 
-The frontend uses port 1440 for the backend on localhost. For separate deployments, set `VITE_SERVER_URL` before building the frontend and set `FRONTEND_ORIGINS` on the backend to a comma-separated list of allowed frontend origins. For same-origin deployments, proxy `/socket.io/` and `/rooms` to the backend. Set `PORT` to override the backend port.
+The frontend uses port 1440 for the backend on localhost. For separate deployments, set `VITE_SERVER_URL` before building the frontend and set `FRONTEND_ORIGINS` on the backend to a comma-separated list of allowed frontend origins. For same-origin deployments, proxy `/socket.io/`, `/rooms`, and `/api/` to the backend. Set `PORT` to override the backend port.
+
+Copy [`.env.example`](.env.example) to root `.env` and fill in the four Supabase runtime values. Both development servers read that file; deployment environment variables take precedence. Follow [Supabase setup](docs/SUPABASE.md) to apply the versioned migrations and configure Auth redirects before using accounts. The runtime API secret does not grant CLI migration access: use `supabase login` or `SUPABASE_ACCESS_TOKEN`; the database password is optional with a temporary login role. Existing guest flows work when Supabase is unconfigured.
 
 `GET /rooms?roomId=<id>` returns the current roster and metrics. Missing, blank, or repeated IDs return 400. Unknown rooms return 404.
 

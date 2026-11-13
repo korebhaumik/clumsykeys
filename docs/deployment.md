@@ -40,6 +40,17 @@ Save the service IDs as GitHub secrets, then manually run the deploy workflow wi
 
 Set the frontend's build environment variable `VITE_SERVER_URL=https://<northflank-backend-host>` and rebuild/redeploy the frontend. Use the base HTTPS URL, without `/socket.io` or `/rooms`; Socket.IO supplies its own path. The backend's `FRONTEND_ORIGINS` must include the frontend's actual origin.
 
+For accounts and database persistence, also set backend runtime variables
+`SUPABASE_URL` and `SUPABASE_SECRET_KEY`, and frontend build variables
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Use the same project on
+both sides. Never pass the secret key as a frontend build variable or Docker
+build argument. The Docker context excludes `.env` files; configure secrets on
+the deployment service. Migration/CLI credentials do not belong in the runtime
+image. Apply reviewed migrations with `npm run db:plan` then `npm run db:push`
+before releasing code that depends on them. Configure Auth callbacks for the real
+frontend URL as described in [Supabase setup](SUPABASE.md). Same-origin proxies
+must forward `/api/` in addition to the existing room and Socket.IO routes.
+
 ## Verification and rollback
 
 Check `https://<backend-host>/health`, then open `#/login` in two browser profiles, join the same room with distinct usernames, start a race, and refresh one client to verify reconnect. Confirm HTTP room requests and Socket.IO polling/WebSocket connections succeed without CORS errors.

@@ -2,6 +2,7 @@
  import SignOutIcon from "../icons/SignOutIcon.svelte";
 	import InfoSvg from "../icons/InfoIcon.svelte";
 	import { theme } from "../../state/app.store";
+	import { supabase } from "../../services/supabase";
 	import KeyboardSvg from "../icons/KeyboardIcon.svelte";
 	import CodeSvg from "../icons/CodeIcon.svelte";
 	import LogoSvg from "../icons/LogoIcon.svelte";
@@ -12,10 +13,16 @@
 	import LeaderboardsSvg from "../icons/LeaderboardsIcon.svelte";
 	import RocketSvg from "../icons/RocketIcon.svelte";
 	import ThemeSvg from "../icons/ThemeIcon.svelte";
-	import { push } from "svelte-spa-router";
+	import { push, router } from "svelte-spa-router";
 	import LangSvg from "../icons/LangIcon.svelte";
+	import { account } from "../../state/account.store";
 
 	let { mode, active = false }: { active?: boolean; mode?: "prose" | "code" } = $props();
+
+	async function signOut() {
+		if (!supabase) return;
+		await supabase.auth.signOut({ scope: "local" });
+	}
 
 	function leaveRoom() {
 		const roomId = localStorage.getItem("roomId");
@@ -96,7 +103,7 @@
 			</button>
 			{/if}
 			<a
-				href="#/leaderboard"
+				href="#/leaderboard" aria-current={router.location === "/leaderboard" ? "page" : undefined}
 				aria-label="Leaderboard"
 				title="Leaderboard"
 				class={cn("transition p-2 text-dark-forest-accent-purple ", {
@@ -174,9 +181,10 @@
 			<hr class="nav-divider h-10 border-none bg-dark-forest-fade w-1 rounded-sm mx-3" />
 		{/if}
 		
+		{#if $account.session}
 		<button
-			aria-label="Leave room"
-			onclick={leaveRoom}
+			aria-label="Sign out"
+			onclick={signOut}
 			class={cn("text-dark-forest-accent-error mr-3 rounded-full p-2", mode && "hidden sm:inline-flex", {
 				"text-dark-forest-accent-error": $theme === "dark-forest",
 				"border border-dark-forest-accent-error": $theme === "dark-forest",
@@ -185,8 +193,9 @@
 			})}
 			><SignOutIcon /></button
 		>
+		{/if}
 		
-		<a aria-label="Join a room" href="#/login" class={cn("p-2 mr-2 rounded-full", mode && "max-[400px]:hidden")}>
+		<a aria-label={$account.session ? "Your account" : "Sign in or create account"} href="#/account" class="p-2 mr-2 rounded-full">
 			<UserSvg />
 		</a>
 		
@@ -217,11 +226,13 @@
 		<nav id={navigationId} aria-label="Mobile navigation" class="mobile-navigation absolute right-5 top-24 z-30 grid gap-3 rounded-lg bg-dark-forest-fade p-4 text-dark-forest-highlighted md:hidden">
 			<a href="#/" onclick={() => (menuIsVisible = false)}>Prose practice</a>
 			<a href="#/game" onclick={() => (menuIsVisible = false)}>Code practice</a>
-			<a href="#/leaderboard" onclick={() => (menuIsVisible = false)}>Leaderboard</a>
+			<a href="#/leaderboard" aria-current={router.location === "/leaderboard" ? "page" : undefined} onclick={() => (menuIsVisible = false)}>Leaderboard</a>
 			<a href="#/race" onclick={() => (menuIsVisible = false)}>Multiplayer</a>
 			{#if mode}<a href="#/login" onclick={() => (menuIsVisible = false)}>Join a room</a>{/if}
 			<a href="#/themes" onclick={() => (menuIsVisible = false)}>Settings</a>
 			<a href="#/about" onclick={() => (menuIsVisible = false)}>About</a>
+			<a href="#/account" onclick={() => (menuIsVisible = false)}>Account</a>
+			<a href="#/history" onclick={() => (menuIsVisible = false)}>Your history</a>
 			{#if mode}<button class="text-left" onclick={leaveRoom}>Leave room</button>{/if}
 		</nav>
 	{/if}

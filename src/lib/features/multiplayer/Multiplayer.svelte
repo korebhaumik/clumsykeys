@@ -6,6 +6,7 @@
 	import { defaultRaceSettings, type RaceSettings as Settings } from "../../../../backend/src/race.settings";
 	import Footer from "../../components/layout/Footer.svelte";
 	import ClipboardSvg from "../../components/icons/ClipboardIcon.svelte";
+	import SignOutIcon from "../../components/icons/SignOutIcon.svelte";
 	import ProgressBar from "./ProgressBar.svelte";
 	import { Toaster, toast } from "svelte-sonner";
 	import Game from "./RaceEngine.svelte";
@@ -21,7 +22,8 @@
 	} from "./race.store";
 	import { push } from "svelte-spa-router";
 	import { type Rank } from "./race.store";
-	import { type Room, roomInfo } from "./room.store";
+	import { type Room, roomInfo, emptyRoom } from "./room.store";
+	import { racePersistence, raceRoundId } from "../../state/race-persistence.store";
 
 	const userId = localStorage.getItem("userId");
 	const username = localStorage.getItem("username");
@@ -30,6 +32,19 @@
 	const checkpointKey = `clumsy-keys:race:${roomId}`;
 	let ready = $state(false);
 	let roomDialog = $state<HTMLDialogElement>()!;
+
+	function leaveRoom() {
+		ready = false;
+		socket.disconnect();
+		localStorage.removeItem("roomId");
+		localStorage.removeItem(sessionKey);
+		localStorage.removeItem(checkpointKey);
+		resetTest();
+		roomInfo.set(emptyRoom);
+		raceRoundId.set(null);
+		racePersistence.set(null);
+		void push("/login");
+	}
 
 	function openRoom() {
 		if (!roomDialog.open) roomDialog.showModal();
@@ -104,8 +119,13 @@
 		const onSession = ({ resumeToken }: { resumeToken: string }) => {
 			localStorage.setItem(sessionKey, resumeToken);
 		};
-		const onDisconnect = () => { ready = false; };
+		const onDisconnect = (reason: string) => {
+			ready = false;
+			if (reason === "io server disconnect") socket.connect();
+		};
+		const onConnectError = () => { ready = false; toast("Could not connect. Check your account session and rejoin the room."); };
 		const onRoomData = (room: Room) => {
+			if (room.roundId && room.roundId !== $raceRoundId) { raceRoundId.set(room.roundId); racePersistence.set(null); }
 			const user = room.users.find((member) => member.userId === userId);
 			if (room.roundId !== $roomInfo.roundId) resetTest();
 			$totalChars = room.text.length;
@@ -127,6 +147,7 @@
 		socket.on("notif", onNotification);
 		socket.on("error", onNotification);
 		socket.on("connect", joinRoom);
+		socket.on("connect_error", onConnectError);
 		if (socket.connected) joinRoom();
 		else socket.connect();
 
@@ -137,6 +158,7 @@
 			socket.off("notif", onNotification);
 			socket.off("error", onNotification);
 			socket.off("connect", joinRoom);
+			socket.off("connect_error", onConnectError);
 		};
 	});
 </script>
@@ -165,8 +187,8 @@
 		{/key}
 	{/if}
 
-	<footer class="page-footer">
-		<Footer onViewRoom={openRoom}>
+	<div class="page-footer race-shortcuts">
+		<Footer onViewRoom={openRoom} showCredits={false}>
 			{#snippet trailing()}
 				{#if thisUser.finished}
 					<p class="finish-status" role="status">
@@ -175,7 +197,7 @@
 				{/if}
 			{/snippet}
 		</Footer>
-	</footer>
+	</div>
 {:else}
 	<div class="lobby-intro">
 		<div class="page-heading">
@@ -189,10 +211,13 @@
 				<h2 id="invite-title" class="eyebrow">Room ID</h2>
 				<code class="room-code">{roomId ?? "—"}</code>
 			</div>
-			<button type="button" class="button button-secondary" disabled={!roomId} onclick={copyInvite}>
-				<span aria-hidden="true"><ClipboardSvg variant="size-4" /></span>
-				Copy invite link
-			</button>
+			<div class="room-actions">
+				<button type="button" class="button button-secondary" disabled={!roomId} onclick={copyInvite}>
+					<span aria-hidden="true"><ClipboardSvg variant="size-4" /></span>
+					Copy invite link
+				</button>
+				<button type="button" class="leave-room" aria-label="Leave room" title="Leave room" onclick={leaveRoom}><SignOutIcon /></button>
+			</div>
 		</section>
 	</div>
 
@@ -277,6 +302,7 @@
 />
 
 <style>
+	.race-shortcuts { padding-bottom: 0; }
 	.room-code { font: 600 var(--text-1rem) var(--mono); overflow-wrap: anywhere; }
 	.panel-heading, .lobby-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--dimension-1rem); flex-wrap: wrap; }
 	.panel-heading .eyebrow { margin-bottom: var(--dimension-0_25rem); }
@@ -284,6 +310,9 @@
 	.lobby-intro .page-heading { margin-bottom: 0; }
 	.invite-panel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--dimension-0_75rem) var(--dimension-1rem); padding-block: var(--dimension-0_85rem); }
 	.invite-panel .eyebrow { margin-bottom: var(--dimension-0_25rem); }
+	.room-actions { display: flex; align-items: center; gap: var(--dimension-0_5rem); margin-inline-start: auto; }
+	.leave-room { display: inline-flex; align-items: center; justify-content: center; min-width: var(--settings-control-height); min-height: var(--settings-control-height); border-radius: var(--radius-0_55rem); color: var(--error); cursor: pointer; }
+	.leave-room:hover { background: var(--accent-wash); }
 	.room-id { min-width: 0; }
 	.room-id .room-code { user-select: all; }
 	.lobby-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); gap: var(--dimension-1rem); align-items: start; }

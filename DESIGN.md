@@ -71,6 +71,10 @@ Clumsy Keys uses a quiet typing-first layout: restrained forest neutrals, sage a
 
 Comfortaa is the existing app face; Poppins is used for the brand, system UI for small chart labels, and `--mono` for technical labels. Keep the existing font loading/fallback behavior. `--text-*`, `--weight-*`, `--leading-*`, and `--tracking-*` preserve the existing scale, with responsive headings expressed as clamps. Use the small text sizes for secondary metadata, not primary actions.
 
+The account dashboard fills the shared page container. Its banner uses the accent
+and caret roles; the initial avatar uses theme-aware `--profile-avatar-*` roles.
+Statistics, bests and recent tests retain the quiet typography and surface palette.
+
 Tailwind spacing follows its quarter-rem scale. `--dimension-*` records precise legacy spacing and layout dimensions; `--radius-*` records corner geometry. Reuse existing tokens. Do not round legacy dimensions merely for tidiness. No new decorative shadows are introduced. Caret and chrome motion use `--motion-*`. Structural zero, fractions, percentages, breakpoint conditions and SVG chart coordinates are not palette values.
 
 ## Icons
@@ -85,6 +89,6 @@ Don't: add raw hex/rgb/hsl values, duplicate near-identical colors, attach click
 
 ## Accessibility
 
-Keyboard focus uses the app-wide `:focus-visible` highlighter in `app.css`, colored by `--focus-highlight`. Dark Forest uses sage; Classic uses black, with white on its black toolbars. Keep component focus styling limited to supporting feedback rather than replacing this indicator. The main typing areas stay outline-free and use the typing caret as their focus cue. Native outlines remain suppressed only for their hidden inputs; forced-color mode uses the system Highlight color on other controls. Tab and Shift+Tab follow document order in prose practice; code practice retains Tab for indentation and Shift+Tab to leave the editor. Mobile navigation closes with Escape and returns focus to its toggle.
+Keyboard focus uses the app-wide `:focus-visible` highlighter in `app.css`, colored by `--focus-highlight`. Dark Forest uses sage; Classic uses black, with white on its black toolbars. Keep component focus styling limited to supporting feedback rather than replacing this indicator. The main typing areas stay outline-free and use the typing caret as their focus cue. Hidden typing inputs suppress their native outlines. Icon-prefixed `.focus-field` inputs forward the same global outline to the enclosing field so icons and text share one focus indicator; buttons inside retain their own indicator. Forced-color mode uses the system Highlight color. Tab and Shift+Tab follow document order in prose practice; code practice retains Tab for indentation and Shift+Tab to leave the editor. Mobile navigation closes with Escape and returns focus to its toggle.
 
 Both themes retain distinct text, error, caret and chart roles. Errors also use underlines; chart series include labels and dashed variants. Settings close controls are now keyboard-accessible buttons. Legacy muted/brand colors are preserved, so this refactor does not claim full WCAG compliance; contrast remediation should be reviewed as an explicit visual change.

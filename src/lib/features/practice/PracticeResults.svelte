@@ -3,8 +3,10 @@
 	import ResetSvg from "../../components/icons/ResetIcon.svelte";
 	import type { PracticeResults } from "./session";
 	import ResultsChart from "../../components/charts/ResultsChart.svelte";
+	import { resultSaveStates, retryPracticeResults } from "./result-persistence";
 
-	let { stats, testType, onRestart }: { stats: PracticeResults; testType: string; onRestart: () => void } = $props();
+	let { stats, testType, onRestart, resultId, signedIn = false, showRestart = true }: { stats: PracticeResults; testType: string; onRestart: () => void; resultId?: string; signedIn?: boolean; showRestart?: boolean } = $props();
+	let saveState = $derived(resultId ? $resultSaveStates[resultId] : undefined);
 	const speedBands = [
 		{ label: "0–30", upper: 30 },
 		{ label: "30–60", upper: 60 },
@@ -48,7 +50,15 @@
 		<div><dt>session</dt><dd>{stats.elapsedSeconds < 0.01 ? "<0.01" : Number(stats.elapsedSeconds.toFixed(2))} s</dd></div>
 	</dl>
 
-	<button class="result-replay" aria-label="Practice again" title="Practice again" onclick={onRestart}><ResetSvg /></button>
+	{#if showRestart}<button class="result-replay" aria-label="Practice again" title="Practice again" onclick={onRestart}><ResetSvg /></button>{/if}
+	{#if resultId}
+		<p class="save-status" role="status">
+			{#if saveState === "saved"}Saved to your account. <a href="#/history">View history</a>
+			{:else if saveState === "pending"}Saving result…
+			{:else if saveState === "failed"}Result not saved. <button onclick={() => retryPracticeResults()}>Retry saving</button>
+			{:else if !signedIn}<a href="#/account">Sign in</a> to save future results across devices.{/if}
+		</p>
+	{/if}
 
 	<section class="word-history" aria-labelledby="input-history">
 		<div class="history-header">
@@ -77,6 +87,8 @@
 </section>
 
 <style>
+	.save-status { margin-top: var(--dimension-1rem); color: var(--muted); font-size: var(--text-0_82rem); }
+	.save-status a, .save-status button { text-decoration: underline; color: var(--accent); }
 	.test-type { font-size: var(--text-1rem); margin-top: var(--dimension-0_4rem); }
 	.word-history {
 		--speed-0: var(--palette-speed-orange);

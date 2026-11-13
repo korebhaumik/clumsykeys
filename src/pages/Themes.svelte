@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ChangeEventHandler } from "svelte/elements";
+	import Dropdown from "../lib/components/Dropdown.svelte";
 	import { theme, themeBackgrounds, type themeType } from "../lib/state/app.store";
 	import PracticeLayout from "../lib/components/layout/PracticeLayout.svelte";
 
@@ -9,8 +9,7 @@
 	] as const;
 	const selectedLabel = $derived($theme === "classic" ? "Classic" : "Dark Forest");
 
-	const handleChange: ChangeEventHandler<HTMLSelectElement> = (event) => {
-		const selectedTheme = event.currentTarget.value as themeType;
+	const handleChange = (selectedTheme: themeType) => {
 		theme.set(selectedTheme);
 		localStorage.setItem("theme", selectedTheme);
 	};
@@ -25,14 +24,10 @@
 
 	<div class="appearance-grid">
 		<div class="panel theme-picker">
-			<label class="field">
-				Color theme
-				<select onchange={handleChange} value={$theme} aria-describedby="theme-save-note">
-					{#each themes as { value, label } (value)}
-						<option {value}>{label}</option>
-					{/each}
-				</select>
-			</label>
+			<div class="field">
+				<span>Color theme</span>
+				<Dropdown label="Color theme" options={themes} value={$theme} onchange={handleChange} describedBy="theme-save-note" />
+			</div>
 			<p id="theme-save-note" class="muted">Changes apply immediately and are saved on this device.</p>
 		</div>
 
@@ -49,6 +44,7 @@
 					<span class="typing-word caret-word"><span class="text-white">ma</span><span class="text-red-500 underline">k</span><span class="text-zinc-600">e</span></span>
 					<span class="typing-word text-zinc-600">steady</span>
 					<span class="typing-word text-zinc-600">progress.</span>
+					<span class="sample-next-line text-zinc-600">Find your rhythm, one key at a time.</span>
 				</p>
 			</div>
 
@@ -66,6 +62,7 @@
 	.theme-picker p { margin-top: var(--dimension-0_8rem); font-size: var(--text-0_82rem); }
 	.theme-preview { overflow: hidden; }
 	.theme-sample { padding: clamp(var(--dimension-1_15rem), var(--dimension-4vw), var(--dimension-1_8rem)) var(--dimension-1_15rem); font-family: inherit; font-size: clamp(var(--text-1rem), var(--text-2_4vw), var(--text-1_25rem)); line-height: var(--leading-1_65); }
+	.sample-next-line { display: block; width: 100%; font-size: inherit; letter-spacing: var(--tracking-0_1em); }
 	.caret-word .text-zinc-600 { position: relative; }
 	.caret-word .text-zinc-600::before {
 		position: absolute;

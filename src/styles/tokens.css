@@ -265,6 +265,9 @@
 	--accent-wash: var(--palette-forest-800);
 	--caret: var(--palette-teal-200);
 	--error: var(--palette-rose-400);
+	--profile-avatar-start: var(--palette-violet-400);
+	--profile-avatar-end: var(--palette-blue-300);
+	--profile-avatar-ink: var(--palette-forest-950);
 	--settings-control-height: 2.625rem;
 }
 
@@ -279,6 +282,9 @@
 	--accent-wash: var(--palette-gray-200);
 	--caret: var(--palette-orange-500);
 	--error: var(--palette-red-700);
+	--profile-avatar-start: var(--palette-violet-300);
+	--profile-avatar-end: var(--palette-blue-700);
+	--profile-avatar-ink: var(--palette-white);
 	color: var(--ink);
 	color-scheme: light;
 }

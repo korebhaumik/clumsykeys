@@ -3,6 +3,7 @@ import type { Server, Socket } from "socket.io";
 import { type Room, rooms } from "./store";
 import { applyRaceSettings, defaultRaceSettings } from "./race.settings";
 import { makeRacePassage } from "./race.passage";
+import type { RaceArchive } from "./persistence.contract";
 
 type JoinRoomReq = {
 	username: string;
@@ -11,6 +12,7 @@ type JoinRoomReq = {
 	userId: string;
 	socket: Socket;
 	io: Server;
+	writeRace: (round: RaceArchive) => void;
 };
 type StartVoteReq = {
 	roomId: string;
@@ -59,6 +61,7 @@ const sessions = new WeakMap<Racer, {
 	token: string;
 	socketId: string | null;
 	expiry?: ReturnType<typeof setTimeout>;
+	accountId: string | null;
 }>();
 
 const roundStarts = new WeakMap<Room, number>();
@@ -66,6 +69,27 @@ const roundTimers = new WeakMap<Room, ReturnType<typeof setTimeout>>();
 const countdownTimers = new WeakMap<Room, ReturnType<typeof setTimeout>>();
 const speedHistory = new WeakMap<Racer, { seconds: number; wpm: number }[]>();
 const finishTimes = new WeakMap<Racer, number>();
+const writers = new WeakMap<Room, (round: RaceArchive) => void>();
+const archives = new WeakMap<Room, { round: RaceArchive; racers: Map<Racer, RaceArchive["results"][number]>; finalized: boolean }>();
+
+function captureRacer(room: Room, racer: Racer, reason: RaceArchive["results"][number]["reason"]) {
+	const entry = archives.get(room)?.racers.get(racer);
+	if (!entry || archives.get(room)?.finalized) return;
+	if (entry.reason === "completed" || entry.reason === "time-limit") return;
+	Object.assign(entry, { wpm: racer.wpm, accuracy: racer.accuracy, typedChars: racer.typedChars,
+		finishSeconds: finishTimes.get(racer) ?? null, reason,
+		speedHistory: (speedHistory.get(racer) ?? []).map(point => ({ ...point })) });
+}
+
+function finalizeArchive(room: Room, outcome: RaceArchive["outcome"]) {
+	const archive = archives.get(room);
+	if (!archive || archive.finalized) return;
+	archive.finalized = true;
+	archive.round.endedAt = new Date().toISOString();
+	archive.round.outcome = outcome;
+	// Every field is copied before rankings can request a reset.
+	writers.get(room)?.(structuredClone(archive.round));
+}
 
 function roomSnapshot(room: Room) {
 	if (room.progress !== "finished") return room;
@@ -88,11 +112,12 @@ function socketOwnsRacer(room: Room | undefined, userId: string, socket: Socket)
 	return racer && sessions.get(racer)?.socketId === socket.id ? racer : undefined;
 }
 
-export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, io }: JoinRoomReq) => {
+export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, io, writeRace }: JoinRoomReq) => {
 	if (socket.data.roomId && (socket.data.roomId !== roomId || socket.data.userId !== userId)) return;
 	const room = rooms.get(roomId);
 	const existing = findRacer(room, userId);
 	const session = existing && sessions.get(existing);
+	if (session && session.accountId !== (socket.data.accountId ?? null)) return socket.emit("error", { msg: "This racer belongs to a different account session." });
 
 	if (room && session && (session.socketId === socket.id || session.token === resumeToken)) {
 		const previousSocket = session.socketId && io.sockets.sockets.get(session.socketId);
@@ -131,7 +156,8 @@ export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, 
 	};
 	const token = randomUUID();
 	cancelCountdown(joinedRoom);
-	sessions.set(racer, { token, socketId: socket.id });
+	sessions.set(racer, { token, socketId: socket.id, accountId: socket.data.accountId ?? null });
+	writers.set(joinedRoom, writeRace);
 	socket.data.roomId = roomId;
 	socket.data.userId = userId;
 	joinedRoom.users.push(racer);
@@ -163,6 +189,7 @@ export const leaveRoom = (socket: Socket, io: Server) => {
 function removeRacer(room: Room, roomId: string, racer: Racer, io: Server) {
 	const index = room.users.indexOf(racer);
 	if (index === -1) return;
+	if (room.progress === "playing") captureRacer(room, racer, "disconnected");
 	clearTimeout(sessions.get(racer)?.expiry);
 	sessions.delete(racer);
 	room.users.splice(index, 1);
@@ -171,6 +198,7 @@ function removeRacer(room: Room, roomId: string, racer: Racer, io: Server) {
 	if (room.progress === "waiting") {
 		resetVotes(roomId);
 	} else if (room.users.length === 0) {
+		finalizeArchive(room, "aborted");
 		resetData(roomId);
 	} else if (room.progress === "playing") {
 		finishRoomIfComplete(room, roomId, io);
@@ -183,6 +211,7 @@ function finishRoomIfComplete(room: Room, roomId: string, io: Server) {
 	clearTimeout(roundTimers.get(room));
 	roundTimers.delete(room);
 	room.progress = "finished";
+	finalizeArchive(room, "completed");
 	sendNotif({ msg: `Game finished in room ${roomId}!!!!`, roomId, io });
 }
 
@@ -246,6 +275,7 @@ export const finishGame = async ({ roomId, userId, socket, io }: FinishGameReq) 
 	user.finished = true;
 	const startedAt = roundStarts.get(room);
 	if (startedAt !== undefined) finishTimes.set(user, (performance.now() - startedAt) / 1000);
+	captureRacer(room, user, "completed");
 	finishRoomIfComplete(room, roomId, io);
 
 	const msg = `${user.username} finished the game in room ${roomId}`;
@@ -313,13 +343,21 @@ function startGame(roomId: string, io: Server) {
 	room.text = makeRacePassage(room.settings);
 	room.progress = "playing";
 	room.roundId = randomUUID();
+	const startedAt = new Date().toISOString();
+	const racers = new Map(room.users.map(racer => [racer, {
+		participantId: randomUUID(), userId: racer.userId, accountId: sessions.get(racer)?.accountId ?? null,
+		username: racer.username, wpm: 0, accuracy: 100, typedChars: 0, finishSeconds: null,
+		reason: "disconnected" as const, speedHistory: [],
+	}]));
+	archives.set(room, { round: { id: room.roundId, roomId, settings: { ...room.settings }, startedAt, endedAt: startedAt,
+		outcome: "completed", results: [...racers.values()] }, racers, finalized: false });
 	roundStarts.set(room, performance.now());
 	room.users.forEach((user) => {
 		user.isPlaying = true;
 	});
 	if (room.settings.mode === "time") {
 		const timer = setTimeout(() => {
-			room.users.forEach((racer) => { racer.finished = true; });
+			room.users.forEach((racer) => { if (!racer.finished) captureRacer(room, racer, "time-limit"); racer.finished = true; });
 			finishRoomIfComplete(room, roomId, io);
 			io.to(roomId).emit("roomData", roomSnapshot(room));
 		}, room.settings.duration * 1000);
@@ -330,6 +368,7 @@ function startGame(roomId: string, io: Server) {
 
 function resetData(roomId: string) {
 	const room = rooms.get(roomId) as Room;
+	archives.delete(room);
 	clearTimeout(roundTimers.get(room));
 	roundTimers.delete(room);
 	roundStarts.delete(room);

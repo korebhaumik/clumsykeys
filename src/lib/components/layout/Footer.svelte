@@ -10,7 +10,8 @@
 	import { theme } from "../../state/app.store";
 	import cn from "../../utils";
 
-	let { showShortcuts = true, active = false, onRestart, onSettings, onViewRoom, trailing }: {
+	let { showShortcuts = true, showCredits = true, active = false, onRestart, onSettings, onViewRoom, trailing }: {
+		showCredits?: boolean;
 		showShortcuts?: boolean;
 		active?: boolean;
 		onRestart?: () => void;
@@ -36,7 +37,7 @@
 	{/if}
 {/snippet}
 
-<div class="w-full">
+<div class="w-full" class:shortcuts-only={!showCredits}>
 	{#if showShortcuts}
 		<div class="footer-shortcuts" class:active-test={active}>
 			{#if onViewRoom}
@@ -49,7 +50,7 @@
 		</div>
 	{/if}
 	
-	<div
+	{#if showCredits}<div
 		class:active-test={active}
 		inert={active}
 		class={cn(
@@ -82,20 +83,20 @@
 				aria-label="Discord"
 				href="http://discord.gg"
 				target="_blank"
-				class="items-center hidden md:flex"
+				class="items-center flex"
 			>
 				<DiscordSvg />
 				<span class="ml-1.5 text-xs">Discord</span>
 			</a>
-			<div class="items-center hidden md:flex">
+			<div class="items-center flex">
 				<ShieldSvg />
 				<span class="ml-1.5 text-xs">Security</span>
 			</div>
-			<div class="items-center hidden md:flex">
+			<div class="items-center flex">
 				<DocumentSvg />
 				<span class="ml-1.5 text-xs">Terms</span>
 			</div>
-			<div class="items-center hidden md:flex">
+			<div class="items-center flex">
 				<LockSvg />
 				<span class="ml-1.5 text-xs">Privacy</span>
 			</div>
@@ -104,7 +105,7 @@
 				<span class="ml-1.5 text-xs">Support</span>
 			</div>
 		</div>
-		<p class="hidden text-xs big:block">
+		<p class="text-xs">
 			developed by <a
 				aria-label="Kore Bhaumik"
 				class="text-amber-700 hover:underline"
@@ -112,10 +113,12 @@
 				target="_blank">@korebhaumik</a
 			>
 		</p>
-	</div>
+	</div>{/if}
 </div>
 
 <style>
+	.shortcuts-only .footer-shortcuts { margin-bottom: 0; }
+	.footer-credits > div { gap: var(--dimension-0_75rem); width: auto; }
 	.footer-credits { transition: opacity var(--motion-160ms) ease, visibility var(--motion-160ms); }
 	.footer-credits.active-test { opacity: 0; visibility: hidden; }
 	.footer-shortcuts { --key-bg: var(--palette-stone-500); --key-ink: var(--palette-forest-950); display: flex; flex-wrap: wrap; gap: var(--dimension-0_65rem) var(--dimension-2_5rem); margin-bottom: var(--dimension-1_25rem); color: var(--key-bg); font-size: var(--text-0_875rem); line-height: var(--dimension-1_25rem); }

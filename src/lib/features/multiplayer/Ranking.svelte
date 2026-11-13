@@ -5,11 +5,17 @@
 	import socket from "./socket";
 	import { resetRoom } from "./room.store";
 	import ResultsChart from "../../components/charts/ResultsChart.svelte";
+	import { account } from "../../state/account.store";
+	import { accountApi } from "../../services/account-api";
+	import { racePersistence, raceRoundId } from "../../state/race-persistence.store";
+	import type { SpeedPoint } from "../../components/charts/result-chart";
 
 	const userId = localStorage.getItem("userId");
+	let archivedOwnId = $state<string>();
+	let historyError = $state("");
 	let leaderboard = $derived(router.location === "/leaderboard");
 	const colors = ["var(--result-accent)", "var(--racer-blue)", "var(--racer-orange)", "var(--racer-violet)", "var(--racer-pink)", "var(--racer-teal)"];
-	let ownScore = $derived($finalRanking.find((racer) => racer.userId === userId));
+	let ownScore = $derived($finalRanking.find((racer) => racer.userId === (archivedOwnId ?? userId)));
 	let racers = $derived($finalRanking.map((racer, index) => ({
 		...racer,
 		color: colors[index % colors.length],
@@ -27,10 +33,22 @@
 	})));
 
 	onMount(() => {
-		if (leaderboard) return;
+		let active = true;
+		if (!$finalRanking.length && $account.session) {
+			void accountApi<{ round: { id: string }; ownRacerId: string; results: { racer_id: string; username: string; wpm: number; accuracy: number; speed_history: SpeedPoint[]; finish_seconds: number | null }[] }>("/api/race-results/latest")
+				.then(result => {
+					if (!active) return;
+					archivedOwnId = result.ownRacerId;
+					raceRoundId.set(result.round.id); racePersistence.set({ roundId: result.round.id, state: "saved" });
+					finalRanking.set(result.results.map(racer => ({ userId: racer.racer_id, username: racer.username, wpm: racer.wpm,
+						accuracy: racer.accuracy, speedHistory: racer.speed_history, finishSeconds: racer.finish_seconds ?? undefined })));
+				}).catch(error => { if (active && error.status !== 404) historyError = error.message; });
+		}
+		if (leaderboard) return () => { active = false; };
 		const roomId = localStorage.getItem("roomId");
 		resetRoom();
 		socket.emit("resetGame", { roomId });
+		return () => { active = false; };
 	});
 
 	function replay() {
@@ -55,6 +73,9 @@
 			</button>
 		{/if}
 	</header>
+	{#if $account.session}
+		<p class="persistence-note" role="status">{historyError || ($racePersistence?.state === "pending" ? "Saving race…" : $racePersistence?.state === "failed" ? "Race could not be saved. Live results remain available here." : $racePersistence?.state === "saved" ? "Race saved to your account." : "")} <a href="#/history">Your history</a></p>
+	{/if}
 
 	{#if racers.length}
 		<div class="race-overview" class:with-score={ownScore && series.length}>
@@ -105,6 +126,8 @@
 </section>
 
 <style>
+	.persistence-note { color: var(--muted); font-size: var(--text-0_82rem); }
+	.persistence-note a { color: var(--accent); text-decoration: underline; }
 	.race-results {
 		--racer-blue: var(--palette-blue-300);
 		--racer-orange: var(--palette-orange-300);

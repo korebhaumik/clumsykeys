@@ -31,16 +31,21 @@ body {
 /* One keyboard highlighter for every route, dialog and focusable control.
    Outlines follow the element through scrolling/resizing without an overlay
    intercepting clicks or falling behind a dialog's top layer. */
-:focus-visible {
+:focus-visible, .focus-field:has(input:focus-visible) {
 	outline: var(--dimension-2px) solid var(--focus-highlight);
 	outline-offset: var(--dimension-3px);
 }
+
+/* Icon-prefixed inputs share one complete field outline instead of drawing an
+   inset second outline around just the editable portion. Buttons keep their
+   own focus indicator. */
+.focus-field input:focus-visible { outline: none; }
 
 /* The typing caret is the focus cue for the main typing area. */
 .sr-only:focus-visible { outline: none; }
 
 @media (forced-colors: active) {
-	:focus-visible {
+	:focus-visible, .focus-field:has(input:focus-visible) {
 		outline-color: Highlight;
 	}
 }

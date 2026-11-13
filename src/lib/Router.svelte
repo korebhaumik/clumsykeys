@@ -5,6 +5,9 @@
 	import Themes from "../pages/Themes.svelte";
 	import Home from "../pages/Home.svelte";
 	import Login from "../pages/Login.svelte";
+	import Account from "../pages/Account.svelte";
+	import History from "../pages/History.svelte";
+	import Leaderboards from "../pages/Leaderboards.svelte";
 	import Multiplayer from "./features/multiplayer/Multiplayer.svelte";
 	import Ranking from "./features/multiplayer/Ranking.svelte";
 	import Navbar from "./components/layout/Navbar.svelte";
@@ -14,9 +17,9 @@
 	let practiceLayout = $derived(
 		router.location === "/" || router.location === "/game" || router.location === "/themes" || router.location === "/about"
 	);
-	let multiplayerLayout = $derived(
+	let pageLayout = $derived(
 		router.location === "/login" || router.location === "/race" ||
-		router.location === "/ranking" || router.location === "/leaderboard"
+		router.location === "/ranking" || router.location === "/leaderboard" || router.location === "/account" || router.location === "/history"
 	);
 
 	const routes = {
@@ -25,9 +28,11 @@
 		"/game": Game,
 		"/themes": Themes,
 		"/login": Login,
+		"/account": Account,
+		"/history": History,
 		"/race": Multiplayer,
 		"/ranking": Ranking,
-		"/leaderboard": Ranking,
+		"/leaderboard": Leaderboards,
 	};
 
 	$effect(() => {
@@ -38,17 +43,19 @@
 	});
 </script>
 
-<div class:page-shell={multiplayerLayout}>
+<div class="route-shell" class:page-shell={pageLayout}>
 	{#if router.location && !practiceLayout}
-		<Navbar mode={multiplayerLayout ? "prose" : undefined} />
+		<Navbar mode={pageLayout ? "prose" : undefined} />
 	{/if}
 	{#key router.location}
-		<div class="route-content" class:engine-page={!practiceLayout} class:page-content={multiplayerLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"}>
+		<div class="route-content" class:engine-page={!practiceLayout} class:page-content={pageLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"}>
 			<Router {routes} />
 		</div>
 	{/key}
 </div>
 
 <style>
-	.race-content { display: flex; flex: 1; flex-direction: column; }
+	.route-shell { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+	.route-shell:not(.page-shell) > .route-content { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+	.route-shell > .race-content { display: flex; flex: 1; flex-direction: column; justify-content: center; }
 </style>

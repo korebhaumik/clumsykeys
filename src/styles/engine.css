@@ -59,7 +59,7 @@
 .button-secondary:hover, .button-secondary[aria-current="page"] { background: var(--accent-wash); }
 .button:disabled { cursor: not-allowed; opacity: .55; }
 .field { display: grid; gap: var(--dimension-0_45rem); font-size: var(--text-0_9rem); font-weight: var(--weight-600); }
-.field :is(input, select) {
+.field input {
 	width: 100%;
 	border-radius: var(--radius-0_55rem);
 	border: var(--dimension-1px) solid var(--line);
@@ -69,7 +69,6 @@
 	font-weight: var(--weight-400);
 }
 .field input::placeholder { color: var(--muted); opacity: .75; }
-.field select { height: var(--settings-control-height); padding-block: 0; }
 .badge {
 	display: inline-flex;
 	align-items: center;
@@ -151,15 +150,14 @@
 
 .page-shell {
 	width: min(100% - var(--dimension-2rem), var(--dimension-66_625rem));
-	min-height: calc(100svh - var(--dimension-2_5rem));
+	flex: 1;
 	margin-inline: auto;
 	display: flex;
 	flex-direction: column;
 	padding-top: clamp(var(--dimension-0rem), var(--dimension-4vh), var(--dimension-2rem));
 }
 .page-shell > header { padding-inline: 0; }
-.page-shell > .page-content { width: auto; min-width: 0; margin: clamp(var(--dimension-2rem), var(--dimension-10vh), var(--dimension-5_25rem)) 0 0; }
-.page-shell > .compact-content { margin-top: clamp(var(--dimension-1_5rem), var(--dimension-5vh), var(--dimension-2_5rem)); }
+.page-shell > .page-content { width: auto; min-width: 0; margin: auto 0; padding-block: var(--dimension-2rem); }
 .page-footer { margin-top: auto; padding-block: var(--dimension-2_25rem) clamp(var(--dimension-1rem), var(--dimension-7vh), var(--dimension-3_5rem)); }
 
 .settings-dialog {

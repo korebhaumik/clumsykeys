@@ -1,0 +1,7 @@
+simulation: clumsy-keys-accounts
+routing: path
+mocks:
+  - name: Supabase Auth and Data API
+    routeKey: supabase
+    origin: supabase.test
+    path: postman/mocks/supabase

@@ -1,0 +1,79 @@
+purpose:
+  stands_in_for: Supabase Auth and the application-specific PostgREST RPC/read paths; not the PostgreSQL engine.
+  unblocks: Deterministic HTTP and browser account flows, upstream write outages, and retry verification without hosted data.
+assumptions:
+  - id: github-pkce-caller
+    status: supported
+    claim: The browser requests GitHub OAuth with an S256 PKCE challenge and restores its session from the modeled Supabase callback.
+    reason: Official Supabase GitHub documentation defines the SDK flow. Browser tests exercise the real SDK against the local authorize/token fixture, including cancelled OAuth followed by email sign-in.
+    verification: Both sign-in and account-creation entry points reached the account page after a modeled GitHub redirect; callback parameters were removed, and an OAuth cancellation error cleared after successful email sign-in. On 2026-11-13, extended browser checks also passed for keyboard activation, session restoration after reload, sign-out and remaining signed out after another reload. The full browser run passed 59 other cases; both extended GitHub cases passed on rerun after scoping an ambiguous sign-out test selector. This does not verify real GitHub credentials or consent.
+    source: src/lib/features/auth/AccountPanel.svelte; src/lib/state/account.store.ts; postman/mocks/supabase/default.cjs; tests/e2e/account-design.spec.ts
+    updated_at: "2026-11-13"
+  - id: private-account-dashboard
+    status: supported
+    claim: The dashboard API returns lifetime solo-practice totals, bests per mode and five recent summaries for the verified owner.
+    reason: The real adapter reached read_account_dashboard in the local Postman request log; SQL tests separately verified aggregation beyond a history page and service-only execute permissions.
+    verification: On 2026-11-13 the simulation returned one saved result after an idempotent retry. Twelve new pgTAP assertions passed on local PostgreSQL; browser checks covered empty/populated dashboards, keyboard table scrolling, both themes, narrow screens and failed refreshes retaining the previous snapshot. The migration was then applied to the configured hosted project; the real Express/Supabase smoke verified totals, bests, recent results, an empty second account and denied browser RPC access. Both disposable users were removed.
+    source: tests/simulation/accounts.ts; supabase/tests/database/dashboard.test.sql; tests/e2e/account-dashboard.spec.ts; supabase/migrations/20261113000100_account_dashboard.sql
+    updated_at: "2026-11-13"
+  - id: dashboard-additional-metrics
+    status: supported
+    claim: The private dashboard includes all correct, incorrect and extra characters from saved solo tests; the UI derives mean duration from typing seconds and completed tests.
+    reason: SQL assertions cover totals beyond one history page and empty accounts; the HTTP adapter and browser use the extended response without changing existing statistics.
+    verification: On 2026-11-13 all 46 local SQL assertions passed. The real backend reached read_account_dashboard through the existing Postman simulation and asserted the character total; browser checks verified 180 characters and 13.3 seconds across three saved sessions, plus empty-account display in both themes at mobile and desktop widths. The new migration was applied to the hosted project; a real private API read returned 50 characters for a saved 40-correct/10-incorrect test and zero for a separate account. Disposable users were removed.
+    source: supabase/migrations/20261113000200_dashboard_characters.sql; supabase/tests/database/dashboard.test.sql; tests/e2e/account-dashboard.spec.ts; tests/simulation/accounts.ts
+    updated_at: "2026-11-13"
+  - id: hosted-github-provider
+    status: supported
+    claim: Real GitHub OAuth is configured and enabled on the hosted project.
+    reason: After the user configured the provider, the hosted public Auth settings reported GitHub enabled and its authorization endpoint redirected to GitHub with the expected Supabase callback.
+    verification: On 2026-11-13, GET /auth/v1/settings returned 200 with external.github true; a PKCE GET /auth/v1/authorize returned 302 to https://github.com/login/oauth/authorize with the configured project's /auth/v1/callback as redirect_uri. This verifies provider enablement and authorization routing, not consent or the client secret exchange. Earlier checks exercised only modeled redirects; no provider credentials or settings were changed by the agent.
+    source: docs/SUPABASE.md; https://supabase.com/docs/guides/auth/social-sign-in/auth-github
+    updated_at: "2026-11-13"
+  - id: hosted-github-consent
+    status: unknown
+    claim: GitHub consent and the real provider token exchange complete and restore an app session.
+    reason: Public endpoint checks stop at the redirect to GitHub; modeled browser callbacks cannot verify real credentials or consent.
+    verification: Complete Continue with GitHub in the configured frontend to verify real consent, provider secret exchange and the frontend redirect allowlist together.
+    source: src/lib/features/auth/AccountPanel.svelte; src/lib/state/account.store.ts; tests/e2e/account-design.spec.ts
+    updated_at: "2026-11-13"
+  - id: sdk-http-shapes
+    status: supported
+    claim: The actual Supabase JS adapter reaches the modeled Auth and PostgREST endpoints with the expected token and RPC payload shapes.
+    reason: Official SDK documentation informed the fixture, and both modeled HTTP and a real local Supabase smoke check exercised the adapter. Owner/workspace mock search was skipped because the CLI was signed out; Orbit returned unrelated management endpoints. This CLI has no status command, so whoami confirmed the signed-out state. No cloud resources were published.
+    verification: Local simulation observed Auth user lookups, a failed RPC write (503), two successful retries, and a history read containing exactly one result. The separate local Supabase smoke check verified real JWT validation and the same practice RPC.
+    source: backend/src/persistence.ts; tests/simulation/accounts.ts; tests/integration/local-supabase.ts; docs/SUPABASE.md
+    updated_at: "2026-11-13"
+  - id: database-guarantees
+    status: supported
+    claim: The versioned SQL enforces owner RLS, atomic parent/detail writes, preference revisions, and idempotent result IDs on the tested local Supabase database.
+    reason: A mock cannot establish SQL behavior. Thirty-two pgTAP assertions passed against the real local database.
+    verification: supabase test db passed after both migrations; real local Auth/Data API smoke check also passed.
+    source: supabase/tests/database/persistence.test.sql; supabase/migrations/; tests/integration/local-supabase.ts
+    updated_at: "2026-11-13"
+  - id: hosted-auth-delivery
+    status: unknown
+    claim: The hosted project's email confirmation/recovery delivery and production callback allowlist are configured correctly.
+    reason: Local fixture callbacks and local Auth do not establish hosted SMTP delivery or dashboard configuration.
+    verification: Browser PKCE confirmation/recovery flows passed against the local fixture. Hosted local callback URLs were applied and checked with email confirmation still enabled. Hosted email delivery remains a deployment check.
+    source: tests/e2e/accounts.spec.ts; docs/SUPABASE.md
+    updated_at: "2026-11-13"
+  - id: hosted-account-persistence
+    status: supported
+    claim: The configured hosted project accepts the real account and practice persistence paths with owner isolation under the applied schema.
+    reason: Both migrations were applied through the user's saved CLI login, and a real hosted smoke check exercised the actual Express adapter and Supabase SDK.
+    verification: Verified JWTs, signup profile trigger, preference save, atomic practice write and retry, owner history, cross-account RLS, and denied direct browser writes. Both disposable pre-confirmed users were removed without sending email. A final read verified all six tables have RLS and migration history is up to date.
+    source: tests/integration/hosted-supabase.ts; supabase/migrations/; scripts/database.mjs
+    updated_at: "2026-11-13"
+  - id: public-solo-leaderboards
+    status: supported
+    claim: Public solo summaries are ranked in PostgreSQL; only a verified backend token can request the caller's personal rank.
+    reason: The backend uses a service-only RPC and projects display names and score fields without email, account UUIDs, preferences or keystroke details.
+    verification: Local SQL tests cover best-per-player ranking, pagination, rolling time filtering, Dev language separation and service-only grants. The real SDK passed leaderboard reads and an upstream 503 through the Postman simulation. The additive migration was applied to hosted Supabase; the hosted backend smoke verified public reads, own rank and denied browser RPC calls, then removed its temporary users.
+    source: backend/src/leaderboard.http.ts; supabase/migrations/20261113000300_solo_leaderboards.sql; supabase/tests/database/leaderboards.test.sql; tests/integration/hosted-supabase.ts
+    updated_at: "2026-11-13"
+fingerprints:
+  - id: integration-working-tree
+    date: "2026-11-13"
+    commit: 0678ce23644a94c050d163a3a37a503d11977cd5 (dirty working tree, including independently authored dropdown changes that were preserved)
+    cli: Postman 1.76.0; Supabase 3.1.0; Supabase JS 2.119.0

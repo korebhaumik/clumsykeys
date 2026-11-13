@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { practiceDurations } from "../../practice/practice-options";
 	import WrenchSvg from "../../../components/icons/WrenchIcon.svelte";
 	import { theme } from "../../../state/app.store";
 	import {
@@ -13,54 +14,11 @@
 </script>
 
 <div class="flex items-center justify-between gap-4 min-w-32">
-	<button
-		aria-pressed={timer === 15}
-		onclick={() => {
-			updateTestConfigType("timer", 15);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && timer === 15,
-			})}>15</span
-		>
-	</button>
-	<button
-		aria-pressed={timer === 30}
-		onclick={() => {
-			updateTestConfigType("timer", 30);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && timer === 30,
-			})}>30</span
-		>
-	</button>
-	<button
-		aria-pressed={timer === 60}
-		onclick={() => {
-			updateTestConfigType("timer", 60);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && timer === 60,
-			})}>60</span
-		>
-	</button>
-	<button
-		aria-pressed={timer === 120}
-		onclick={() => {
-			updateTestConfigType("timer", 120);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && timer === 120,
-			})}>120</span
-		>
-	</button>
+	{#each practiceDurations as value (value)}
+		<button aria-pressed={timer === value} onclick={() => updateTestConfigType("timer", value)}>
+			<span class={cn("tracking-wide", { "text-dark-forest-accent-main underline": $theme === "dark-forest" && timer === value })}>{value}</span>
+		</button>
+	{/each}
 	<button
 		aria-label="Customize test type"
 		onclick={() => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { practiceWordCounts } from "../../practice/practice-options";
 	import WrenchSvg from "../../../components/icons/WrenchIcon.svelte";
 	import { theme } from "../../../state/app.store";
 	import {
@@ -13,54 +14,11 @@
 </script>
 
 <div class="flex items-center justify-between gap-4 min-w-32">
-	<button
-		aria-pressed={words === 25}
-		onclick={() => {
-			updateTestConfigType("words", 25);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && words === 25,
-			})}>25</span
-		>
-	</button>
-	<button
-		aria-pressed={words === 50}
-		onclick={() => {
-			updateTestConfigType("words", 50);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && words === 50,
-			})}>50</span
-		>
-	</button>
-	<button
-		aria-pressed={words === 100}
-		onclick={() => {
-			updateTestConfigType("words", 100);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && words === 100,
-			})}>100</span
-		>
-	</button>
-	<button
-		aria-pressed={words === 200}
-		onclick={() => {
-			updateTestConfigType("words", 200);
-		}}
-	>
-		<span
-			class={cn("tracking-wide", {
-				"text-dark-forest-accent-main underline": $theme === "dark-forest" && words === 200,
-			})}>200</span
-		>
-	</button>
+	{#each practiceWordCounts as value (value)}
+		<button aria-pressed={words === value} onclick={() => updateTestConfigType("words", value)}>
+			<span class={cn("tracking-wide", { "text-dark-forest-accent-main underline": $theme === "dark-forest" && words === value })}>{value}</span>
+		</button>
+	{/each}
 	<button
 		aria-label="Customize test type"
 		onclick={() => {

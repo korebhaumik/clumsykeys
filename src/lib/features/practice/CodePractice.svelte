@@ -1,6 +1,7 @@
 <script lang="ts">
  import IndentIcon from "../../components/icons/IndentIcon.svelte";
 	import { onMount, tick } from "svelte";
+	import { get } from "svelte/store";
 	import PracticeLayout from "../../components/layout/PracticeLayout.svelte";
 	import CodeOptions from "./CodeOptions.svelte";
 	import ResetSvg from "../../components/icons/ResetIcon.svelte";
@@ -12,7 +13,10 @@
 	import { createPracticeSession, type PracticeResults as Results, type PracticeStats } from "./session";
 	import { langData, languages, parseSnippet } from "./code-snippets";
 	import { drawCodeKeywords, type KeywordLimit, type KeywordModifiers } from "./code-keywords";
-	import { codePreferencesKey, readCodePreferences } from "./code-preferences";
+	import { codePreferencesKey, codePreferences } from "./code-preferences";
+	import { account } from "../../state/account.store";
+	import { practiceBusy } from "../../state/preferences.store";
+	import { submitPracticeResult } from "./result-persistence";
 	import {
 		alignPracticeCaret,
 		markPracticeCharacter,
@@ -21,7 +25,7 @@
 	} from "./typing-dom";
 
 
-	const preferences = readCodePreferences();
+	const preferences = get(codePreferences);
 	let langChoice = $state(preferences.language);
 
 	let mode = $state(preferences.mode);
@@ -39,6 +43,8 @@
 	let liveStats = $state<PracticeStats>();
 	let results = $state<Results>();
 	let session = $state.raw(createPracticeSession());
+	let resultId = $state(window.crypto.randomUUID());
+	let sessionAccountId = $state(get(account).session?.user.id ?? null);
 	let typedLetter = "";
 	let isBlur = $state(false);
 	let autoTabs = $state(true);
@@ -65,10 +71,18 @@
 	onMount(() => {
 		resetPositions();
 		inputEl.focus();
+		const unsubscribe = codePreferences.subscribe(next => {
+			if (game !== "waiting" || JSON.stringify(next) === JSON.stringify({ mode, language: langChoice, limit: keywordLimit, modifiers })) return;
+			langChoice = next.language; mode = next.mode; keywordLimit = next.limit; modifiers = { ...next.modifiers };
+			snippetIndex = Math.floor(Math.random() * langData[next.language].length);
+			void restart();
+		});
+		return () => { unsubscribe(); practiceBusy.set(false); };
 	});
 
 	$effect(() => {
 		const settings = JSON.stringify({ mode, language: langChoice, limit: keywordLimit, modifiers });
+		if (JSON.stringify(get(codePreferences)) !== settings) codePreferences.set(JSON.parse(settings));
 		try {
 			sessionStorage.setItem(codePreferencesKey, settings);
 		} catch {
@@ -77,6 +91,7 @@
 	});
 
 	$effect(() => {
+		practiceBusy.set(game !== "waiting");
 		if (game !== "playing") return;
 		const activeSession = session;
 		liveStats = activeSession.stats();
@@ -122,6 +137,8 @@
 			keywords = drawCodeKeywords(langChoice, keywordCount(keywordLimit), modifiers);
 		}
 		session = createPracticeSession();
+		resultId = window.crypto.randomUUID();
+		sessionAccountId = get(account).session?.user.id ?? null;
 		wordIndex = 0;
 		letterIndex = 0;
 		lineIndex = 0;
@@ -155,8 +172,17 @@
 	}
 
 	function finish() {
+		if (game !== "playing") return;
 		results = session.finish();
+		submitPracticeResult(sessionAccountId, { id: resultId, mode: mode === "keywords" ? "code-keywords" : "code-snippets",
+			language: langChoice, settings: { mode, language: langChoice, limit: keywordLimit, modifiers: { ...modifiers }, autoTabs }, stats: results });
 		game = "finished";
+	}
+
+	function startSession() {
+		if (game !== "waiting") return;
+		sessionAccountId = get(account).session?.user.id ?? null;
+		game = "playing";
 	}
 
 	function selectLanguage(language: keyof typeof langData) {
@@ -330,7 +356,7 @@
 		if (code === "Tab" && event.shiftKey) return;
 		if (code === "Space" || code === "Enter" || code === "Tab" || code === "Backspace") event.preventDefault();
 		if (event.key.length !== 1 && !["Enter", "Tab", "Backspace"].includes(code)) return;
-		if (game === "waiting" && mode === "snippets") game = "playing";
+		if (mode === "snippets") startSession();
 		if (game !== "playing") return;
 
 		const lastWordInLine = wordIndex === codeSnippet[lineIndex].content.length - 1;
@@ -373,13 +399,13 @@
 {/snippet}
 
 {#snippet codeOptions(section: "test" | "details")}
-	<CodeOptions bind:autoTabs {langChoice} {mode} {section} {keywordLimit} {modifiers} onLimitChange={selectLimit} onToggleModifier={toggleModifier} onLanguageChange={(event) => selectLanguage((event.currentTarget as HTMLSelectElement).value as keyof typeof langData)} />
+	<CodeOptions bind:autoTabs {langChoice} {mode} {section} {keywordLimit} {modifiers} onLimitChange={selectLimit} onToggleModifier={toggleModifier} onLanguageChange={selectLanguage} />
 {/snippet}
 
 <PracticeLayout mode="code" active={game === "playing"} finished={!!results} onRestart={restart} onSettings={openSettings}>
 
 	{#if results}
-		<PracticeResults testType={`${languages[langChoice]} ${mode === "keywords" ? "keywords" : "practice"}`} stats={results} onRestart={restart} />
+		<PracticeResults testType={`${languages[langChoice]} ${mode === "keywords" ? "keywords" : "practice"}`} stats={results} onRestart={restart} {resultId} signedIn={!!sessionAccountId} />
 	{:else}
 	<div class="code-layout" class:playing={game === "playing"}>
 		<div class="code-toolbar">
@@ -421,7 +447,7 @@
 									event.currentTarget.value = "";
 									return;
 								}
-								if (game === "waiting") game = "playing";
+								startSession();
 							}
 							if (typedLetter.length === 1) handleInput();
 							event.currentTarget.value = "";

@@ -57,6 +57,7 @@
 			<button class="button button-primary" type="submit">
 				Join room <span aria-hidden="true">→</span>
 			</button>
+			<p class="muted">Guest rooms work without an account. <a href="#/account">Sign in</a> to save your races.</p>
 		</form>
 	</section>
 </div>

@@ -12,4 +12,5 @@ export default ts.config(
     rules: { '@typescript-eslint/no-explicit-any': 'off', 'svelte/require-each-key': 'off', 'svelte/no-at-html-tags': 'error', 'svelte/no-dom-manipulating': 'off', 'svelte/no-useless-mustaches': 'off', 'svelte/prefer-svelte-reactivity': 'off', 'svelte/prefer-writable-derived': 'off', '@typescript-eslint/no-unused-vars': ['error', {varsIgnorePattern: '^_$'}] }
   },
   { files: ['**/*.svelte'], languageOptions: { parserOptions: { parser: ts.parser } } },
+  { files: ['postman/mocks/**/*.cjs'], languageOptions: { sourceType: 'commonjs', globals: { require: 'readonly', Buffer: 'readonly' } }, rules: { '@typescript-eslint/no-require-imports': 'off', 'svelte/no-inner-declarations': 'off' } },
 );
