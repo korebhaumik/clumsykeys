@@ -8,6 +8,25 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Focused persistent-header verification
+
+On **14 November 2026**, moved the practice/static-page header into the router's
+shared shell, outside keyed route content. Appearance and About now replace/fade
+only their content. A shell-scoped Svelte context retains active-test control
+visibility, route changes update practice branding, and navigation closes the
+mobile menu without replacing the header.
+
+Lint, dead-code checks, frontend/backend types, documentation checks, **50
+unit/integration tests**, the full **124-case Chrome suite**, and both builds
+passed against this change and the self-hosted fonts. Browser coverage includes
+both themes, narrow/desktop layouts, keyboard navigation, reduced motion, typing,
+header/footer DOM continuity, content replacement, brand changes and active-test
+header visibility. New navigation cases check for console/page errors. Screenshots
+were inspected for both themes. Existing Vite configuration-loader and Knip
+configuration hints remain; no hosted deployment, database, advisory audit or
+credential scan was repeated during this focused UI pass.
+
+
 ## Focused self-hosted font verification
 
 On **14 November 2026**, replaced runtime Google Fonts imports with same-origin

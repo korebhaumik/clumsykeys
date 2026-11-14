@@ -11,6 +11,7 @@
 	import Multiplayer from "./features/multiplayer/Multiplayer.svelte";
 	import Ranking from "./features/multiplayer/Ranking.svelte";
 	import Navbar from "./components/layout/Navbar.svelte";
+	import { setPracticeHeader } from "./components/layout/practice-header-context";
 	import socket from "./features/multiplayer/socket";
 	import { emptyRoom, roomInfo } from "./features/multiplayer/room.store";
 
@@ -21,6 +22,10 @@
 		router.location === "/login" || router.location === "/race" ||
 		router.location === "/ranking" || router.location === "/leaderboard" || router.location === "/account" || router.location === "/history"
 	);
+
+	const practiceHeader = $state({ active: false });
+	setPracticeHeader(practiceHeader);
+	let headerMode: "code" | "prose" | undefined = $derived(router.location === "/game" ? "code" : practiceLayout || pageLayout ? "prose" : undefined);
 
 	const routes = {
 		"/": Home,
@@ -43,9 +48,9 @@
 	});
 </script>
 
-<div class="route-shell" class:page-shell={pageLayout}>
-	{#if router.location && !practiceLayout}
-		<Navbar mode={pageLayout ? "prose" : undefined} />
+<div class="route-shell" class:page-shell={practiceLayout || pageLayout} class:practice-shell={practiceLayout}>
+	{#if router.location}
+		<Navbar mode={headerMode} active={practiceLayout && practiceHeader.active} />
 	{/if}
 	{#key router.location}
 		<div class="route-content" class:engine-page={!practiceLayout} class:page-content={pageLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"}>
@@ -56,6 +61,6 @@
 
 <style>
 	.route-shell { display: flex; flex: 1; flex-direction: column; min-width: 0; }
-	.route-shell:not(.page-shell) > .route-content { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+	.route-shell:not(.page-shell) > .route-content, .route-shell.practice-shell > .route-content { display: flex; flex: 1; flex-direction: column; min-width: 0; }
 	.route-shell > .race-content { display: flex; flex: 1; flex-direction: column; justify-content: center; }
 </style>

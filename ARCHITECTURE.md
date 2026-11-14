@@ -81,7 +81,10 @@ when account identity changes.
 
 Auth returns to the root with `auth_action` and PKCE query parameters, then moves
 to the account route. Hash navigation does not require a server catch-all rewrite.
-The shared page shell owns header placement and content centering. App renders
+The router renders one persistent header outside keyed route content; practice
+layouts share active-test visibility through a shell-scoped Svelte context.
+Route changes update the header mode and replace/fade only the content. The
+shared page shell owns header placement and content centering. App renders
 one global footer; practice and live-race views render only their contextual
 shortcut rows. Long/narrow views use normal document scrolling. See
 [DESIGN.md](DESIGN.md) for width, focus and responsive presentation conventions.

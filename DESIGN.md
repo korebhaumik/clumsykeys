@@ -146,6 +146,10 @@ keyboard navigation and focus return. Errors use text/underlines as well as colo
 
 ## Motion and verification
 
+Keep the shared header mounted across navigation, including Appearance and About;
+only route content participates in the entrance animation. Practice activity may
+hide header controls without replacing the header.
+
 Route/result entry is a short opacity fade using the motion tokens, enabled only
 when reduced motion is not requested. The room preview supports pause/resume,
 shows a static frame for reduced motion and stops advancing while the document
