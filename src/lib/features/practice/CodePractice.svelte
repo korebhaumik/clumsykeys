@@ -11,7 +11,9 @@
 	import PracticeLiveStats from "./PracticeLiveStats.svelte";
 	import PracticeResults from "./PracticeResults.svelte";
 	import { createPracticeSession, type PracticeResults as Results, type PracticeStats } from "./session";
-	import { langData, languages, parseSnippet } from "./code-snippets";
+	import { parseSnippet } from "./code-snippets";
+	import { codeLanguages as languages, snippetLengths, type SnippetLength, type CodeLanguage } from "../../../../shared/content/code-catalog";
+	import { drawSnippet } from "../../../../shared/content/snippets";
 	import { drawCodeKeywords, type KeywordLimit, type KeywordModifiers } from "./code-keywords";
 	import { codePreferencesKey, codePreferences } from "./code-preferences";
 	import { account } from "../../state/account.store";
@@ -34,10 +36,11 @@
 	let keywords = $state.raw(preferences.mode === "keywords"
 		? drawCodeKeywords(preferences.language, keywordCount(preferences.limit), preferences.modifiers)
 		: []);
-	let snippetIndex = $state(Math.floor(Math.random() * langData[preferences.language].length));
+	let snippetLength = $state<SnippetLength>("medium");
+	let selectedSnippet = $state.raw(drawSnippet(preferences.language, "medium"));
 	let codeSnippet = $derived(mode === "keywords"
 		? [{ content: keywords, indents: 0, index: 0 }]
-		: parseSnippet(langData[langChoice][snippetIndex]));
+		: parseSnippet(selectedSnippet.lines));
 
 	let game = $state<PracticeState>("waiting");
 	let liveStats = $state<PracticeStats>();
@@ -74,7 +77,6 @@
 		const unsubscribe = codePreferences.subscribe(next => {
 			if (game !== "waiting" || JSON.stringify(next) === JSON.stringify({ mode, language: langChoice, limit: keywordLimit, modifiers })) return;
 			langChoice = next.language; mode = next.mode; keywordLimit = next.limit; modifiers = { ...next.modifiers };
-			snippetIndex = Math.floor(Math.random() * langData[next.language].length);
 			void restart();
 		});
 		return () => { unsubscribe(); practiceBusy.set(false); };
@@ -135,6 +137,8 @@
 	async function restart() {
 		if (mode === "keywords") {
 			keywords = drawCodeKeywords(langChoice, keywordCount(keywordLimit), modifiers);
+		} else {
+			selectedSnippet = drawSnippet(langChoice, snippetLength, selectedSnippet.id);
 		}
 		session = createPracticeSession();
 		resultId = window.crypto.randomUUID();
@@ -185,14 +189,14 @@
 		game = "playing";
 	}
 
-	function selectLanguage(language: keyof typeof langData) {
+	function selectLanguage(language: CodeLanguage) {
 		langChoice = language;
-		snippetIndex = Math.floor(Math.random() * langData[language].length);
 		void restart();
 	}
 
-	function nextSnippet() {
-		snippetIndex = (snippetIndex + 1) % langData[langChoice].length;
+	function selectSnippetLength(length: SnippetLength) {
+		if (snippetLength === length) return;
+		snippetLength = length;
 		void restart();
 	}
 
@@ -413,10 +417,10 @@
 				<TestSettingsButton disabled={game === "playing"} onclick={openSettings} />
 				{#if game === "waiting"}{@render modeToggle()}{/if}
 				{#if game === "waiting" && mode === "snippets"}
-					<div class="snippet-selector">
-						<span>Snippets</span>
-						<span>{snippetIndex + 1} / {langData[langChoice].length}</span>
-						<button type="button" onclick={nextSnippet}>Next snippet <span aria-hidden="true">→</span></button>
+					<div class="snippet-selector" role="group" aria-label="Snippet length">
+						{#each snippetLengths as length (length)}
+							<button type="button" aria-pressed={snippetLength === length} onclick={() => selectSnippetLength(length)}>{length.charAt(0).toUpperCase() + length.slice(1)}</button>
+						{/each}
 					</div>
 				{:else if game === "waiting"}
 					{@render codeOptions("test")}
@@ -522,10 +526,9 @@
     .toolbar-row, .snippet-selector { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dimension-0_75rem); }
     .toolbar-row { align-items: stretch; width: 100%; }
     .snippet-selector { min-height: var(--dimension-3rem); padding: 0 var(--dimension-1rem); border-radius: var(--radius-0_5rem); font-weight: var(--weight-600); background: var(--surface); color: var(--muted); }
-    .snippet-selector button { border-inline-start: var(--dimension-2px) solid var(--inset); padding-inline-start: var(--dimension-0_75rem); color: var(--accent); }
+    .snippet-selector [aria-pressed="true"] { color: var(--accent); text-decoration: underline; text-underline-offset: var(--dimension-0_14em); }
     :global([data-theme="classic"]) :is(.mode-toggle, .snippet-selector) { background: var(--accent); color: color-mix(in srgb, var(--accent-ink) 60%, var(--accent)); color-scheme: dark; }
-    :global([data-theme="classic"]) :is(.mode-toggle [aria-pressed="true"], .snippet-selector button) { color: var(--accent-ink); }
-    :global([data-theme="classic"]) .snippet-selector button { border-color: currentColor; }
+    :global([data-theme="classic"]) :is(.mode-toggle [aria-pressed="true"], .snippet-selector [aria-pressed="true"]) { color: var(--accent-ink); }
     :global([data-theme="classic"]) :is(.mode-toggle, .snippet-selector) { --focus-highlight: var(--accent-ink); }
 
 	.code-scroll { position: relative; overflow-x: auto; scrollbar-color: var(--line) var(--inset); }

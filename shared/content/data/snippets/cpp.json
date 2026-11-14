@@ -1,0 +1,490 @@
+[
+  {
+    "id": "cpp-calculate-area",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "#include <cmath>",
+      "int main() {",
+      "\tdouble radius = 5;",
+      "\tif (radius < 0) {",
+      "\t\tstd::cout << \"Invalid radius\" << std::endl;",
+      "\t} else {",
+      "\t\tstd::cout << \"Area: \" << M_PI * std::pow(radius, 2) << std::endl;",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-bubble-sort",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "#include <vector>",
+      "#include <algorithm>",
+      "int main() {",
+      "\tstd::vector<int> numbers = {5, 3, 8, 1, 2};",
+      "\tstd::sort(numbers.begin(), numbers.end());",
+      "\tfor (int number : numbers) {",
+      "\t\tstd::cout << number << \" \";",
+      "\t}",
+      "\tstd::cout << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-longest-word",
+    "language": "randomCpp",
+    "length": "long",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "#include <string>",
+      "#include <sstream>",
+      "int main() {",
+      "\tstd::string sentence = \"The quick brown fox jumps over the lazy dog\";",
+      "\tstd::istringstream iss(sentence);",
+      "\tstd::string longestWord, word;",
+      "\twhile (iss >> word) {",
+      "\t\tif (word.size() > longestWord.size()) {",
+      "\t\t\tlongestWord = word;",
+      "\t\t}",
+      "\t}",
+      "\tstd::cout << \"Longest word: \" << longestWord << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-calculate-sum",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "#include <vector>",
+      "int main() {",
+      "\tstd::vector<int> numbers = {1, 2, 3, 4, 5};",
+      "\tint sum = 0;",
+      "\tfor (int number : numbers) {",
+      "\t\tsum += number;",
+      "\t}",
+      "\tstd::cout << \"Sum: \" << sum << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-reverse-string",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "#include <string>",
+      "#include <algorithm>",
+      "int main() {",
+      "\tstd::string str = \"Hello, World!\";",
+      "\tstd::reverse(str.begin(), str.end());",
+      "\tstd::cout << \"Reversed string: \" << str << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-square-example",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int square(int x) {",
+      "\treturn x * x;",
+      "}",
+      "int main(void) {",
+      "\tstd::cout << square(3) << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-double-example",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int double_value(int x) {",
+      "\treturn x * 2;",
+      "}",
+      "int main(void) {",
+      "\tstd::cout << double_value(3) << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-increment-example",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int increment(int x) {",
+      "\treturn x + 1;",
+      "}",
+      "int main(void) {",
+      "\tstd::cout << increment(3) << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-cube-example",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int cube(int x) {",
+      "\treturn x * x * x;",
+      "}",
+      "int main(void) {",
+      "\tstd::cout << cube(3) << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-triple-example",
+    "language": "randomCpp",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int triple(int x) {",
+      "\treturn x * 3;",
+      "}",
+      "int main(void) {",
+      "\tstd::cout << triple(3) << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-decrement-list",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int decrement(int x) {",
+      "\treturn x - 1;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tstd::cout << \"Results:\" << std::endl;",
+      "\tfor (int value : values) {",
+      "\t\tstd::cout << decrement(value) << std::endl;",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-negate-list",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int negate(int x) {",
+      "\treturn -x;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tstd::cout << \"Results:\" << std::endl;",
+      "\tfor (int value : values) {",
+      "\t\tstd::cout << negate(value) << std::endl;",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-offset-list",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int offset(int x) {",
+      "\treturn x + 7;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tstd::cout << \"Results:\" << std::endl;",
+      "\tfor (int value : values) {",
+      "\t\tstd::cout << offset(value) << std::endl;",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-scale_four-list",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int scale_four(int x) {",
+      "\treturn x * 4;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tstd::cout << \"Results:\" << std::endl;",
+      "\tfor (int value : values) {",
+      "\t\tstd::cout << scale_four(value) << std::endl;",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-square_plus_one-list",
+    "language": "randomCpp",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int square_plus_one(int x) {",
+      "\treturn x * x + 1;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tstd::cout << \"Results:\" << std::endl;",
+      "\tfor (int value : values) {",
+      "\t\tstd::cout << square_plus_one(value) << std::endl;",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-remainder_three-summary",
+    "language": "randomCpp",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int remainder_three(int x) {",
+      "\treturn x % 3;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = remainder_three(values[i]);",
+      "\t\tstd::cout << result << std::endl;",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tstd::cout << accepted << std::endl;",
+      "\tstd::cout << total << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-scale_five-summary",
+    "language": "randomCpp",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int scale_five(int x) {",
+      "\treturn x * 5;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = scale_five(values[i]);",
+      "\t\tstd::cout << result << std::endl;",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tstd::cout << accepted << std::endl;",
+      "\tstd::cout << total << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-shift_left-summary",
+    "language": "randomCpp",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int shift_left(int x) {",
+      "\treturn x - 4;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = shift_left(values[i]);",
+      "\t\tstd::cout << result << std::endl;",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tstd::cout << accepted << std::endl;",
+      "\tstd::cout << total << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-square_minus_one-summary",
+    "language": "randomCpp",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int square_minus_one(int x) {",
+      "\treturn x * x - 1;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = square_minus_one(values[i]);",
+      "\t\tstd::cout << result << std::endl;",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tstd::cout << accepted << std::endl;",
+      "\tstd::cout << total << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "cpp-scale_six-summary",
+    "language": "randomCpp",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <iostream>",
+      "int scale_six(int x) {",
+      "\treturn x * 6;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = scale_six(values[i]);",
+      "\t\tstd::cout << result << std::endl;",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tstd::cout << accepted << std::endl;",
+      "\tstd::cout << total << std::endl;",
+      "\treturn 0;",
+      "}"
+    ]
+  }
+]

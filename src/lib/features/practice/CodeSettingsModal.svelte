@@ -9,7 +9,7 @@
 	import HashtagIcon from "../../components/icons/HashtagIcon.svelte";
 	import TimerIcon from "../../components/icons/TimerIcon.svelte";
 	import ArrowRightIcon from "../../components/icons/ArrowRightIcon.svelte";
-	import { languages, languageChoices } from "./code-snippets";
+	import { codeLanguages as languages, codeLanguageChoices as languageChoices } from "../../../../shared/content/code-catalog";
 	import { raceDurations, raceWordCounts } from "../../../../backend/src/race.settings";
 	import type { KeywordLimit, KeywordModifiers } from "./code-keywords";
 

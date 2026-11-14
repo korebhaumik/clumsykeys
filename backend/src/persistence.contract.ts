@@ -1,3 +1,4 @@
+import { quoteLengths, type QuoteLength } from "../../shared/content/quote-length";
 // Browser-safe persistence contract. No transport, environment, or SDK imports.
 import type { Database, Json } from "./database.types";
 export type { Json } from "./database.types";
@@ -14,7 +15,7 @@ export type Preferences = {
 		punctuations: null | "easy" | "mid" | "hard" | "insane";
 		numbers: null | "easy" | "mid" | "hard" | "insane";
 		language: "english" | "english 1k" | "english 2k" | "english 5k" | "hinglish";
-		timer: number | null; words: number | null; quotes: "Random Quotes" | null;
+		timer: number | null; words: number | null; quotes: "Random Quotes" | null; quoteLength?: QuoteLength;
 		difficulty: { wpmLimit: number | null; timeLimit: number | null };
 	};
 	code: CodePreferences;
@@ -69,6 +70,7 @@ export function parsePreferences(value: unknown): Preferences | undefined {
 	const levels = [null, "easy", "mid", "hard", "insane"];
 	if (!levels.includes(p.punctuations as null) || !levels.includes(p.numbers as null) ||
 		!["english", "english 1k", "english 2k", "english 5k", "hinglish"].includes(String(p.language)) ||
+		(p.quoteLength !== undefined && !quoteLengths.some(length => length === p.quoteLength)) ||
 		!limit(p.timer) || !limit(p.words) || ![null, "Random Quotes"].includes(p.quotes as null) ||
 		[p.timer !== null, p.words !== null, p.quotes !== null].filter(Boolean).length !== 1 ||
 		!limit(p.difficulty.wpmLimit) || !limit(p.difficulty.timeLimit) ||
@@ -81,6 +83,7 @@ export function parsePreferences(value: unknown): Preferences | undefined {
 		version: 1, theme: value.theme as Preferences["theme"],
 		prose: { punctuations: p.punctuations, numbers: p.numbers, language: p.language,
 			timer: p.timer, words: p.words, quotes: p.quotes,
+			...(p.quoteLength !== undefined ? { quoteLength: p.quoteLength } : {}),
 			difficulty: { wpmLimit: p.difficulty.wpmLimit, timeLimit: p.difficulty.timeLimit } } as Preferences["prose"],
 		code: { mode: c.mode, language: c.language, limit: { type: c.limit.type, value: c.limit.value },
 			modifiers: { numbers: c.modifiers.numbers, punctuation: c.modifiers.punctuation } } as CodePreferences,

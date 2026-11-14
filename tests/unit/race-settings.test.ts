@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { applyRaceSettings, defaultRaceSettings, raceLanguages } from '../../backend/src/race.settings';
 import { makeRacePassage } from '../../backend/src/race.passage';
-import { drawQuote, drawWords } from '../../backend/src/words/passages';
-import englishQuotes from '../../backend/src/words/english_quotes.json';
-import english from '../../backend/src/words/english.json';
-import english1k from '../../backend/src/words/english_1k.json';
+import { drawQuote, drawWords } from '../../shared/content/passages';
+import englishQuotes from '../../shared/content/data/prose/english_quotes.json';
+import english from '../../shared/content/data/prose/english.json';
+import english1k from '../../shared/content/data/prose/english_1k.json';
 
 test('settings accept valid changes without mutation and reject malformed, unknown, or unchanged values', () => {
   for (const patch of [null, [], 'words', { mode: 'invalid' }, { duration: 1 }, { wordCount: 0 }, { numbers: 1 }, { extra: true }, {}]) {

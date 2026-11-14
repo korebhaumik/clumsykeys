@@ -1,0 +1,504 @@
+[
+  {
+    "id": "c-reverse-string",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "#include <string.h>",
+      "int main() {",
+      "\tchar str[] = \"Hello, World!\";",
+      "\tint n = strlen(str);",
+      "\tfor (int i = 0; i < n / 2; i++) {",
+      "\t\tchar temp = str[i];",
+      "\t\tstr[i] = str[n - i - 1];",
+      "\t\tstr[n - i - 1] = temp;",
+      "\t}",
+      "\tprintf(\"Reversed string: %s\\n\", str);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-calculate-sum",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int main() {",
+      "\tint numbers[] = {1, 2, 3, 4, 5};",
+      "\tint sum = 0;",
+      "\tfor (int i = 0; i < sizeof(numbers) / sizeof(numbers[0]); i++) {",
+      "\t\tsum += numbers[i];",
+      "\t}",
+      "\tprintf(\"Sum: %d\\n\", sum);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-calculate-area",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int main() {",
+      "\tint radius = 5;",
+      "\tif (radius < 0) {",
+      "\t\tprintf(\"Invalid radius\\n\");",
+      "\t} else {",
+      "\t\tprintf(\"Area: %f\\n\", 3.14 * radius * radius);",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-longest-word",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "#include <string.h>",
+      "int main() {",
+      "\tchar sentence[] = \"The quick brown fox jumps over the lazy dog\";",
+      "\tchar *word = strtok(sentence, \" \");",
+      "\tchar *longestWord = word;",
+      "\twhile (word != NULL) {",
+      "\t\tif (strlen(word) > strlen(longestWord)) {",
+      "\t\t\tlongestWord = word;",
+      "\t\t}",
+      "\t\tword = strtok(NULL, \" \");",
+      "\t}",
+      "\tprintf(\"Longest word: %s\\n\", longestWord);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-bubble-sort",
+    "language": "randomC",
+    "length": "long",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int main() {",
+      "\tint numbers[] = {5, 3, 8, 1, 2};",
+      "\tint n = sizeof(numbers) / sizeof(numbers[0]);",
+      "\tfor (int i = 0; i < n - 1; i++) {",
+      "\t\tfor (int j = 0; j < n - i - 1; j++) {",
+      "\t\t\tif (numbers[j] > numbers[j + 1]) {",
+      "\t\t\t\tint temp = numbers[j];",
+      "\t\t\t\tnumbers[j] = numbers[j + 1];",
+      "\t\t\t\tnumbers[j + 1] = temp;",
+      "\t\t\t}",
+      "\t\t}",
+      "\t}",
+      "\tfor (int i = 0; i < n; i++) {",
+      "\t\tprintf(\"%d \", numbers[i]);",
+      "\t}",
+      "\tprintf(\"\\n\");",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-square-example",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int square(int x) {",
+      "\treturn x * x;",
+      "}",
+      "int main(void) {",
+      "\tprintf(\"%d\\n\", square(3));",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-double-example",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int double_value(int x) {",
+      "\treturn x * 2;",
+      "}",
+      "int main(void) {",
+      "\tprintf(\"%d\\n\", double_value(3));",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-increment-example",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int increment(int x) {",
+      "\treturn x + 1;",
+      "}",
+      "int main(void) {",
+      "\tprintf(\"%d\\n\", increment(3));",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-cube-example",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int cube(int x) {",
+      "\treturn x * x * x;",
+      "}",
+      "int main(void) {",
+      "\tprintf(\"%d\\n\", cube(3));",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-triple-example",
+    "language": "randomC",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int triple(int x) {",
+      "\treturn x * 3;",
+      "}",
+      "int main(void) {",
+      "\tprintf(\"%d\\n\", triple(3));",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-decrement-list",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int decrement(int x) {",
+      "\treturn x - 1;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tint result = decrement(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-negate-list",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int negate(int x) {",
+      "\treturn -x;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tint result = negate(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-offset-list",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int offset(int x) {",
+      "\treturn x + 7;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tint result = offset(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-scale_four-list",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int scale_four(int x) {",
+      "\treturn x * 4;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tint result = scale_four(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-square_plus_one-list",
+    "language": "randomC",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int square_plus_one(int x) {",
+      "\treturn x * x + 1;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {1, 2, 3, 4, 5};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tint result = square_plus_one(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t}",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-remainder_three-summary",
+    "language": "randomC",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int remainder_three(int x) {",
+      "\treturn x % 3;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = remainder_three(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tprintf(\"%d\\n\", accepted);",
+      "\tprintf(\"%d\\n\", total);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-scale_five-summary",
+    "language": "randomC",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int scale_five(int x) {",
+      "\treturn x * 5;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = scale_five(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tprintf(\"%d\\n\", accepted);",
+      "\tprintf(\"%d\\n\", total);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-shift_left-summary",
+    "language": "randomC",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int shift_left(int x) {",
+      "\treturn x - 4;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = shift_left(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tprintf(\"%d\\n\", accepted);",
+      "\tprintf(\"%d\\n\", total);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-square_minus_one-summary",
+    "language": "randomC",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int square_minus_one(int x) {",
+      "\treturn x * x - 1;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = square_minus_one(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tprintf(\"%d\\n\", accepted);",
+      "\tprintf(\"%d\\n\", total);",
+      "\treturn 0;",
+      "}"
+    ]
+  },
+  {
+    "id": "c-scale_six-summary",
+    "language": "randomC",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "#include <stdio.h>",
+      "int scale_six(int x) {",
+      "\treturn x * 6;",
+      "}",
+      "int main(void) {",
+      "\tint values[] = {-3, 1, 2, 4, 6};",
+      "\tint count = sizeof(values) / sizeof(values[0]);",
+      "\tint total = 0;",
+      "\tint accepted = 0;",
+      "\tfor (int i = 0; i < count; i++) {",
+      "\t\tif (values[i] < 0) {",
+      "\t\t\tcontinue;",
+      "\t\t}",
+      "\t\tint result = scale_six(values[i]);",
+      "\t\tprintf(\"%d\\n\", result);",
+      "\t\ttotal += result;",
+      "\t\taccepted++;",
+      "\t}",
+      "\tprintf(\"%d\\n\", accepted);",
+      "\tprintf(\"%d\\n\", total);",
+      "\treturn 0;",
+      "}"
+    ]
+  }
+]

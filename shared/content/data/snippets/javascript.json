@@ -1,0 +1,409 @@
+[
+  {
+    "id": "javascript-calculate-area",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "function calculateArea(radius) {",
+      "\tif (radius < 0) {",
+      "\t\treturn \"Invalid radius\";",
+      "\t} else {",
+      "\t\treturn Math.PI * Math.pow(radius, 2);",
+      "\t}",
+      "}",
+      "console.log(calculateArea(5));"
+    ]
+  },
+  {
+    "id": "javascript-bubble-sort",
+    "language": "randomJs",
+    "length": "long",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "function bubbleSort(numbers) {",
+      "\tfor (let i = 0; i < numbers.length; i++) {",
+      "\t\tfor (let j = 0; j < numbers.length - 1; j++) {",
+      "\t\t\tif (numbers[j] > numbers[j + 1]) {",
+      "\t\t\t\t[numbers[j], numbers[j + 1]] = [numbers[j + 1], numbers[j]];",
+      "\t\t\t}",
+      "\t\t}",
+      "\t}",
+      "\treturn numbers;",
+      "}",
+      "console.log(bubbleSort([5, 3, 8, 1, 2]));"
+    ]
+  },
+  {
+    "id": "javascript-longest-word",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "function findLongestWord(sentence) {",
+      "\tconst words = sentence.split(' ');",
+      "\tconst longestWord = words.reduce((longest, currentWord) => currentWord.length > longest.length ? currentWord : longest, '');",
+      "\treturn longestWord;",
+      "}",
+      "console.log(findLongestWord(\"The quick brown fox jumps over the lazy dog\"));"
+    ]
+  },
+  {
+    "id": "javascript-calculate-sum",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "function calculateSum(numbers) {",
+      "\tlet sum = 0;",
+      "\tfor (let number of numbers) {",
+      "\t\tsum += number;",
+      "\t}",
+      "\treturn sum;",
+      "}",
+      "console.log(calculateSum([1, 2, 3, 4, 5]));"
+    ]
+  },
+  {
+    "id": "javascript-reverse-string",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "function reverseString(string) {",
+      "\treturn string.split('').reverse().join('');",
+      "}",
+      "console.log(reverseString(\"Hello, World!\"));"
+    ]
+  },
+  {
+    "id": "javascript-square-example",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function square(x) {",
+      "\treturn x * x;",
+      "}",
+      "console.log(square(3));"
+    ]
+  },
+  {
+    "id": "javascript-double-example",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function double(x) {",
+      "\treturn x * 2;",
+      "}",
+      "console.log(double(3));"
+    ]
+  },
+  {
+    "id": "javascript-increment-example",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function increment(x) {",
+      "\treturn x + 1;",
+      "}",
+      "console.log(increment(3));"
+    ]
+  },
+  {
+    "id": "javascript-cube-example",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function cube(x) {",
+      "\treturn x * x * x;",
+      "}",
+      "console.log(cube(3));"
+    ]
+  },
+  {
+    "id": "javascript-triple-example",
+    "language": "randomJs",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function triple(x) {",
+      "\treturn x * 3;",
+      "}",
+      "console.log(triple(3));"
+    ]
+  },
+  {
+    "id": "javascript-decrement-list",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function decrement(x) {",
+      "\treturn x - 1;",
+      "}",
+      "const values = [1, 2, 3, 4, 5];",
+      "const results = [];",
+      "for (const value of values) {",
+      "\tresults.push(decrement(value));",
+      "}",
+      "console.log(results);"
+    ]
+  },
+  {
+    "id": "javascript-negate-list",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function negate(x) {",
+      "\treturn -x;",
+      "}",
+      "const values = [1, 2, 3, 4, 5];",
+      "const results = [];",
+      "for (const value of values) {",
+      "\tresults.push(negate(value));",
+      "}",
+      "console.log(results);"
+    ]
+  },
+  {
+    "id": "javascript-offset-list",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function offset(x) {",
+      "\treturn x + 7;",
+      "}",
+      "const values = [1, 2, 3, 4, 5];",
+      "const results = [];",
+      "for (const value of values) {",
+      "\tresults.push(offset(value));",
+      "}",
+      "console.log(results);"
+    ]
+  },
+  {
+    "id": "javascript-scale_four-list",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function scaleFour(x) {",
+      "\treturn x * 4;",
+      "}",
+      "const values = [1, 2, 3, 4, 5];",
+      "const results = [];",
+      "for (const value of values) {",
+      "\tresults.push(scaleFour(value));",
+      "}",
+      "console.log(results);"
+    ]
+  },
+  {
+    "id": "javascript-square_plus_one-list",
+    "language": "randomJs",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function squarePlusOne(x) {",
+      "\treturn x * x + 1;",
+      "}",
+      "const values = [1, 2, 3, 4, 5];",
+      "const results = [];",
+      "for (const value of values) {",
+      "\tresults.push(squarePlusOne(value));",
+      "}",
+      "console.log(results);"
+    ]
+  },
+  {
+    "id": "javascript-remainder_three-summary",
+    "language": "randomJs",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function remainderThree(x) {",
+      "\treturn x % 3;",
+      "}",
+      "const values = [-3, 1, 2, 4, 6];",
+      "const results = [];",
+      "let total = 0;",
+      "for (const value of values) {",
+      "\tif (value < 0) {",
+      "\t\tcontinue;",
+      "\t}",
+      "\tconst result = remainderThree(value);",
+      "\tresults.push(result);",
+      "\ttotal += result;",
+      "}",
+      "console.log(\"Results:\", results);",
+      "console.log(\"Count:\", results.length);",
+      "console.log(\"Total:\", total);"
+    ]
+  },
+  {
+    "id": "javascript-scale_five-summary",
+    "language": "randomJs",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function scaleFive(x) {",
+      "\treturn x * 5;",
+      "}",
+      "const values = [-3, 1, 2, 4, 6];",
+      "const results = [];",
+      "let total = 0;",
+      "for (const value of values) {",
+      "\tif (value < 0) {",
+      "\t\tcontinue;",
+      "\t}",
+      "\tconst result = scaleFive(value);",
+      "\tresults.push(result);",
+      "\ttotal += result;",
+      "}",
+      "console.log(\"Results:\", results);",
+      "console.log(\"Count:\", results.length);",
+      "console.log(\"Total:\", total);"
+    ]
+  },
+  {
+    "id": "javascript-shift_left-summary",
+    "language": "randomJs",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function shiftLeft(x) {",
+      "\treturn x - 4;",
+      "}",
+      "const values = [-3, 1, 2, 4, 6];",
+      "const results = [];",
+      "let total = 0;",
+      "for (const value of values) {",
+      "\tif (value < 0) {",
+      "\t\tcontinue;",
+      "\t}",
+      "\tconst result = shiftLeft(value);",
+      "\tresults.push(result);",
+      "\ttotal += result;",
+      "}",
+      "console.log(\"Results:\", results);",
+      "console.log(\"Count:\", results.length);",
+      "console.log(\"Total:\", total);"
+    ]
+  },
+  {
+    "id": "javascript-square_minus_one-summary",
+    "language": "randomJs",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function squareMinusOne(x) {",
+      "\treturn x * x - 1;",
+      "}",
+      "const values = [-3, 1, 2, 4, 6];",
+      "const results = [];",
+      "let total = 0;",
+      "for (const value of values) {",
+      "\tif (value < 0) {",
+      "\t\tcontinue;",
+      "\t}",
+      "\tconst result = squareMinusOne(value);",
+      "\tresults.push(result);",
+      "\ttotal += result;",
+      "}",
+      "console.log(\"Results:\", results);",
+      "console.log(\"Count:\", results.length);",
+      "console.log(\"Total:\", total);"
+    ]
+  },
+  {
+    "id": "javascript-scale_six-summary",
+    "language": "randomJs",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "function scaleSix(x) {",
+      "\treturn x * 6;",
+      "}",
+      "const values = [-3, 1, 2, 4, 6];",
+      "const results = [];",
+      "let total = 0;",
+      "for (const value of values) {",
+      "\tif (value < 0) {",
+      "\t\tcontinue;",
+      "\t}",
+      "\tconst result = scaleSix(value);",
+      "\tresults.push(result);",
+      "\ttotal += result;",
+      "}",
+      "console.log(\"Results:\", results);",
+      "console.log(\"Count:\", results.length);",
+      "console.log(\"Total:\", total);"
+    ]
+  }
+]

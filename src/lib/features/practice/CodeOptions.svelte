@@ -4,7 +4,7 @@
     import TimerSvg from "../../components/icons/TimerIcon.svelte";
     import AtSvg from "../../components/icons/AtIcon.svelte";
     import HashSvg from "../../components/icons/HashIcon.svelte";
-    import { languages, languageChoices } from "./code-snippets";
+    import { codeLanguages as languages, codeLanguageChoices as languageChoices } from "../../../../shared/content/code-catalog";
     import type { KeywordLimit, KeywordModifiers } from "./code-keywords";
     import { practiceDurations, practiceWordCounts } from "./practice-options";
     let { autoTabs = $bindable(true), langChoice, mode, section, keywordLimit, modifiers, onLimitChange, onToggleModifier, onLanguageChange }: {

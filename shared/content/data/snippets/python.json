@@ -1,0 +1,370 @@
+[
+  {
+    "id": "python-calculate-area",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "import math",
+      "def calculate_area(radius):",
+      "\tif radius < 0:",
+      "\t\treturn \"Invalid radius\"",
+      "\telse:",
+      "\t\treturn math.pi * math.pow(radius, 2)",
+      "print(calculate_area(5))"
+    ]
+  },
+  {
+    "id": "python-bubble-sort",
+    "language": "randomPy",
+    "length": "long",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "def bubble_sort(numbers):",
+      "\tfor i in range(len(numbers)):",
+      "\t\tfor j in range(len(numbers) - 1):",
+      "\t\t\tif numbers[j] > numbers[j + 1]:",
+      "\t\t\t\tnumbers[j], numbers[j + 1] = numbers[j + 1], numbers[j]",
+      "\treturn numbers",
+      "print(bubble_sort([5, 3, 8, 1, 2]))"
+    ]
+  },
+  {
+    "id": "python-longest-word",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "def find_longest_word(sentence):",
+      "\twords = sentence.split()",
+      "\tlongest_word = max(words, key=len)",
+      "\treturn longest_word",
+      "print(find_longest_word(\"The quick brown fox jumps over the lazy dog\"))"
+    ]
+  },
+  {
+    "id": "python-calculate-sum",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "def calculate_sum(numbers):",
+      "\tsum = 0",
+      "\tfor number in numbers:",
+      "\t\tsum += number",
+      "\treturn sum",
+      "print(calculate_sum([1, 2, 3, 4, 5]))"
+    ]
+  },
+  {
+    "id": "python-reverse-string",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "def reverse_string(string):",
+      "\treturn string[::-1]",
+      "print(reverse_string(\"Hello, World!\"))"
+    ]
+  },
+  {
+    "id": "python-square-example",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def square(x):",
+      "\treturn x * x",
+      "print(square(3))"
+    ]
+  },
+  {
+    "id": "python-double-example",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def double(x):",
+      "\treturn x * 2",
+      "print(double(3))"
+    ]
+  },
+  {
+    "id": "python-increment-example",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def increment(x):",
+      "\treturn x + 1",
+      "print(increment(3))"
+    ]
+  },
+  {
+    "id": "python-cube-example",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def cube(x):",
+      "\treturn x * x * x",
+      "print(cube(3))"
+    ]
+  },
+  {
+    "id": "python-triple-example",
+    "language": "randomPy",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def triple(x):",
+      "\treturn x * 3",
+      "print(triple(3))"
+    ]
+  },
+  {
+    "id": "python-decrement-list",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def decrement(x):",
+      "\treturn x - 1",
+      "values = [1, 2, 3, 4, 5]",
+      "results = []",
+      "for value in values:",
+      "\tresults.append(decrement(value))",
+      "print(results)"
+    ]
+  },
+  {
+    "id": "python-negate-list",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def negate(x):",
+      "\treturn -x",
+      "values = [1, 2, 3, 4, 5]",
+      "results = []",
+      "for value in values:",
+      "\tresults.append(negate(value))",
+      "print(results)"
+    ]
+  },
+  {
+    "id": "python-offset-list",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def offset(x):",
+      "\treturn x + 7",
+      "values = [1, 2, 3, 4, 5]",
+      "results = []",
+      "for value in values:",
+      "\tresults.append(offset(value))",
+      "print(results)"
+    ]
+  },
+  {
+    "id": "python-scale_four-list",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def scale_four(x):",
+      "\treturn x * 4",
+      "values = [1, 2, 3, 4, 5]",
+      "results = []",
+      "for value in values:",
+      "\tresults.append(scale_four(value))",
+      "print(results)"
+    ]
+  },
+  {
+    "id": "python-square_plus_one-list",
+    "language": "randomPy",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def square_plus_one(x):",
+      "\treturn x * x + 1",
+      "values = [1, 2, 3, 4, 5]",
+      "results = []",
+      "for value in values:",
+      "\tresults.append(square_plus_one(value))",
+      "print(results)"
+    ]
+  },
+  {
+    "id": "python-remainder_three-summary",
+    "language": "randomPy",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def remainder_three(x):",
+      "\treturn x % 3",
+      "values = [-3, 1, 2, 4, 6]",
+      "results = []",
+      "total = 0",
+      "for value in values:",
+      "\tif value < 0:",
+      "\t\tcontinue",
+      "\tresult = remainder_three(value)",
+      "\tresults.append(result)",
+      "\ttotal += result",
+      "print(\"Results:\", results)",
+      "print(\"Count:\", len(results))",
+      "print(\"Total:\", total)"
+    ]
+  },
+  {
+    "id": "python-scale_five-summary",
+    "language": "randomPy",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def scale_five(x):",
+      "\treturn x * 5",
+      "values = [-3, 1, 2, 4, 6]",
+      "results = []",
+      "total = 0",
+      "for value in values:",
+      "\tif value < 0:",
+      "\t\tcontinue",
+      "\tresult = scale_five(value)",
+      "\tresults.append(result)",
+      "\ttotal += result",
+      "print(\"Results:\", results)",
+      "print(\"Count:\", len(results))",
+      "print(\"Total:\", total)"
+    ]
+  },
+  {
+    "id": "python-shift_left-summary",
+    "language": "randomPy",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def shift_left(x):",
+      "\treturn x - 4",
+      "values = [-3, 1, 2, 4, 6]",
+      "results = []",
+      "total = 0",
+      "for value in values:",
+      "\tif value < 0:",
+      "\t\tcontinue",
+      "\tresult = shift_left(value)",
+      "\tresults.append(result)",
+      "\ttotal += result",
+      "print(\"Results:\", results)",
+      "print(\"Count:\", len(results))",
+      "print(\"Total:\", total)"
+    ]
+  },
+  {
+    "id": "python-square_minus_one-summary",
+    "language": "randomPy",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def square_minus_one(x):",
+      "\treturn x * x - 1",
+      "values = [-3, 1, 2, 4, 6]",
+      "results = []",
+      "total = 0",
+      "for value in values:",
+      "\tif value < 0:",
+      "\t\tcontinue",
+      "\tresult = square_minus_one(value)",
+      "\tresults.append(result)",
+      "\ttotal += result",
+      "print(\"Results:\", results)",
+      "print(\"Count:\", len(results))",
+      "print(\"Total:\", total)"
+    ]
+  },
+  {
+    "id": "python-scale_six-summary",
+    "language": "randomPy",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "def scale_six(x):",
+      "\treturn x * 6",
+      "values = [-3, 1, 2, 4, 6]",
+      "results = []",
+      "total = 0",
+      "for value in values:",
+      "\tif value < 0:",
+      "\t\tcontinue",
+      "\tresult = scale_six(value)",
+      "\tresults.append(result)",
+      "\ttotal += result",
+      "print(\"Results:\", results)",
+      "print(\"Count:\", len(results))",
+      "print(\"Total:\", total)"
+    ]
+  }
+]

@@ -1,5 +1,5 @@
 import { practiceDurations, practiceWordCounts } from "./practice-options";
-import { languages } from "./code-snippets";
+import { codeLanguages as languages } from "../../../../shared/content/code-catalog";
 import type { CodePreferences } from "../../../../backend/src/persistence.contract";
 import { writable } from "svelte/store";
 

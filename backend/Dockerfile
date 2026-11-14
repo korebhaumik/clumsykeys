@@ -6,6 +6,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json backend/package.json
 RUN pnpm --filter clumsy-keys-server install --frozen-lockfile
 
+COPY shared shared
 COPY backend/src backend/src
 COPY backend/tsconfig.json backend/tsconfig.json
 RUN pnpm --filter clumsy-keys-server build
@@ -21,4 +22,4 @@ COPY --from=build /runtime/node_modules ./node_modules
 
 USER node
 EXPOSE 1440
-CMD ["node", "build/app.js"]
+CMD ["node", "build/backend/src/app.js"]

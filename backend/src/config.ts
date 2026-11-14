@@ -1,10 +1,11 @@
 import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { loadEnvFile } from "node:process";
 
 export function loadEnvironment() {
-	// Source and compiled server both live one directory beneath backend/.
-	const rootEnv = resolve(__dirname, "../../.env");
+	// Shared content is compiled alongside backend/src inside backend/build.
+	const compiled = __dirname.endsWith(join("build", "backend", "src"));
+	const rootEnv = resolve(__dirname, compiled ? "../../../../.env" : "../../.env");
 	if (existsSync(rootEnv)) loadEnvFile(rootEnv);
 }
 

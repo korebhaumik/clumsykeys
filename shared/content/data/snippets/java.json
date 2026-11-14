@@ -1,0 +1,505 @@
+[
+  {
+    "id": "java-calculate-area",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "public class Main {",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(calculateArea(5));",
+      "\t}",
+      "\tpublic static double calculateArea(double radius) {",
+      "\t\tif (radius < 0) {",
+      "\t\t\treturn -1;",
+      "\t\t} else {",
+      "\t\t\treturn Math.PI * Math.pow(radius, 2);",
+      "\t\t}",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-bubble-sort",
+    "language": "randomJava",
+    "length": "long",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "public class Main {",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] numbers = {5, 3, 8, 1, 2};",
+      "\t\tbubbleSort(numbers);",
+      "\t\tfor (int number : numbers) {",
+      "\t\t\tSystem.out.print(number + \" \");",
+      "\t\t}",
+      "\t}",
+      "\tpublic static void bubbleSort(int[] numbers) {",
+      "\t\tfor (int i = 0; i < numbers.length; i++) {",
+      "\t\t\tfor (int j = 0; j < numbers.length - 1; j++) {",
+      "\t\t\t\tif (numbers[j] > numbers[j + 1]) {",
+      "\t\t\t\t\tint temp = numbers[j];",
+      "\t\t\t\t\tnumbers[j] = numbers[j + 1];",
+      "\t\t\t\t\tnumbers[j + 1] = temp;",
+      "\t\t\t\t}",
+      "\t\t\t}",
+      "\t\t}",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-longest-word",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "public class Main {",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(findLongestWord(\"The quick brown fox jumps over the lazy dog\"));",
+      "\t}",
+      "\tpublic static String findLongestWord(String sentence) {",
+      "\t\tString[] words = sentence.split(\" \");",
+      "\t\tString longestWord = \"\";",
+      "\t\tfor (String word : words) {",
+      "\t\t\tif (word.length() > longestWord.length()) {",
+      "\t\t\t\tlongestWord = word;",
+      "\t\t\t}",
+      "\t\t}",
+      "\t\treturn longestWord;",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-calculate-sum",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "public class Main {",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] numbers = {1, 2, 3, 4, 5};",
+      "\t\tSystem.out.println(calculateSum(numbers));",
+      "\t}",
+      "\tpublic static int calculateSum(int[] numbers) {",
+      "\t\tint sum = 0;",
+      "\t\tfor (int number : numbers) {",
+      "\t\t\tsum += number;",
+      "\t\t}",
+      "\t\treturn sum;",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-reverse-string",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Migrated from the existing Clumsy Keys catalog; original external provenance is unverified.",
+      "url": null
+    },
+    "lines": [
+      "public class Main {",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(reverseString(\"Hello, World!\"));",
+      "\t}",
+      "\tpublic static String reverseString(String string) {",
+      "\t\treturn new StringBuilder(string).reverse().toString();",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-square-example",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int square(int x) {",
+      "\t\treturn x * x;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(square(3));",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-double-example",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int doubleValue(int x) {",
+      "\t\treturn x * 2;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(doubleValue(3));",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-increment-example",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int increment(int x) {",
+      "\t\treturn x + 1;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(increment(3));",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-cube-example",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int cube(int x) {",
+      "\t\treturn x * x * x;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(cube(3));",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-triple-example",
+    "language": "randomJava",
+    "length": "short",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int triple(int x) {",
+      "\t\treturn x * 3;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tSystem.out.println(triple(3));",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-decrement-list",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int decrement(int x) {",
+      "\t\treturn x - 1;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {1, 2, 3, 4, 5};",
+      "\t\tint total = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tSystem.out.println(decrement(value));",
+      "\t\t\ttotal += decrement(value);",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-negate-list",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int negate(int x) {",
+      "\t\treturn -x;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {1, 2, 3, 4, 5};",
+      "\t\tint total = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tSystem.out.println(negate(value));",
+      "\t\t\ttotal += negate(value);",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-offset-list",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int offset(int x) {",
+      "\t\treturn x + 7;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {1, 2, 3, 4, 5};",
+      "\t\tint total = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tSystem.out.println(offset(value));",
+      "\t\t\ttotal += offset(value);",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-scale_four-list",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int scaleFour(int x) {",
+      "\t\treturn x * 4;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {1, 2, 3, 4, 5};",
+      "\t\tint total = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tSystem.out.println(scaleFour(value));",
+      "\t\t\ttotal += scaleFour(value);",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-square_plus_one-list",
+    "language": "randomJava",
+    "length": "medium",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int squarePlusOne(int x) {",
+      "\t\treturn x * x + 1;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {1, 2, 3, 4, 5};",
+      "\t\tint total = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tSystem.out.println(squarePlusOne(value));",
+      "\t\t\ttotal += squarePlusOne(value);",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-remainder_three-summary",
+    "language": "randomJava",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int remainderThree(int x) {",
+      "\t\treturn x % 3;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {-3, 1, 2, 4, 6};",
+      "\t\tint total = 0;",
+      "\t\tint count = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tif (value < 0) {",
+      "\t\t\t\tcontinue;",
+      "\t\t\t}",
+      "\t\t\tint result = remainderThree(value);",
+      "\t\t\tSystem.out.println(result);",
+      "\t\t\ttotal += result;",
+      "\t\t\tcount++;",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Count: \" + count);",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-scale_five-summary",
+    "language": "randomJava",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int scaleFive(int x) {",
+      "\t\treturn x * 5;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {-3, 1, 2, 4, 6};",
+      "\t\tint total = 0;",
+      "\t\tint count = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tif (value < 0) {",
+      "\t\t\t\tcontinue;",
+      "\t\t\t}",
+      "\t\t\tint result = scaleFive(value);",
+      "\t\t\tSystem.out.println(result);",
+      "\t\t\ttotal += result;",
+      "\t\t\tcount++;",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Count: \" + count);",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-shift_left-summary",
+    "language": "randomJava",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int shiftLeft(int x) {",
+      "\t\treturn x - 4;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {-3, 1, 2, 4, 6};",
+      "\t\tint total = 0;",
+      "\t\tint count = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tif (value < 0) {",
+      "\t\t\t\tcontinue;",
+      "\t\t\t}",
+      "\t\t\tint result = shiftLeft(value);",
+      "\t\t\tSystem.out.println(result);",
+      "\t\t\ttotal += result;",
+      "\t\t\tcount++;",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Count: \" + count);",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-square_minus_one-summary",
+    "language": "randomJava",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int squareMinusOne(int x) {",
+      "\t\treturn x * x - 1;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {-3, 1, 2, 4, 6};",
+      "\t\tint total = 0;",
+      "\t\tint count = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tif (value < 0) {",
+      "\t\t\t\tcontinue;",
+      "\t\t\t}",
+      "\t\t\tint result = squareMinusOne(value);",
+      "\t\t\tSystem.out.println(result);",
+      "\t\t\ttotal += result;",
+      "\t\t\tcount++;",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Count: \" + count);",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  },
+  {
+    "id": "java-scale_six-summary",
+    "language": "randomJava",
+    "length": "long",
+    "source": {
+      "description": "Original examples created for Clumsy Keys.",
+      "url": null
+    },
+    "lines": [
+      "class Main {",
+      "\tstatic int scaleSix(int x) {",
+      "\t\treturn x * 6;",
+      "\t}",
+      "\tpublic static void main(String[] args) {",
+      "\t\tint[] values = {-3, 1, 2, 4, 6};",
+      "\t\tint total = 0;",
+      "\t\tint count = 0;",
+      "\t\tfor (int value : values) {",
+      "\t\t\tif (value < 0) {",
+      "\t\t\t\tcontinue;",
+      "\t\t\t}",
+      "\t\t\tint result = scaleSix(value);",
+      "\t\t\tSystem.out.println(result);",
+      "\t\t\ttotal += result;",
+      "\t\t\tcount++;",
+      "\t\t}",
+      "\t\tSystem.out.println(\"Count: \" + count);",
+      "\t\tSystem.out.println(\"Total: \" + total);",
+      "\t}",
+      "}"
+    ]
+  }
+]

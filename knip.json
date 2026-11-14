@@ -12,6 +12,7 @@
       ],
       "project": [
         "src/**/*.{ts,svelte}",
+        "shared/**/*.ts",
         "tests/**/*.ts",
         "scripts/*.mjs"
       ],

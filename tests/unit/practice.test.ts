@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createPracticeSession } from '../../src/lib/features/practice/session';
-import { parseSnippet, langData, languages } from '../../src/lib/features/practice/code-snippets';
+import { parseSnippet } from '../../src/lib/features/practice/code-snippets';
+import { codeLanguages as languages, codeLanguageChoices as languageChoices, snippetLengths } from '../../shared/content/code-catalog';
+import { snippetCatalog } from '../../shared/content/snippet-catalog';
 import { drawCodeKeywords } from '../../src/lib/features/practice/code-keywords';
 import { smoothPath } from '../../src/lib/components/charts/result-chart';
 
@@ -39,14 +41,27 @@ test('session preserves four-character WPM, errors, idle seconds, and unique cor
 });
 
 test('snippet parser preserves empty words and indentation for every supported language', () => {
-  assert.deepEqual(Object.keys(langData), Object.keys(languages));
+  assert.deepEqual([...new Set(snippetCatalog.map(snippet => snippet.language))], Object.keys(languages));
   assert.deepEqual(parseSnippet(['\t\tif  x:', '']), [
     { content: ['if', '', 'x:'], indents: 2, index: 0 },
     { content: [''], indents: 0, index: 1 },
   ]);
-  for (const snippets of Object.values(langData)) {
-    assert.ok(snippets.length);
-    for (const lines of snippets) assert.equal(parseSnippet(lines).length, lines.length);
+  for (const snippet of snippetCatalog) assert.equal(parseSnippet(snippet.lines).length, snippet.lines.length);
+});
+
+test('snippet lengths partition every language into complete, progressively larger snippets', () => {
+  for (const language of languageChoices) {
+    const snippets = snippetCatalog.filter(snippet => snippet.language === language);
+    const groups = snippetLengths.map(length => snippets.filter(snippet => snippet.length === length));
+    assert.equal(new Set(groups.flat().map(snippet => snippet.id)).size, snippets.length, `${language} covers the catalog`);
+    assert.equal(groups.flat().length, snippets.length, `${language} has disjoint groups`);
+    let previousMax = 0;
+    for (const group of groups) {
+      assert.ok(group.length > 0);
+      const sizes = group.map(snippet => snippet.lines.join('\n').length);
+      assert.ok(Math.min(...sizes) > previousMax, `${language} lengths increase`);
+      previousMax = Math.max(...sizes);
+    }
   }
 });
 

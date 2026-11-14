@@ -24,7 +24,13 @@ with normal document scrolling when a small viewport cannot contain it.
 The account content fills the shared page container, including its signed-in
 view, while retaining the same outer width limit and gutters as other pages.
 
-The server separates process startup (`app.ts`), application construction (`server.ts`), HTTP routes (`http.ts`), Socket.IO bindings (`socket.ts`), room lifecycle (`room.services.ts`), settings validation and passage generation. Room state is in memory. The browser shares the browser-safe race settings contract and passage datasets and sampling functions with the backend.
+The server separates process startup (`app.ts`), application construction (`server.ts`), HTTP routes (`http.ts`), Socket.IO bindings (`socket.ts`), room lifecycle (`room.services.ts`), settings validation and passage generation. Room state is in memory. The browser shares the browser-safe race settings contract with the backend.
+Content catalogs, selection, and token modifiers live in the browser-safe
+`shared/content` directory; solo settings adapters and the server race adapter
+use that same pipeline. All keywords use JSON catalogs. Complete snippets have
+stable IDs, source metadata and authored length categories. Restart redraws
+content; snippets avoid their previous ID when the category has alternatives.
+See `shared/content/README.md` for content maintenance and build packaging.
 
 Race ownership uses socket sessions and resume tokens. Recovery lasts 30 seconds. Countdown, round timing, sampled history and finish times remain server-owned. Practice metrics retain the historical four-character WPM calculation. DOM typing engines deliberately mutate character feedback nodes and use keyed sessions to reset them; replacing this with reactive per-character state requires independent regression work.
 

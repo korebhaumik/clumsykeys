@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { filterQuery, languageOptions, lengthOptions, pageSize, parseFilters, rankScores, testOptions, updateFilters, type SoloScore } from '../../src/lib/features/leaderboards/leaderboard';
 import { leaderboardService, previewUserId } from '../fixtures/leaderboard-service';
-import { languages } from '../../src/lib/features/practice/code-snippets';
+import { codeLanguages as languages } from '../../shared/content/code-catalog';
 import { practiceDurations, practiceWordCounts, proseLanguages } from '../../src/lib/features/practice/practice-options';
 
 const now = Date.parse('2026-11-13T12:00:00Z');

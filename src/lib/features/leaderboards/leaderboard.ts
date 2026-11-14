@@ -1,4 +1,4 @@
-import { languages } from "../practice/code-snippets";
+import { codeLanguages as languages } from "../../../../shared/content/code-catalog";
 import { practiceDurations, practiceWordCounts, proseLanguages } from "../practice/practice-options";
 
 import type { LeaderboardFilters, LeaderboardMode, LeaderboardPage, SoloScore, TestFormat } from "../../../../backend/src/leaderboard.contract";

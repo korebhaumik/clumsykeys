@@ -1,3 +1,12 @@
+import { quoteLengths, type QuoteLength } from "../../../../shared/content/quote-length";
+const quoteLengthStorageKey = "clumsy-keys:quote-length";
+function initialQuoteLength(): QuoteLength {
+	try {
+		const saved = sessionStorage.getItem(quoteLengthStorageKey);
+		return quoteLengths.find(length => length === saved) ?? "medium";
+	} catch { return "medium"; }
+}
+
 // Types
 
 export type QuotesParams = "Random Quotes";
@@ -14,6 +23,7 @@ export type TestConfig = {
 	timer: number | null;
 	words: number | null;
 	quotes: QuotesParams | null;
+	quoteLength?: QuoteLength;
 	difficulty: { wpmLimit: number | null; timeLimit: number | null };
 };
 
@@ -43,6 +53,7 @@ export const testConfig = writable({
 	timer: 30,
 	words: null,
 	quotes: null,
+	quoteLength: initialQuoteLength(),
 	difficulty: { wpmLimit: null, timeLimit: null },
 } as TestConfig);
 
@@ -96,4 +107,9 @@ export function updateModalContent(content: ModalContentParams) {
 	modalConfig.update((config) => {
 		return { ...config, content: content };
 	});
+}
+
+export function updateQuoteLength(quoteLength: QuoteLength) {
+	try { sessionStorage.setItem(quoteLengthStorageKey, quoteLength); } catch { /* Keep selection usable without storage. */ }
+	testConfig.update(config => ({ ...config, timer: null, words: null, quotes: "Random Quotes", quoteLength }));
 }
