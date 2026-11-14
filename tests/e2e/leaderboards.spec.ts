@@ -12,6 +12,14 @@ async function choose(page: Page, label: string, option: string) {
   await page.getByRole('option', { name: option, exact: true }).click();
 }
 const rankingRows = (page: Page) => page.locator('tbody tr:not(.skeleton-row)');
+async function expectCompactTable(page: Page) {
+  const unusedHeight = await page.locator('.table-scroll').evaluate(element => {
+    const table = element.querySelector('table')!.getBoundingClientRect();
+    return element.getBoundingClientRect().bottom - table.bottom;
+  });
+  // Allow the horizontal scrollbar at narrow widths, but no reserved empty rows.
+  expect(unusedHeight).toBeLessThan(24);
+}
 
 for (const theme of ['dark-forest', 'classic']) for (const width of [320, 768, 1440]) {
   test(`solo rankings in ${theme} at ${width}px`, async ({ page }, testInfo) => {
@@ -34,11 +42,14 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 768, 1
     await expect(rankingRows(page)).toHaveCount(10);
     await page.getByRole('button', { name: 'Next leaderboard page', exact: true }).click();
     await expect(rankingRows(page)).toHaveCount(4);
+    await expectCompactTable(page);
     await expect(page.getByRole('button', { name: 'Next leaderboard page', exact: true })).toBeDisabled();
     await expect(page.getByLabel('Preview player standing')).toContainText('#18');
     await choose(page, 'Time range', 'Past 24 hours');
     await expect(page).toHaveURL(/range=day&page=1/);
     await expect(rankingRows(page)).toHaveCount(2);
+    await expectCompactTable(page);
+    await page.locator('.table-scroll').screenshot({ path: testInfo.outputPath(`compact-rankings-${theme}-${width}.png`) });
     await expect(page.getByLabel('Preview player standing')).toContainText('No ranked result');
     const prose = page.getByRole('tab', { name: 'Prose', exact: false });
     await prose.focus(); await page.keyboard.press('ArrowRight');
@@ -124,6 +135,7 @@ test('signed-in solo scores load from the real backend adapter', async ({ page }
   await page.goto('/#/leaderboard');
   await expect(page.getByLabel('Your standing' , { exact: true })).toContainText('100 WPM');
   await expect(page.locator('tbody tr[aria-current="true"]')).toHaveCount(1);
+  await expectCompactTable(page);
   await expect(page.getByText('Demo scores', { exact: true })).toHaveCount(0);
 });
 

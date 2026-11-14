@@ -80,7 +80,7 @@
 		<AccountDashboard user={$account.session!.user} name={profileName} {busy} onsignout={signOut} />
 	{:else}
 		<div class="account-intro">
-			<p class="eyebrow"><span class="intro-dash" aria-hidden="true"></span> Your typing journey</p>
+			<p class="eyebrow">Your typing journey</p>
 			<h1 id="account-title">Find your<br /><span>rhythm.</span></h1>
 			<p class="intro-copy">A little practice. A new personal best.</p>
 			<div class="typing-specimen" aria-hidden="true">
@@ -132,8 +132,6 @@
 <style>
 	.account-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(var(--dimension-2rem), var(--dimension-7vw), var(--dimension-6rem)); padding-bottom: var(--dimension-1rem); }
 	.account-intro { min-width: 0; }
-	.account-intro .eyebrow { display: flex; align-items: center; gap: var(--dimension-0_65rem); }
-	.intro-dash { width: var(--dimension-1_5rem); height: var(--dimension-1px); background: var(--accent); }
 	.account-intro h1 { margin: var(--dimension-1rem) 0 var(--dimension-0_85rem); font-size: clamp(var(--text-2_75rem), var(--text-4vw), var(--text-3_25rem)); line-height: var(--leading-1_06); font-weight: var(--weight-700); letter-spacing: var(--tracking-negative-_045em); }
 	.account-intro h1 > span { color: var(--accent); }
 	.intro-copy { color: var(--muted); font-size: var(--text-0_9rem); line-height: var(--leading-1_65); }

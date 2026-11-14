@@ -193,6 +193,8 @@
 .settings-dialog-header { justify-content: space-between; padding-top: var(--dimension-1_25rem); }
 .settings-dialog-header h2 { display: flex; align-items: center; gap: var(--dimension-0_55rem); font-size: var(--text-1_25rem); font-weight: var(--weight-600); }
 .settings-dialog-header h2 svg { flex: none; color: var(--accent); }
+/* The heading receives announcement focus, but is not an interactive control. */
+.settings-dialog-header h2:focus-visible { outline: none; }
 .settings-dialog-header .settings-dialog-close { flex: none; padding: var(--dimension-0_45rem); border-color: transparent; border-radius: var(--radius-99px); color: var(--muted); }
 .settings-dialog-header .settings-dialog-close:hover { color: var(--ink); }
 .settings-dialog-body { padding: var(--dimension-1_25rem); }

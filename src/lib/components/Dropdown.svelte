@@ -114,6 +114,7 @@
 	.dropdown-option { display: flex; align-items: center; justify-content: space-between; gap: var(--dimension-0_75rem); padding: var(--dimension-0_65rem) var(--dimension-0_5rem); border-radius: var(--radius-0_3rem); cursor: pointer; }
 	.dropdown-option.active { background: var(--accent-wash); }
 	.dropdown-option[aria-selected="true"] { font-weight: var(--weight-600); }
-	.compact { width: var(--dimension-9rem); max-width: 100%; }
+	.compact { width: max-content; max-width: 100%; }
 	.compact .dropdown-trigger { min-height: 0; padding: var(--dimension-0_25rem); border: 0; background: transparent; color: inherit; font-weight: var(--weight-600); text-decoration: underline; text-underline-offset: var(--dimension-0_14em); }
+	.compact .dropdown-options { inset-inline-end: auto; min-width: var(--dimension-9rem); }
 </style>

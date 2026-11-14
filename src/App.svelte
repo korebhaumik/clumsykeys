@@ -49,5 +49,5 @@
 <style>
 	.app-frame { display: flex; flex-direction: column; min-height: 100svh; }
 	main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-	.global-footer { width: min(100% - var(--dimension-2rem), var(--dimension-66_625rem)); margin-inline: auto; padding-top: var(--dimension-1_25rem); padding-bottom: 0; }
+	.global-footer { width: min(100% - var(--dimension-2rem), var(--dimension-66_625rem)); margin-inline: auto; padding-top: var(--dimension-1_25rem); }
 </style>

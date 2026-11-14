@@ -15,6 +15,11 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1920])
       await expect(footer.getByRole('link', { name: 'Kore Bhaumik', exact: true })).toBeVisible();
       for (const label of ['Security', 'Terms', 'Privacy', 'Support']) await expect(footer.getByText(label, { exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      const bottomSpace = await footer.evaluate(element => {
+        const credits = element.querySelector('.footer-credits')!.getBoundingClientRect();
+        return element.getBoundingClientRect().bottom - credits.bottom;
+      });
+      expect(bottomSpace).toBeGreaterThanOrEqual(16);
       if (width === 1920 && route !== '/leaderboard') {
         const geometry = await page.evaluate(() => {
           const footer = document.querySelector('.global-footer')!.getBoundingClientRect();
@@ -24,6 +29,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1920])
       }
     }
     await page.goto('/');
+    await expect(page.locator('.practice-shell > header')).toBeVisible();
     if (width === 1920) {
       const alignment = await page.evaluate(() => {
         const header = document.querySelector('.practice-shell > header')!.getBoundingClientRect();

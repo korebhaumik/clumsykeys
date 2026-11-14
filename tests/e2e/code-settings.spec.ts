@@ -24,6 +24,8 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await page.goto('/');
     await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
     const dialog = page.getByRole('dialog');
+    await expect(dialog.getByRole('heading')).toBeFocused();
+    await expect(dialog.getByRole('heading')).toHaveCSS('outline-style', 'none');
     // Compare the same idle state, regardless of which control opens beneath the pointer.
     await page.mouse.move(0, 0);
     const proseAppearance = await appearance(dialog);
@@ -32,6 +34,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     const opener = page.getByRole('button', { name: 'Test Settings', exact: true });
     await opener.click();
     await expect(dialog.getByRole('heading', { name: 'Test Settings', exact: true })).toBeFocused();
+    await expect(dialog.getByRole('heading')).toHaveCSS('outline-style', 'none');
     await page.mouse.move(0, 0);
     expect(await appearance(dialog)).toEqual(proseAppearance);
     await page.screenshot({ path: testInfo.outputPath('code-settings.png'), animations: 'disabled' });
@@ -39,10 +42,12 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
 
     await page.keyboard.press('Tab');
     await expect(dialog.getByRole('button', { name: 'Close settings' })).toBeFocused();
+    await expect(dialog.getByRole('button', { name: 'Close settings' })).toHaveCSS('outline-style', 'solid');
     await page.keyboard.press('Tab');
     await expect(dialog.getByRole('button', { name: 'Language', exact: true })).toBeFocused();
     await dialog.getByRole('button', { name: 'Language', exact: true }).click();
     await expect(dialog.getByRole('heading', { name: 'Language', exact: true })).toBeFocused();
+    await expect(dialog.getByRole('heading')).toHaveCSS('outline-style', 'none');
     await dialog.getByRole('button', { name: 'JavaScript', exact: true }).click();
     await expect(dialog.getByRole('button', { name: 'JavaScript', exact: true })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByRole('region', { name: 'JavaScript snippet' })).toHaveCount(1);

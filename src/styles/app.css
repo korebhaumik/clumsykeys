@@ -9,6 +9,12 @@
 	*, ::before, ::after, ::backdrop, ::file-selector-button {
 		border-color: var(--color-gray-200, currentColor);
 	}
+
+	/* Round otherwise square focus outlines. Component and utility radii win
+	   over this base-layer fallback, so circles and rounded controls keep shape. */
+	:focus-visible, .focus-field:has(input:focus-visible) {
+		border-radius: var(--radius-0_3rem);
+	}
 }
 
 html {

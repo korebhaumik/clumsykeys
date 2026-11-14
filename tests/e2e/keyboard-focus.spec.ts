@@ -30,6 +30,13 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
       const controls = page.locator(':is(a[href], button, input, select, textarea, [tabindex="0"]):not([tabindex="-1"])');
       for (const control of await controls.all()) {
         if (!(await control.isVisible()) || !(await control.isEnabled()) || await control.getAttribute('tabindex') === '-1') continue;
+        // An authored radius must survive focus; square controls get the fallback.
+        await control.evaluate(element => (element as HTMLElement).blur());
+        const corners = ['border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius'];
+        const radii = await control.evaluate((element, corners) => {
+          const style = getComputedStyle(element);
+          return corners.map(corner => style.getPropertyValue(corner));
+        }, corners);
         await control.focus();
         if (await control.evaluate(element => element.classList.contains('sr-only'))) {
           await expect(control).toHaveCSS('outline-style', 'none');
@@ -37,6 +44,9 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
           if (route === '/game') await expect(page.locator('.code-scroll')).toHaveCSS('outline-style', 'none');
         } else {
           await expectHighlight(control, theme);
+          for (const [index, corner] of corners.entries()) {
+            await expect(control).toHaveCSS(corner, radii[index] === '0px' ? '4.8px' : radii[index]);
+          }
         }
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

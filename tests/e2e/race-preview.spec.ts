@@ -1,0 +1,50 @@
+import { test, expect } from '@playwright/test';
+
+for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440]) {
+  test(`race preview types phrases and can pause in ${theme} at ${width}px`, async ({ page }, testInfo) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.setViewportSize({ width, height: 900 });
+    await page.addInitScript(theme => localStorage.setItem('theme', theme), theme);
+    await page.route('https://fonts.googleapis.com/**', route => route.abort());
+    await page.clock.install({ time: new Date('2026-11-14T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-11-14T00:00:01Z'));
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/#/login');
+    const preview = page.getByRole('region', { name: 'Two-player race preview' });
+    const lanes = preview.locator('.preview-lane');
+    const counts = async () => Promise.all([0, 1].map(index => lanes.nth(index).locator('.typed').count()));
+    await expect(preview).toBeVisible();
+    await expect(preview.getByRole('button', { name: 'Pause race preview' })).toBeVisible();
+    expect(await page.locator('.page-heading .eyebrow').evaluate(element => getComputedStyle(element, '::before').content)).toBe('none');
+    await page.clock.runFor(4200);
+    const early = await counts();
+    expect(early[1]).toBeGreaterThan(early[0]);
+    const initialPhrase = (await lanes.first().locator('.character').allTextContents()).join('');
+    await preview.getByRole('button', { name: 'Pause race preview' }).click();
+    const paused = await counts();
+    await page.clock.runFor(1000);
+    expect(await counts()).toEqual(paused);
+    await preview.getByRole('button', { name: 'Resume race preview' }).click();
+    await page.clock.runFor(700);
+    await expect(lanes.nth(1).locator('.mistake')).toHaveCount(1);
+    await page.clock.runFor(400);
+    await expect(lanes.nth(1).locator('.mistake')).toHaveCount(0);
+    await page.clock.runFor(1700);
+    expect(await lanes.first().locator(".typing-viewport").evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+    const late = await counts();
+    expect(late[0]).toBeGreaterThan(late[1]);
+    await page.screenshot({ path: testInfo.outputPath('typing-race-preview.png'), animations: 'disabled' });
+    await page.clock.runFor(6000);
+    const nextPhrase = (await lanes.first().locator('.character').allTextContents()).join('');
+    expect(nextPhrase).not.toEqual(initialPhrase);
+    expect(await lanes.nth(1).locator('.typing-phrase').textContent()).toBe(nextPhrase);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(preview.getByRole('button')).toHaveCount(0);
+    const reduced = await counts();
+    await page.clock.runFor(2000);
+    expect(await counts()).toEqual(reduced);
+    expect(errors).toEqual([]);
+  });
+}

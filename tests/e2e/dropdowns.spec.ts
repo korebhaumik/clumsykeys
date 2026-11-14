@@ -54,9 +54,22 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
 
     await page.goto('/#/game');
     const language = page.getByRole('combobox', { name: 'Snippet language' });
+    const gap = async () => language.evaluate(button => {
+      const label = button.querySelector('span')!.getBoundingClientRect();
+      const arrow = button.querySelector('svg')!.getBoundingClientRect();
+      return arrow.left - label.right;
+    });
+    expect(await gap()).toBeLessThanOrEqual(13);
     await language.click();
+    const popup = page.getByRole('listbox', { name: 'Snippet language' });
+    await expect(popup.getByRole('option', { name: 'JavaScript', exact: true })).toBeVisible();
+    expect(await popup.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+    const popupBox = await popup.boundingBox();
+    expect(popupBox!.x).toBeGreaterThanOrEqual(0);
+    expect(popupBox!.x + popupBox!.width).toBeLessThanOrEqual(width);
     await page.getByRole('option', { name: 'JavaScript', exact: true }).click();
     await expect(language).toBeFocused();
+    expect(await gap()).toBeLessThanOrEqual(13);
     await expect(page.getByRole('region', { name: 'JavaScript snippet' })).toBeVisible();
 
     await page.goto('/#/login');

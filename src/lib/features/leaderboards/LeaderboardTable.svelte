@@ -9,7 +9,7 @@
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex (The overflow table must be scrollable using the keyboard.) -->
-<div class="table-scroll" class:empty={!loading && !rows.length} role="region" aria-label="Solo rankings, scroll for more columns" tabindex="0" aria-busy={loading}>
+<div class="table-scroll" role="region" aria-label="Solo rankings, scroll for more columns" tabindex="0" aria-busy={loading}>
 	{#if !loading && !rows.length}
 		<div class="table-state">{@render children()}</div>
 	{:else}
@@ -38,8 +38,7 @@
 {#if loading || rows.length}<p class="character-note">¹ Characters: correct / incorrect / extra.</p>{/if}
 
 <style>
-	.table-scroll { overflow-x: auto; min-height: calc(var(--dimension-3_5rem) * 11); }
-	.table-scroll.empty { min-height: 0; }
+	.table-scroll { overflow-x: auto; }
 	table { width: 100%; min-width: var(--dimension-60rem); border-collapse: collapse; text-align: left; font-size: var(--text-0_82rem); font-variant-numeric: tabular-nums; white-space: nowrap; }
 	tr { height: var(--dimension-3_5rem); }
 	th, td { padding: var(--dimension-0_75rem) var(--dimension-0_65rem); }
