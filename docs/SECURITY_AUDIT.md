@@ -8,6 +8,41 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Focused frontend configuration-cache verification
+
+On **14 November 2026**, added versioned localStorage configuration snapshots
+validated through the browser-safe preference contract. Startup restores guest
+or the matching last account's settings before practice mounts. Uncached signed-in
+practice shows a loading status until its initial read settles; read failures
+allow local practice and retain an explicit sync error. Matching background data
+does not regenerate the passage. Dirty edits retain their synced revision, survive
+reloads and conflict with newer server revisions until explicit reload. Remote
+updates still wait through active tests/results. Reconnection retries failed sync.
+Snippet length and auto-indent are additional device-local cached UI choices.
+
+The bounded configuration cache contains settings and a revision baseline, not
+credentials, account profile data, score/history responses or live room state.
+Guest and account snapshots are separate; the account snapshot is restored only
+for its recorded owner. Storage failures and malformed/version-mismatched values
+fall back without disabling practice. Existing Auth storage exposure findings
+below remain applicable; this change does not introduce a new auth cookie or
+change HTTP authentication, RLS or backend persistence contracts.
+
+Frozen installation with pnpm 12.18.0, lint, dead-code checks, frontend/backend
+types, documentation checks, **53 unit/integration tests**, the full **137-case
+Chrome suite**, and both builds passed. The thirteen new cache browser cases
+cover slow/failed initial reads, matching refresh DOM continuity, edits during
+refresh, active-test deferral, failed writes/reload/retry, revision conflicts,
+owner changes, guest new-tab persistence, both themes at 320/1440px, snippet and
+indentation persistence, reconnection and corrupt/denied storage. Cache-focused
+assertions initially missed the code modal's Indentation step; the corrected
+cases and final full suite passed. Existing Vite configuration-loader and Knip
+configuration hints remain. Browser dependency behavior used the local modeled
+Supabase fixture, with selected first-party delays/failures injected in Playwright;
+no hosted settings, SQL/Auth stack, dependency advisory audit or credential scan
+was freshly verified by this focused pass.
+
+
 ## Focused persistent-header verification
 
 On **14 November 2026**, moved the practice/static-page header into the router's

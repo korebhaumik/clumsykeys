@@ -79,6 +79,13 @@ assumptions:
     verification: On 2026-11-13, 34 server tests passed, including write quotas, origin rejection, sanitized errors, impossible-score rejection and timed completion ownership. The local simulation on port 15444 returned 503 for an injected write failure, accepted two retries with one stored result, and returned private dashboard/history plus public rankings. A separate hosted read-only catalog query verified six application tables with owner RLS, restricted RPC grants, locked search paths and no storage buckets. Local pgTAP tests were attempted but unavailable because the local database/Docker daemon was stopped. Plausible fabricated scores remain an open integrity finding.
     source: tests/unit/security.test.ts; tests/unit/persistence.test.ts; tests/simulation/accounts.ts; scripts/security-database.sql; docs/SECURITY_AUDIT.md
     updated_at: "2026-11-13"
+  - id: browser-preference-cache
+    status: supported
+    claim: The browser restores validated owner-scoped settings before practice mounts, revalidates through the account API, and preserves dirty edits using the existing preference revision contract.
+    reason: Playwright runs the real browser SDK and Express service against the existing local Supabase fixture; delayed and failed first-party preference responses exercise startup and reconciliation without hosted writes.
+    verification: On 2026-11-14, twelve focused cache browser cases passed on the frontend-cache-working-tree fingerprint. Matching refreshes retained passage DOM, uncached startup waited for settings, active tests deferred remote changes, dirty edits survived reloads, newer revisions blocked autosave until explicit reload, owner changes restored guest settings, reconnection retried a failed read, and edits made during a pending read were retained and saved. Guest new-tab and code UI persistence passed in both themes at 320/1440px. Malformed/denied storage fell back to usable practice. The final full browser suite then passed all 137 cases, including a thirteenth cache case confirming an uncached initial-read failure still permits local practice with an explicit sync error. This verifies client behavior against local modeled HTTP, not hosted Auth or database state. The Postman simulation CLI was not run for this pass; Playwright reused its existing fixture directly and injected selected first-party failures/delays.
+    source: tests/e2e/preferences-cache.spec.ts; src/lib/features/settings/account-preferences.ts; src/lib/features/settings/preferences-cache.ts; postman/mocks/supabase/default.cjs; playwright.config.ts
+    updated_at: "2026-11-14"
 
 fingerprints:
   - id: integration-working-tree
@@ -89,3 +96,7 @@ fingerprints:
     date: "2026-11-13"
     commit: f3b0865 (security hardening working tree on codex/security-audit)
     cli: Postman 1.76.0; Supabase 3.1.0; Node 24.11.1; pnpm 12.18.0 through its JavaScript entry point
+  - id: frontend-cache-working-tree
+    date: "2026-11-14"
+    commit: 1e08f4b (dirty working tree with self-hosted fonts, persistent navigation header and preference caching)
+    cli: Postman 1.76.0; Node 24.11.1; pnpm 12.18.0 through npx

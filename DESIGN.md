@@ -51,7 +51,10 @@ pages and after long content; avoid viewport-height tricks that overlap content.
 
 Current page patterns:
 
-- **Practice:** settings and mode controls lead into the typing area. Active
+- **Practice:** restore validated cached settings before generating a passage.
+  A signed-in user with no cache sees a practice-settings loading status while
+  the first read is pending; cached users can practice during background refresh.
+  Settings and mode controls lead into the typing area. Active
   tests replace configuration controls with live stats and suppress distracting
   chrome; results bring back explicit replay actions and detailed feedback.
 - **About:** a short introduction and understated linked rows fill the parent

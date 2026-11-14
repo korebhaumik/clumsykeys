@@ -15,6 +15,7 @@
 	import { codeLanguages as languages, snippetLengths, type SnippetLength, type CodeLanguage } from "../../../../shared/content/code-catalog";
 	import { drawSnippet } from "../../../../shared/content/snippets";
 	import { drawCodeKeywords, type KeywordLimit, type KeywordModifiers } from "./code-keywords";
+	import { readCodeUiPreferences, cacheCodeUiPreferences } from "./code-ui-preferences";
 	import { codePreferencesKey, codePreferences } from "./code-preferences";
 	import { account } from "../../state/account.store";
 	import { practiceBusy } from "../../state/preferences.store";
@@ -28,6 +29,7 @@
 
 
 	const preferences = get(codePreferences);
+	const uiPreferences = readCodeUiPreferences();
 	let langChoice = $state(preferences.language);
 
 	let mode = $state(preferences.mode);
@@ -36,8 +38,8 @@
 	let keywords = $state.raw(preferences.mode === "keywords"
 		? drawCodeKeywords(preferences.language, keywordCount(preferences.limit), preferences.modifiers)
 		: []);
-	let snippetLength = $state<SnippetLength>("medium");
-	let selectedSnippet = $state.raw(drawSnippet(preferences.language, "medium"));
+	let snippetLength = $state<SnippetLength>(uiPreferences.snippetLength);
+	let selectedSnippet = $state.raw(drawSnippet(preferences.language, uiPreferences.snippetLength));
 	let codeSnippet = $derived(mode === "keywords"
 		? [{ content: keywords, indents: 0, index: 0 }]
 		: parseSnippet(selectedSnippet.lines));
@@ -50,7 +52,7 @@
 	let sessionAccountId = $state(get(account).session?.user.id ?? null);
 	let typedLetter = "";
 	let isBlur = $state(false);
-	let autoTabs = $state(true);
+	let autoTabs = $state(uiPreferences.autoTabs);
 	let lineIndex = $state(0);
 	let wordIndex = 0;
 	let letterIndex = 0;
@@ -81,6 +83,8 @@
 		});
 		return () => { unsubscribe(); practiceBusy.set(false); };
 	});
+
+	$effect(() => { cacheCodeUiPreferences({ snippetLength, autoTabs }); });
 
 	$effect(() => {
 		const settings = JSON.stringify({ mode, language: langChoice, limit: keywordLimit, modifiers });

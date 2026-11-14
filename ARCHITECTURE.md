@@ -59,8 +59,11 @@ and synchronization status belong in `state/`. There are no broad global barrels
 ## Browser startup, routes and shell
 
 `index.html` applies the saved theme before mount. `src/main.ts` initializes the
-account and processes PKCE callback query parameters before dynamically importing
-`App.svelte`. Account/HMR subscriptions are cleaned up. App starts preference and
+account, processes PKCE callback query parameters and starts preference sync
+before dynamically importing `App.svelte`. Validated browser-cached settings are
+applied before practice mounts; an uncached signed-in practice route waits for
+the initial preference read, falling back to local settings on failure.
+Account/HMR subscriptions are cleaned up. App starts
 solo-result synchronization, handles race-save status and clears old room state
 when account identity changes.
 
@@ -101,8 +104,8 @@ See the [content guide](shared/content/README.md) for catalog rules and provenan
 Quotes are never truncated to a word preset. Solo quote length is an optional
 preference/result setting with a medium fallback; multiplayer uses its unfiltered
 quote pool. Snippet restart avoids the previous ID when the category has an
-alternative. Snippet length is currently local to the practice view and is not
-persisted in account preferences or result settings. Neither quote nor snippet
+alternative. Snippet length and auto-indent are cached as device-local UI choices; snippet
+length is not part of account preferences or result settings. Neither quote nor snippet
 length currently subdivides the public solo board.
 
 `session.ts` owns pure solo metrics, retaining the historical four-character WPM
