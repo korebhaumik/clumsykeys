@@ -28,11 +28,13 @@ Tailwind spacing/sizing utilities remain available.
 | `--focus-highlight` | App-wide keyboard focus outline. |
 | `--profile-avatar-*` | Theme-specific avatar gradient and foreground. |
 | `--result-*` | Result surfaces, labels, plots, grids and error markers. |
+| `--racer-*` | Shared theme-specific multiplayer series colors. |
 
-The two themes define their semantic aliases centrally. Race series and speed
-bands select theme-specific palette tokens in their owning presentation. Keep
-intentionally distinct chart and feedback colors; reuse existing primitives for
-exact duplicates. Never add raw hex/rgb/hsl values to application components.
+The two themes define their semantic aliases centrally. Result/chart and racer
+series aliases are available on the theme root so saved-history charts work
+without a results-page wrapper. Speed bands select theme-specific palette tokens
+in their owning presentation. Keep intentionally distinct chart and feedback
+colors; reuse existing primitives for exact duplicates. Never add raw hex/rgb/hsl values to application components.
 When a new role is needed, add its authored value and theme mapping centrally.
 
 ## Layout and hierarchy
@@ -61,6 +63,23 @@ Current page patterns:
   signed-in dashboard fills the container. The banner uses accent/caret roles,
   avatars use profile roles, and statistics/bests/recent tests use the shared
   surfaces. Show real loading, empty, failed and retained-snapshot states.
+- **History:** the practice/multiplayer switch leads directly into filters,
+  inline summaries and a striped results table. Results load automatically on
+  entry, reload and history-type changes; there is no manual refresh button. The
+  page title is available to assistive technology without a visible
+  introduction or new-test row. Sortable metric/date headings and
+  explicit detail buttons support keyboard use. Overflow stays inside the table
+  on narrow screens. Filters, summaries and CSV export describe loaded results;
+  loading more extends that set. Returning from details preserves filters, sorting
+  and the initiating button’s focus. While inspecting a result, “Back to history”
+  sits at the right of the practice/multiplayer row and remains usable during
+  loading. Opening a result immediately shows its own skeleton view; errors and
+  retry stay there. Returning cancels pending presentation updates.
+  Initial loads use summary and five-row table skeletons; pagination appends three placeholder rows and retains saved
+  rows on failure. Skeleton motion respects reduced-motion preferences. Saved race
+  details show the archived mode, language, active time/word limit and modifier
+  switches above the chart, using only field labels and values without an
+  introductory heading. Missing archived fields stay explicitly unavailable.
 - **Leaderboards:** filters and readable standings frame a horizontally
   scrollable table. Sparse result pages do not reserve unused table-row space.
 
@@ -99,7 +118,8 @@ click handlers or feature state to SVGs.
 Charts share the presentational renderer and pure path helper. Retain legends,
 labels, dashed variants and error shapes as additional distinctions. Color alone
 must not carry the only meaningful distinction. Chart labels and curves must
-continue to reflect the existing WPM and timing semantics.
+continue to reflect the existing WPM and timing semantics. Reserve the SVG’s
+intrinsic height while measuring its container width to avoid resize feedback.
 
 ## Focus, keyboard and feedback
 

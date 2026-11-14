@@ -1,9 +1,12 @@
 # Security audit
 
-Last reviewed: **14 November 2026**, against the current working tree and freshly
-built frontend/backend. Source baseline: `22ab661`, plus the working-tree changes.
-This is a maintained assessment of the current controls and remaining work;
-older test counts and pre-refactor file locations are superseded by this report.
+Full security review: **14 November 2026**, source baseline `22ab661` plus that
+review’s working-tree changes. Focused history UI verification: **14 November
+2026**, baseline `63c504d` plus the history redesign, chart colors, archived
+race settings and simplified history toolbar/detail labels. The focused pass reran the
+source/build/browser checks listed below; it did not repeat credential scans,
+dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
+assessment of current controls and remaining work.
 
 ## Outcome and scope
 
@@ -15,9 +18,7 @@ never exposed in external deployments, logs, ignored files or other clones.
 
 **Score integrity remains an open high-priority risk.** Solo counters and
 multiplayer progress are client reports. Plausible fabricated results can affect
-public solo rankings despite validation and server-owned race timing. The latest
-browser verification also has an unresolved multiplayer completion/replay timeout;
-this assessment does not claim an entirely green browser suite.
+public solo rankings despite validation and server-owned race timing.
 
 Reviewed the HTTP handlers, Socket.IO handlers and ownership checks, browser
 Auth/configuration and result queues, browser-safe validation contracts, SQL
@@ -94,15 +95,34 @@ presented as current verification.
 ## Latest verification
 
 Environment: Node **24.11.1**, pnpm **12.18.0**, Vite **8.3.6**, Supabase JS
-**2.119.0**, Socket.IO **4.8.4**. Dates and counts below describe this refresh.
+**2.119.0**, Socket.IO **4.8.4**. Lint, dead-code, type/docs, unit/browser and
+build rows were rerun for history, saved multiplayer chart colors and archived
+race settings, the compact toolbar and immediate result-detail loading. Other
+evidence below belongs to the earlier full security review. The history cases cover both themes at 320/1440px,
+keyboard sorting/scrolling and detail focus return, loaded-result filters/CSV,
+automatic entry/reload, pagination failures and skeleton transitions with
+reduced motion. History has no visible introductory header or manual refresh
+control; archived settings display only field labels and values. One new chart
+case reproduced the missing-theme-color failure before the fix.
+All four new chart cases now check plot/axis colors, all six racer lines,
+finish markers and legend colors in saved history and latest results. These chart cases model archived HTTP
+responses; the separate HTTP/Socket.IO suite covers local transport/persistence.
+The four chart cases also cover all four race modes, applicable archived limits, modifier
+values, missing settings and browser resize errors. A real local socket/HTTP
+check verifies that later lobby changes do not alter a saved settings snapshot.
+Four additional loading cases cover practice/race detail skeletons, pending
+request cancellation, retry after failure, reduced motion and the right-aligned
+Back action, with retained rows and restored focus.
+An explicit SVG height stabilizes chart measurement; the final complete browser
+run emitted no ResizeObserver loop errors.
 
 | Check | Latest result |
 | --- | --- |
 | `npm run lint` | Passed, including the design audit. |
 | `npm run audit:dead` | Passed with configuration hints; no unused runtime items reported. |
 | `npm run check:all` | Passed frontend/backend type checks; includes `check:docs` after this refresh. |
-| `npm test` | **45 passed**, including real ephemeral HTTP/Socket.IO and the SDK against the local upstream fixture. |
-| `npm run test:e2e` | **98 passed, 2 failed** in the full run: multiplayer start/completion/replay timeout and a missing trace-file error during a keyboard test. An isolated rerun on separate ports/output paths passed **all four keyboard cases**, but the multiplayer flow still timed out waiting for race results. Browser completion/replay verification remains open. |
+| `npm test` | **50 passed** (history/chart/settings recheck), including real ephemeral HTTP/Socket.IO and the SDK against the local upstream fixture. |
+| `npm run test:e2e` | **116 passed** in the complete history/chart/settings/loading recheck, including eight history utility/skeleton cases, four result-detail loading/navigation cases and four saved/latest multiplayer chart cases covering archived settings. The prior history run had 107 passes and one Classic account reload timeout; that flow passed both its isolated rerun and this complete run. Its earlier timing cause was not established. |
 | Frontend/backend production builds | Passed. Vite reports a future native-config-loader warning for an extensionless config import; it is not a current build failure. |
 | Credential scan | Working files, reachable history/reflogs and generated artifacts passed. Pattern scanning does not establish the safety of ignored environment files, arbitrary encodings, external backups, logs or prior hosted bundles. |
 | Dependency registry | Two development-only advisories; no production advisories, as detailed above. |
@@ -119,10 +139,6 @@ handler input/output; `check:docs` also does not prove semantic equivalence.
 
 ## Remaining actions
 
-- Resolve the multiplayer completion/replay browser timeout and rerun the full
-  suite without shared ports or trace directories before treating browser
-  readiness as completely verified. This observation alone does not identify a
-  production exploit or establish a root cause.
 - Decide the trust/eligibility model for public scores and address plausible
   fabricated counters before calling rankings verified competition.
 - Configure and verify exact production origins, frontend CSP/HTTPS headers,

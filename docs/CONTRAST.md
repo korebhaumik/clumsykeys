@@ -50,13 +50,64 @@ These are source-color calculations for representative current combinations, not
 | Classic | Unselected navigation icons / page | `#8e8e8e` / `#f3f4f6` | 2.98:1 | Below threshold |
 | Classic | Shared border / page | `#d1d5db` / `#f3f4f6` | 1.34:1 | Below threshold |
 
+## History table refresh
+
+Recalculated on **14 November 2026** from `tokens.css` for the history toolbar,
+striped results, hover/focus rows and metric/detail actions. Existing
+semantic colors are reused without transparency. Values below cover normal text;
+the shared border limitations below remain applicable to filter controls.
+
+| Theme | Foreground | Page / stripe / hover background | Ratios |
+| --- | --- | --- | --- |
+| Dark Forest | Ink `#dadada` | `#151b1d` / `#242a2d` / `#343e39` | 12.45 / 10.40 / 7.93:1 |
+| Dark Forest | Muted `#a4aaa9` | Same | 7.38 / 6.16 / 4.70:1 |
+| Dark Forest | Accent/focus `#9bcd86` | Same | 9.51 / 7.94 / 6.06:1 |
+| Classic | Ink/accent/focus `#000000` | `#f3f4f6` / `#ffffff` / `#e5e7eb` | 19.08 / 21.00 / 16.96:1 |
+| Classic | Muted `#595959` | Same | 6.36 / 7.00 / 5.66:1 |
+
+These combinations exceed 4.5:1 for normal text and 3:1 for the global focus
+outline. Selected history controls also use an underline or sort arrow; row
+striping is decorative. Skeletons reuse the accent-wash surface, pulse only
+when reduced motion is not requested, and convey no score values. Their contrast
+is decorative; loading status is also announced as text. This is a source-color
+check, not full accessibility certification.
+
+History has no visible introductory header or manual refresh control. Existing
+text, selected-tab and focus pairs above cover the remaining toolbar.
+
+The archived race settings summary uses the same page foreground pairs,
+recalculated on **14 November 2026**: Dark Forest ink/muted on page are
+12.45/7.38:1, and Classic ink/muted on page are 19.08/6.36:1. The section has no
+new background or interactive controls; its separators are decorative. Result
+detail skeletons reuse surface/accent-wash placeholders with no score values;
+they are hidden from assistive technology. Their loading status uses the muted
+page-text pairs, and animation respects reduced motion. The Back action uses
+the existing accent/focus colors on the page.
+
+## Saved multiplayer chart colors
+
+Recalculated on **14 November 2026** after moving result and racer aliases to
+the theme root. Archived charts now resolve the same plot, axis, series and
+legend colors as the latest race results, including outside `.test-results`.
+The existing source colors remain unchanged.
+
+| Theme | Plot | Axis labels / plot | Legend text / page | Six series / plot, in palette order |
+| --- | --- | --- | --- | --- |
+| Dark Forest | `#111719` | `#a1a7a6`, 7.41:1 | 7.12:1 | 9.88 / 7.63 / 7.16 / 7.54 / 7.51 / 8.80:1 |
+| Classic | `#e9ecee` | `#565c62`, 5.70:1 | 6.15:1 | 17.70 / 5.53 / 5.42 / 5.69 / 5.47 / 5.17:1 |
+
+Series order is result accent, blue, orange, violet, pink and teal; canonical
+values are in `tokens.css`. All six lines exceed 3:1 against their plot, and
+labels/legend text exceed 4.5:1 against these backgrounds. This does not establish
+pairwise line distinguishability, every overlap or full chart accessibility.
+
 ## Known limitations and remaining work
 
 - Legacy Dark Forest muted text is 4.05:1 on a panel. The same color is 4.85:1 on the page; its acceptability depends on its actual background. Do not label the token itself universally passing or failing.
 - Classic gray navigation icons are slightly below 3:1. The orange Classic caret is below 3:1 on the page. Review these essential cues as an explicit visual change; this documentation update does not recolor the interface.
 - Shared neutral borders are below 3:1 in both themes. Some are decorative dividers; controls that rely on the boundary for identification need a component-level review. Several room/card borders mix the line token with transparency, which further reduces contrast.
 - The brand subtitle is 2.30:1 in Dark Forest (`#475569` on `#151b1d`) and 2.98:1 in Classic (`#8e8e8e` on `#f3f4f6`). Logotypes are exempt under SC 1.4.3, but non-logo informational text using those colors is not.
-- Account-avatar gradients, translucent backgrounds, hover/disabled states, colored navigation glyphs, Tailwind-colored credit links, all race series and speed bands, and every chart annotation are not exhaustively measured here. Charts also use legends/labels and dashed variants; those do not establish color-contrast compliance on their own.
+- Account-avatar gradients, translucent backgrounds, hover/disabled states, colored navigation glyphs, Tailwind-colored credit links, all rendered race overlaps, speed bands, and every chart annotation are not exhaustively measured here. Charts also use legends/labels and dashed variants; those do not establish color-contrast compliance on their own.
 - Forced-color rendering, alternate browser engines, real font loading, zoom, focus visibility through every overlay, and assistive-technology behavior need separate verification.
 
 ## Maintenance

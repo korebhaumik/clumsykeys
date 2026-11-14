@@ -24,7 +24,8 @@
 
 <figure class="chart" aria-label={errors ? "Practice speed and errors over time" : "Race speed by player over time"}>
 	<div bind:clientWidth={width} class="chart-plot">
-		<svg viewBox="0 0 {chartWidth} {height}" role="img" aria-label="Words per minute by elapsed seconds">
+		<!-- Keep the plot height stable while the observed width updates the viewBox. -->
+		<svg height={height} viewBox="0 0 {chartWidth} {height}" role="img" aria-label="Words per minute by elapsed seconds">
 			<rect x={left} y={top} width={right - left} height={bottom - top} fill="var(--result-plot)" />
 			{#each [0, 1, 2, 3, 4] as tick}
 				<line class="grid-line" x1={left} x2={right} y1={y(tick * step)} y2={y(tick * step)} />
