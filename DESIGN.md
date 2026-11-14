@@ -51,7 +51,9 @@ pages and after long content; avoid viewport-height tricks that overlap content.
 
 Current page patterns:
 
-- **Practice:** restore validated cached settings before generating a passage.
+- **Practice:** first-time guests start with English and a 30-second prose test,
+  or Python snippets at medium length with Auto Tabs. Restore validated cached
+  settings before generating a passage.
   A signed-in user with no cache sees a practice-settings loading status while
   the first read is pending; cached users can practice during background refresh.
   Settings and mode controls lead into the typing area. Active

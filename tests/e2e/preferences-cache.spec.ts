@@ -215,3 +215,16 @@ test('an uncached account can still practice when its initial preference request
   await page.goto('/#/account');
   await expect(page.getByRole('status').filter({ hasText: 'Modeled initial read outage' })).toBeVisible();
 });
+
+test('first-time guests start with English 30 seconds and medium Python snippets with Auto Tabs', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('textbox', { name: 'Type the practice passage' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'time', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '30', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'english', exact: true })).toBeVisible();
+  await page.goto('/#/game');
+  await expect(page.getByRole('button', { name: 'Snippets', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('group', { name: 'Snippet length', exact: true }).getByRole('button', { name: 'Medium', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Auto Tabs', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('combobox', { name: 'Snippet language', exact: true })).toContainText('Python');
+});

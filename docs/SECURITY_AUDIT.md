@@ -8,6 +8,15 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## First-visit defaults verification
+
+On **14 November 2026**, changed fresh guest prose defaults to English with a
+30-second timer. Code defaults remain Python snippets, medium length and Auto
+Tabs. Cached/account configurations still take precedence. The explicit new
+first-visit browser case passed, together with all **138 Chrome cases**, **53
+unit/integration tests**, lint, dead-code/type/docs checks and both builds.
+Existing Vite/Knip hints remain; no hosted or database checks were rerun.
+
 ## Focused frontend configuration-cache verification
 
 On **14 November 2026**, added versioned localStorage configuration snapshots
@@ -42,7 +51,6 @@ Supabase fixture, with selected first-party delays/failures injected in Playwrig
 no hosted settings, SQL/Auth stack, dependency advisory audit or credential scan
 was freshly verified by this focused pass.
 
-
 ## Focused persistent-header verification
 
 On **14 November 2026**, moved the practice/static-page header into the router's
@@ -60,7 +68,6 @@ header visibility. New navigation cases check for console/page errors. Screensho
 were inspected for both themes. Existing Vite configuration-loader and Knip
 configuration hints remain; no hosted deployment, database, advisory audit or
 credential scan was repeated during this focused UI pass.
-
 
 ## Focused self-hosted font verification
 
@@ -81,7 +88,6 @@ suite also covered keyboard and typing flows. Existing Vite configuration-loader
 and Knip configuration hints remain. This focused pass did not repeat dependency
 advisory/credential scans, SQL/Auth checks or hosted deployment verification;
 those older results below retain their original scope.
-
 
 ## Outcome and scope
 
