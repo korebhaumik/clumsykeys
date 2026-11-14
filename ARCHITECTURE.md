@@ -156,8 +156,15 @@ all active rooms/timers/recovery sessions; confirmed database rows remain durabl
 The private dashboard reads one service-only aggregate of all saved solo tests,
 per-test arithmetic means, characters/time totals, bests per mode and five recent
 summaries. Guest, unsaved, abandoned and multiplayer activity is excluded.
-`#/history` paginates private practice and race results; shared race scoreboards
-omit opponent account and internal participant UUIDs.
+`#/history` paginates private practice and race results. The history feature owns
+loaded-result filtering, metric/date sorting and CSV formatting in a pure helper;
+its presentation retains the listing while inspecting result charts. Detail
+reads switch to a result skeleton immediately, with independent loading/error
+state and retry. Returning or changing history type invalidates pending detail
+responses, so late completions cannot reopen the result. Race details
+display the round’s archived settings, never current lobby settings. Summaries
+and exports cover matching loaded rows, rather than account-wide aggregates.
+Shared race scoreboards omit opponent account and internal participant UUIDs.
 
 Solo leaderboards use a cancellable HTTP service and the service-only
 `read_solo_leaderboard` RPC. PostgreSQL filters by family, language, format, test

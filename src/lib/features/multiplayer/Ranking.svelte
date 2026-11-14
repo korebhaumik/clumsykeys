@@ -128,21 +128,7 @@
 <style>
 	.persistence-note { color: var(--muted); font-size: var(--text-0_82rem); }
 	.persistence-note a { color: var(--accent); text-decoration: underline; }
-	.race-results {
-		--racer-blue: var(--palette-blue-300);
-		--racer-orange: var(--palette-orange-300);
-		--racer-violet: var(--palette-violet-300);
-		--racer-pink: var(--palette-pink-300);
-		--racer-teal: var(--palette-teal-400);
-		--result-border: color-mix(in srgb, var(--result-muted) 24%, transparent);
-	}
-	:global([data-theme="classic"]) .race-results {
-		--racer-blue: var(--palette-blue-700);
-		--racer-orange: var(--palette-orange-800);
-		--racer-violet: var(--palette-violet-700);
-		--racer-pink: var(--palette-pink-700);
-		--racer-teal: var(--palette-teal-800);
-	}
+	.race-results { --result-border: color-mix(in srgb, var(--result-muted) 24%, transparent); }
 	.results-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: var(--dimension-0_9rem); margin-bottom: var(--dimension-1_35rem); }
 	.results-heading .eyebrow { color: var(--result-accent); margin-bottom: var(--dimension-0_35rem); }
 	h1 { font-size: clamp(var(--text-1_8rem), var(--text-4vw), var(--text-2_8rem)); line-height: var(--leading-1_12); }

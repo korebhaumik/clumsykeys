@@ -140,6 +140,7 @@ test('race archives survive an immediate replay reset and expose only participan
   const roomId = 'archive-complete', { a, b, snapshot } = await racingPair(roomId);
   try {
     const roundId = snapshot().roundId;
+    const archivedSettings = structuredClone(snapshot().settings);
     a.emit('timeData', { roomId, userId: roomId + '-a', wpm: 60, accuracy: 95, typedChars: 20 });
     await waitFor(() => snapshot().users.find((r: any) => r.userId === roomId + '-a')?.wpm === 60);
     a.emit('timeData', { roomId, userId: roomId + '-a', wpm: 60, accuracy: 95, typedChars: snapshot().text.length });
@@ -148,8 +149,11 @@ test('race archives survive an immediate replay reset and expose only participan
     a.emit('finishGame', { roomId, userId: roomId + '-a' }); b.emit('finishGame', { roomId, userId: roomId + '-b' });
     await finished; await waitFor(() => snapshot().progress === 'finished');
     a.emit('resetGame', { roomId }); await waitFor(() => snapshot().progress === 'waiting');
+    a.emit('updateRaceSettings', { mode: 'words', wordCount: 100 });
+    await waitFor(() => snapshot().settings.mode === 'words');
     await waitFor(async () => (await request('/api/race-results/' + roundId)).status === 200);
     const saved = await (await request('/api/race-results/' + roundId)).json();
+    assert.deepEqual(saved.round.settings, archivedSettings);
     const own = saved.results.find((r: any) => r.racer_id === roomId + '-a');
     assert.equal(saved.results.length, 2); assert.equal(own.wpm, 60);
     assert.ok(own.speed_history.length > 0); assert.ok(own.finish_seconds > 0);

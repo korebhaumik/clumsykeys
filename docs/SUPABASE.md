@@ -117,7 +117,10 @@ See [Supabase's GitHub setup guide](https://supabase.com/docs/guides/auth/social
   four-character WPM formula is retained. An immutable result UUID makes retries
   safe, including after a response is lost.
 - `race_rounds` and `race_results` store the original roster, bounded samples,
-  server finish times, guest participants, disconnects, and aborted rounds. The
+  server finish times, guest participants, disconnects, aborted rounds and the
+  round’s settings snapshot. History displays that snapshot with the race chart;
+  only the active time or word limit is shown. Missing values are marked
+  unavailable without substituting current lobby defaults. The
   server captures results before replay or disconnect cleanup can erase them.
   Restricted RPC functions write parent/child rows atomically.
 - Every application table has RLS and explicit grants. Browser users can read
