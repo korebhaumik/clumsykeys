@@ -38,7 +38,7 @@ Copy [`.env.example`](.env.example) to root `.env` and fill in the four Supabase
 
 `GET /rooms?roomId=<id>` returns the current roster and metrics. Missing, blank, or repeated IDs return 400. Unknown rooms return 404.
 
-The multiplayer backend follows the Catan deployment flow: GitHub Actions builds a Docker image, pushes it to Docker Hub, then deploys the successful build's tag to Northflank. Northflank deployment is temporarily disabled; Docker Hub builds and pushes remain active. See [deployment setup](docs/deployment.md) for re-enabling deployment, required secrets, service configuration, and rollback. `GET /health` returns `{ "ok": true }` for readiness checks.
+The frontend is configured for Vercel through `vercel.json`, with the pinned pnpm install, Vite build, and `dist` output. The multiplayer backend follows the Catan deployment flow: GitHub Actions builds a Docker image, pushes it to Docker Hub, then deploys the successful build's tag to Northflank. Northflank deployment is temporarily disabled; Docker Hub builds and pushes remain active. See [deployment setup](docs/deployment.md) for frontend settings, re-enabling backend deployment, required secrets, service configuration, and rollback. `GET /health` returns `{ "ok": true }` for readiness checks.
 
 Practice and race results live in their respective feature modules. The obsolete result draft was removed after verifying it was outside the router.
 

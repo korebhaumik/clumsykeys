@@ -1,4 +1,4 @@
-# Multiplayer deployment
+# Deployment: Vercel and Northflank
 
 Northflank deployment is temporarily disabled with `if: ${{ false }}` on the deploy job in `.github/workflows/deploy-northflank.yml`. Automatic and manual runs skip deployment. Docker Hub builds and pushes remain active. To re-enable deployment, restore the original condition preserved in the workflow comment. The deployment steps below describe behavior after re-enabling it.
 
@@ -11,7 +11,46 @@ This mirrors Catan's two-workflow pipeline:
 
 Northflank runs the image built in CI; it does not rebuild the Git repository. Frontend-only changes do not trigger this pipeline. Manual builds from other branches publish images but do not automatically deploy them.
 
-## One-time setup
+## Frontend: Vercel
+
+Import the repository as a Vercel project with the **repository root** as its
+Root Directory. Select **Node.js 24.x** in Build and Deployment settings. The
+checked-in `vercel.json` selects Vite, pins the install command to pnpm 12.18.0,
+builds with `npm run build`, and publishes only `dist`. The explicit pnpm version
+matters: this repository uses pnpm 12's multi-document lockfile, while Vercel's
+lockfile-version detection can select pnpm 9 or 10. Do not override the install
+command with an unpinned `pnpm install`.
+
+Set these **build-time** environment variables in Vercel before deploying:
+
+| Variable | Value |
+| --- | --- |
+| `VITE_SERVER_URL` | Northflank backend's public HTTPS origin, without a path or trailing slash |
+| `VITE_SUPABASE_URL` | Supabase project URL, if accounts are enabled |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | The same project's public publishable or anon key, if accounts are enabled |
+
+Leave both public Supabase values unset for guest-only operation. Never add
+`SUPABASE_SECRET_KEY`, database passwords, or migration tokens to the frontend
+project. Changing a `VITE_` variable requires a new frontend build.
+
+The app uses **hash routes** (`/#/about`, `/#/login`, etc.), so it does not need a
+catch-all SPA rewrite. Account callbacks use the root URL with an `auth_action`
+query parameter and also work without a rewrite. The backend runs on Northflank;
+Vercel does not need API functions or a WebSocket proxy for this configuration.
+
+Add the exact Vercel production origin and any explicitly supported preview
+origins to Northflank's `FRONTEND_ORIGINS`. Preview deployments are not implicitly
+allowed. Also configure the production Supabase Auth Site URL and the
+`/?auth_action=confirm` and `/?auth_action=recovery` redirect URLs as described in
+[Supabase setup](SUPABASE.md). Preview account flows need their own allowed
+redirect URLs.
+
+The frontend configuration includes the response headers described below.
+Confirm them on the hosted response after deploying. See the official
+[Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite) and
+[package manager](https://vercel.com/docs/package-managers) documentation.
+
+## Backend: Northflank setup
 
 Create a Docker Hub repository named `clumsykeys-server`. Add these GitHub repository Actions secrets:
 
@@ -34,7 +73,7 @@ Run the build workflow once to publish the initial image. In Northflank, add Doc
 - Public port: **1440**, protocol **HTTP**, with WebSocket upgrades supported for Socket.IO. Use the public HTTPS hostname for clients.
 - Readiness and liveness: HTTP `GET /health` on port **1440**; expect status `200` and `{ "ok": true }`.
 - Environment: `PORT=1440`, `NODE_ENV=production`, `FRONTEND_ORIGINS=https://<frontend-host>`. Separate multiple allowed frontend origins with commas; use complete origins without paths or trailing slashes.
-- Leave the image's default start command (`node build/app.js`). Disable separate registry-triggered auto-deploys so this workflow controls releases.
+- Leave the image's default start command (`node build/backend/src/app.js`). Disable separate registry-triggered auto-deploys so this workflow controls releases.
 
 Save the service IDs as GitHub secrets, then manually run the deploy workflow with the initial image tag. Later matching pushes to `main` build, publish and deploy automatically. Both workflow files must exist on the repository's default branch for GitHub's workflow dispatch/run triggers.
 
