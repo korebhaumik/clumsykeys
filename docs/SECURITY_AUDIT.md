@@ -8,6 +8,27 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Focused self-hosted font verification
+
+On **14 November 2026**, replaced runtime Google Fonts imports with same-origin
+WOFF2 assets: Comfortaa variable 300–700 and Poppins 400/500. Unicode subsets,
+`font-display: swap` and licenses are retained; the primary Comfortaa Latin file
+is preloaded and production assets are fingerprinted. Font loading no longer
+contacts Google. Licenses are copied into production from `public/fonts`.
+
+Frozen installation with pnpm 12.18.0, lint, dead-code checks, frontend/backend
+types, documentation checks, **50 unit/integration tests**, and frontend/backend
+builds passed. The full Chrome run passed **116 existing cases**; four new font
+cases initially failed because of an assertion implementation error. After fixing
+the test, all **four font cases passed** in a targeted rerun, covering both themes
+at 320/1440px, successful same-origin font decoding, correct brand weights, no
+Google font requests, initial typing focus and no console/page errors. The full
+suite also covered keyboard and typing flows. Existing Vite configuration-loader
+and Knip configuration hints remain. This focused pass did not repeat dependency
+advisory/credential scans, SQL/Auth checks or hosted deployment verification;
+those older results below retain their original scope.
+
+
 ## Outcome and scope
 
 No critical issue or detected privileged credential in the scanned source,
@@ -55,7 +76,7 @@ covers hosting controls; [SUPABASE.md](SUPABASE.md) covers schema and Auth setup
 | Status | Current implementation and evidence | Remaining action |
 | --- | --- | --- |
 | Public-key build guard | `vite.config.ts` rejects privileged keys and credential-named `VITE_` values. `public-config.ts` permits public publishable/legacy anon keys and rejects insecure non-loopback Supabase URLs. Source maps are disabled. `.gitignore` and `.dockerignore` exclude environment files. Fresh source/history/artifact scans passed. | Keep server secrets in backend runtime configuration. Public configuration in JavaScript is expected; grants/RLS and verified identity protect account data. Rotate credentials if actual exposure is discovered elsewhere. |
-| Headers configured; **document CSP/TLS verification open** | Express returns API-only CSP, no-store, nosniff, DENY framing, no-referrer and Permissions-Policy, and removes X-Powered-By. `vercel.json` now configures nosniff, DENY, no-referrer and Permissions-Policy for the frontend. The document has an inline theme bootstrap and uses dynamic Svelte styles; no enforced frontend document CSP is configured here. | Verify deployed headers, actual HTTPS/HSTS policy, and a tested frontend CSP allowing the actual backend/Supabase/font origins and required inline/dynamic styles. Do not copy the API's `default-src 'none'` policy onto the frontend. |
+| Headers configured; **document CSP/TLS verification open** | Express returns API-only CSP, no-store, nosniff, DENY framing, no-referrer and Permissions-Policy, and removes X-Powered-By. `vercel.json` now configures nosniff, DENY, no-referrer and Permissions-Policy for the frontend. The document has an inline theme bootstrap and uses dynamic Svelte styles; no enforced frontend document CSP is configured here. | Verify deployed headers, actual HTTPS/HSTS policy, and a tested frontend CSP allowing the actual backend/Supabase origins, same-origin font assets and required inline/dynamic styles. Do not copy the API's `default-src 'none'` policy onto the frontend. |
 | Browser-storage exposure remains | Supabase sessions, pending private result details and room recovery tokens use browser storage. PKCE callback parameters are cleared; account requests use explicit bearer headers. Solo retries remain account-bound, limited to 20 entries/approximately 2 MB. | XSS or malicious same-origin scripts could read stored credentials/data. Minimize third-party scripts and implement the document CSP. Moving sessions to HttpOnly cookies requires a separate session/CSRF design. |
 | Supply-chain configuration | Actions use pinned commit SHAs. CI has narrow permissions, freezes dependency installs and scans source/history/build output. The Node 24 multi-stage Dockerfile copies only the runtime package, compiled backend/shared content and production dependencies into the final stage and runs as `node`. | Base-image tags remain mutable; image digest pinning/update automation and actual Linux image/OS scanning are separate follow-ups. Northflank's deploy job remains explicitly disabled. |
 

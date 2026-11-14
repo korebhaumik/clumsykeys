@@ -25,6 +25,10 @@ matters: this repository uses pnpm 12's multi-document lockfile, while Vercel's
 lockfile-version detection can select pnpm 9 or 10. Do not override the install
 command with an unpinned `pnpm install`.
 
+Font files are bundled from `src/assets/fonts` into fingerprinted Vite assets in
+`dist/assets`; deploy them with the frontend. No external Google Fonts origins
+are needed for font loading. The primary Comfortaa Latin subset is preloaded.
+
 Set these **build-time** environment variables in Vercel before deploying:
 
 | Variable                        | Value                                                                      |

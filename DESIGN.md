@@ -89,9 +89,13 @@ and charts free of app/feature stores.
 ## Typography and geometry
 
 Comfortaa is the app face; Poppins is used for the brand, system UI for small
-chart labels, and `--mono` for technical labels and selected metrics. Font imports
-live in [`src/styles/app.css`](src/styles/app.css); keep their current loading and
-fallback behavior. Do not imply that remote fonts are always available.
+chart labels, and `--mono` for technical labels and selected metrics. Self-hosted WOFF2 faces
+are declared in [`src/styles/fonts.css`](src/styles/fonts.css) and imported by
+[`src/styles/app.css`](src/styles/app.css). Comfortaa uses variable weights
+300–700; the brand uses Poppins 400/500. Preserve Unicode subsets and
+`font-display: swap`; HTML preloads the primary Comfortaa Latin subset. Vite fingerprints the
+assets for production. Keep the [font licenses and provenance](src/assets/fonts/README.md)
+with the files; runtime font loading requires no Google connection.
 
 Use `--text-*`, `--weight-*`, `--leading-*` and `--tracking-*` for authored
 CSS typography, with responsive headings expressed as clamps. Small labels are
