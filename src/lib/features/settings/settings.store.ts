@@ -49,7 +49,7 @@ import { writable } from "svelte/store";
 export const testConfig = writable({
 	punctuations: null,
 	numbers: null,
-	language: "english 2k",
+	language: "english",
 	timer: 30,
 	words: null,
 	quotes: null,

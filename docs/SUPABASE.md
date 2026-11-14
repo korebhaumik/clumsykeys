@@ -148,18 +148,40 @@ source of truth; `backend/src/database.types.ts` is generated from the SQL schem
 
 ## Synchronization and failures
 
-Remote preferences win when an account has saved settings. A new account starts
-with the current local settings. Hydration waits until the next practice session
+Validated localStorage snapshots restore guest and the last matching account
+configuration before the typing engine mounts. A single last-account snapshot
+is checked against the active account ID and holds settings, the last synced
+settings and their revision;
+it contains no tokens, profile data or scores. Guest settings have a separate
+durable cache. Versioned keys and validation live in
+[`preferences-cache.ts`](../src/lib/features/settings/preferences-cache.ts).
+Snapshots remain until settings change or browser storage is cleared; account
+restoration/sign-in always revalidates through the server. An uncached signed-in practice route shows a loading status until
+the first read succeeds or fails; a failed read permits practice with local
+settings and leaves synchronization explicitly failed.
+
+The browser refreshes cached settings from the server in the background. Matching settings do not
+regenerate the passage. Remote preferences win when there are no unsynced edits.
+Dirty local settings survive reloads and retry against their known revision; a
+newer server revision stops autosave until the user explicitly reloads through
+the account page. Changes made while a read is pending are retained. A new
+account starts with current guest settings. Hydration waits until the next
+practice session
 instead of replacing an active passage or results screen. Autosaves are debounced;
 a revision conflict stops overwriting and offers a reload through the account
 page. Sign-out/account switching restores guest preferences and leaves the old
-room session. The existing local storage keys remain in use. Prose preferences optionally
+room session. Existing storage keys remain supported; malformed/version-mismatched
+caches
+fall back to legacy settings or defaults, and storage denial/quota failures keep
+controls usable. A connection-restored event retries failed synchronization.
+Prose preferences optionally
 include `quoteLength` (`short`, `medium`, or `long`); legacy settings remain
 accepted and quote selection defaults to medium. Short quotes have at most 100
 characters, medium quotes 101–300, and long quotes more than 300; text is never
 truncated to fit a length. The code snippet-length selector is currently a
-session-only UI choice and is not persisted in account preferences or saved
-result settings. Solo ranking filters currently group all quote lengths and all
+device-local UI choice, cached with auto-indent in localStorage, and is not
+persisted in account preferences or saved result settings. Solo ranking filters
+currently group all quote lengths and all
 snippet lengths together.
 
 Signed-in solo results save in the background. Up to twenty pending results

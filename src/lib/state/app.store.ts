@@ -8,9 +8,10 @@ export const themeBackgrounds: Record<themeType, string> = {
 	"dark-forest": "bg-dark-forest-primary",
 };
 
-const savedTheme = localStorage.getItem("theme");
+let savedTheme: string | null = null;
+try { savedTheme = localStorage.getItem("theme"); } catch { /* Use the default theme without storage. */ }
 const initialTheme = savedTheme === "classic" ? "classic" : "dark-forest";
-if (savedTheme !== initialTheme) localStorage.setItem("theme", initialTheme);
+try { if (savedTheme !== initialTheme) localStorage.setItem("theme", initialTheme); } catch { /* Storage is optional. */ }
 
 export const theme = writable<themeType>(initialTheme);
 export const game = writable<"waiting" | "playing" | "finished">("waiting");

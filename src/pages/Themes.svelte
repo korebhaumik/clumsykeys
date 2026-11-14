@@ -11,7 +11,7 @@
 
 	const handleChange = (selectedTheme: themeType) => {
 		theme.set(selectedTheme);
-		localStorage.setItem("theme", selectedTheme);
+		try { localStorage.setItem("theme", selectedTheme); } catch { /* Keep theme selection usable without storage. */ }
 	};
 </script>
 

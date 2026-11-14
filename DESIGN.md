@@ -51,7 +51,12 @@ pages and after long content; avoid viewport-height tricks that overlap content.
 
 Current page patterns:
 
-- **Practice:** settings and mode controls lead into the typing area. Active
+- **Practice:** first-time guests start with English and a 30-second prose test,
+  or Python snippets at medium length with Auto Tabs. Restore validated cached
+  settings before generating a passage.
+  A signed-in user with no cache sees a practice-settings loading status while
+  the first read is pending; cached users can practice during background refresh.
+  Settings and mode controls lead into the typing area. Active
   tests replace configuration controls with live stats and suppress distracting
   chrome; results bring back explicit replay actions and detailed feedback.
 - **About:** a short introduction and understated linked rows fill the parent
@@ -89,9 +94,13 @@ and charts free of app/feature stores.
 ## Typography and geometry
 
 Comfortaa is the app face; Poppins is used for the brand, system UI for small
-chart labels, and `--mono` for technical labels and selected metrics. Font imports
-live in [`src/styles/app.css`](src/styles/app.css); keep their current loading and
-fallback behavior. Do not imply that remote fonts are always available.
+chart labels, and `--mono` for technical labels and selected metrics. Self-hosted WOFF2 faces
+are declared in [`src/styles/fonts.css`](src/styles/fonts.css) and imported by
+[`src/styles/app.css`](src/styles/app.css). Comfortaa uses variable weights
+300–700; the brand uses Poppins 400/500. Preserve Unicode subsets and
+`font-display: swap`; HTML preloads the primary Comfortaa Latin subset. Vite fingerprints the
+assets for production. Keep the [font licenses and provenance](src/assets/fonts/README.md)
+with the files; runtime font loading requires no Google connection.
 
 Use `--text-*`, `--weight-*`, `--leading-*` and `--tracking-*` for authored
 CSS typography, with responsive headings expressed as clamps. Small labels are
@@ -141,6 +150,10 @@ Escape and returns focus to its toggle. Preserve existing dialog/dropdown
 keyboard navigation and focus return. Errors use text/underlines as well as color.
 
 ## Motion and verification
+
+Keep the shared header mounted across navigation, including Appearance and About;
+only route content participates in the entrance animation. Practice activity may
+hide header controls without replacing the header.
 
 Route/result entry is a short opacity fade using the motion tokens, enabled only
 when reduced motion is not requested. The room preview supports pause/resume,

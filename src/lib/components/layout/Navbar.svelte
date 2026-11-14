@@ -41,6 +41,10 @@
 	let menuToggle: HTMLButtonElement;
 	const navigationId = $props.id();
 
+	$effect(() => {
+		if (router.location) menuIsVisible = false;
+	});
+
 	function handleNavigationKey(event: KeyboardEvent) {
 		if (event.key === "Escape" && menuIsVisible && !document.querySelector("dialog[open]")) {
 			event.preventDefault();

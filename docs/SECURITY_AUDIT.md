@@ -8,6 +8,87 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## First-visit defaults verification
+
+On **14 November 2026**, changed fresh guest prose defaults to English with a
+30-second timer. Code defaults remain Python snippets, medium length and Auto
+Tabs. Cached/account configurations still take precedence. The explicit new
+first-visit browser case passed, together with all **138 Chrome cases**, **53
+unit/integration tests**, lint, dead-code/type/docs checks and both builds.
+Existing Vite/Knip hints remain; no hosted or database checks were rerun.
+
+## Focused frontend configuration-cache verification
+
+On **14 November 2026**, added versioned localStorage configuration snapshots
+validated through the browser-safe preference contract. Startup restores guest
+or the matching last account's settings before practice mounts. Uncached signed-in
+practice shows a loading status until its initial read settles; read failures
+allow local practice and retain an explicit sync error. Matching background data
+does not regenerate the passage. Dirty edits retain their synced revision, survive
+reloads and conflict with newer server revisions until explicit reload. Remote
+updates still wait through active tests/results. Reconnection retries failed sync.
+Snippet length and auto-indent are additional device-local cached UI choices.
+
+The bounded configuration cache contains settings and a revision baseline, not
+credentials, account profile data, score/history responses or live room state.
+Guest and account snapshots are separate; the account snapshot is restored only
+for its recorded owner. Storage failures and malformed/version-mismatched values
+fall back without disabling practice. Existing Auth storage exposure findings
+below remain applicable; this change does not introduce a new auth cookie or
+change HTTP authentication, RLS or backend persistence contracts.
+
+Frozen installation with pnpm 12.18.0, lint, dead-code checks, frontend/backend
+types, documentation checks, **53 unit/integration tests**, the full **137-case
+Chrome suite**, and both builds passed. The thirteen new cache browser cases
+cover slow/failed initial reads, matching refresh DOM continuity, edits during
+refresh, active-test deferral, failed writes/reload/retry, revision conflicts,
+owner changes, guest new-tab persistence, both themes at 320/1440px, snippet and
+indentation persistence, reconnection and corrupt/denied storage. Cache-focused
+assertions initially missed the code modal's Indentation step; the corrected
+cases and final full suite passed. Existing Vite configuration-loader and Knip
+configuration hints remain. Browser dependency behavior used the local modeled
+Supabase fixture, with selected first-party delays/failures injected in Playwright;
+no hosted settings, SQL/Auth stack, dependency advisory audit or credential scan
+was freshly verified by this focused pass.
+
+## Focused persistent-header verification
+
+On **14 November 2026**, moved the practice/static-page header into the router's
+shared shell, outside keyed route content. Appearance and About now replace/fade
+only their content. A shell-scoped Svelte context retains active-test control
+visibility, route changes update practice branding, and navigation closes the
+mobile menu without replacing the header.
+
+Lint, dead-code checks, frontend/backend types, documentation checks, **50
+unit/integration tests**, the full **124-case Chrome suite**, and both builds
+passed against this change and the self-hosted fonts. Browser coverage includes
+both themes, narrow/desktop layouts, keyboard navigation, reduced motion, typing,
+header/footer DOM continuity, content replacement, brand changes and active-test
+header visibility. New navigation cases check for console/page errors. Screenshots
+were inspected for both themes. Existing Vite configuration-loader and Knip
+configuration hints remain; no hosted deployment, database, advisory audit or
+credential scan was repeated during this focused UI pass.
+
+## Focused self-hosted font verification
+
+On **14 November 2026**, replaced runtime Google Fonts imports with same-origin
+WOFF2 assets: Comfortaa variable 300–700 and Poppins 400/500. Unicode subsets,
+`font-display: swap` and licenses are retained; the primary Comfortaa Latin file
+is preloaded and production assets are fingerprinted. Font loading no longer
+contacts Google. Licenses are copied into production from `public/fonts`.
+
+Frozen installation with pnpm 12.18.0, lint, dead-code checks, frontend/backend
+types, documentation checks, **50 unit/integration tests**, and frontend/backend
+builds passed. The full Chrome run passed **116 existing cases**; four new font
+cases initially failed because of an assertion implementation error. After fixing
+the test, all **four font cases passed** in a targeted rerun, covering both themes
+at 320/1440px, successful same-origin font decoding, correct brand weights, no
+Google font requests, initial typing focus and no console/page errors. The full
+suite also covered keyboard and typing flows. Existing Vite configuration-loader
+and Knip configuration hints remain. This focused pass did not repeat dependency
+advisory/credential scans, SQL/Auth checks or hosted deployment verification;
+those older results below retain their original scope.
+
 ## Outcome and scope
 
 No critical issue or detected privileged credential in the scanned source,
@@ -55,7 +136,7 @@ covers hosting controls; [SUPABASE.md](SUPABASE.md) covers schema and Auth setup
 | Status | Current implementation and evidence | Remaining action |
 | --- | --- | --- |
 | Public-key build guard | `vite.config.ts` rejects privileged keys and credential-named `VITE_` values. `public-config.ts` permits public publishable/legacy anon keys and rejects insecure non-loopback Supabase URLs. Source maps are disabled. `.gitignore` and `.dockerignore` exclude environment files. Fresh source/history/artifact scans passed. | Keep server secrets in backend runtime configuration. Public configuration in JavaScript is expected; grants/RLS and verified identity protect account data. Rotate credentials if actual exposure is discovered elsewhere. |
-| Headers configured; **document CSP/TLS verification open** | Express returns API-only CSP, no-store, nosniff, DENY framing, no-referrer and Permissions-Policy, and removes X-Powered-By. `vercel.json` now configures nosniff, DENY, no-referrer and Permissions-Policy for the frontend. The document has an inline theme bootstrap and uses dynamic Svelte styles; no enforced frontend document CSP is configured here. | Verify deployed headers, actual HTTPS/HSTS policy, and a tested frontend CSP allowing the actual backend/Supabase/font origins and required inline/dynamic styles. Do not copy the API's `default-src 'none'` policy onto the frontend. |
+| Headers configured; **document CSP/TLS verification open** | Express returns API-only CSP, no-store, nosniff, DENY framing, no-referrer and Permissions-Policy, and removes X-Powered-By. `vercel.json` now configures nosniff, DENY, no-referrer and Permissions-Policy for the frontend. The document has an inline theme bootstrap and uses dynamic Svelte styles; no enforced frontend document CSP is configured here. | Verify deployed headers, actual HTTPS/HSTS policy, and a tested frontend CSP allowing the actual backend/Supabase origins, same-origin font assets and required inline/dynamic styles. Do not copy the API's `default-src 'none'` policy onto the frontend. |
 | Browser-storage exposure remains | Supabase sessions, pending private result details and room recovery tokens use browser storage. PKCE callback parameters are cleared; account requests use explicit bearer headers. Solo retries remain account-bound, limited to 20 entries/approximately 2 MB. | XSS or malicious same-origin scripts could read stored credentials/data. Minimize third-party scripts and implement the document CSP. Moving sessions to HttpOnly cookies requires a separate session/CSRF design. |
 | Supply-chain configuration | Actions use pinned commit SHAs. CI has narrow permissions, freezes dependency installs and scans source/history/build output. The Node 24 multi-stage Dockerfile copies only the runtime package, compiled backend/shared content and production dependencies into the final stage and runs as `node`. | Base-image tags remain mutable; image digest pinning/update automation and actual Linux image/OS scanning are separate follow-ups. Northflank's deploy job remains explicitly disabled. |
 

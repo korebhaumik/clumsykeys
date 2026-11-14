@@ -3,7 +3,6 @@
 	import { theme } from "./lib/state/app.store";
 	import { onMount } from "svelte";
 	import { account } from "./lib/state/account.store";
-	import { startPreferenceSync } from "./lib/features/settings/account-preferences";
 	import { startResultSync } from "./lib/features/practice/result-persistence";
 	import socket from "./lib/features/multiplayer/socket";
 	import { emptyRoom, roomInfo } from "./lib/features/multiplayer/room.store";
@@ -30,8 +29,8 @@
 			}
 			identity = next;
 		});
-		const stopPreferences = startPreferenceSync(), stopResults = startResultSync();
-		return () => { unsubscribe(); stopPreferences(); stopResults(); socket.off("persistenceStatus", onPersistence); };
+		const stopResults = startResultSync();
+		return () => { unsubscribe(); stopResults(); socket.off("persistenceStatus", onPersistence); };
 	});
 
 	$effect(() => {
