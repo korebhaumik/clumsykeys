@@ -1,94 +1,136 @@
 # Design system
 
-Clumsy Keys uses a quiet typing-first layout: restrained forest neutrals, sage accents, rounded controls, and minimal chrome during typing. Classic retains a light page with black controls and orange caret. Preserve the existing proportions and visual hierarchy.
+Clumsy Keys keeps typing at the center: quiet surfaces, clear text, restrained
+accents, rounded controls and minimal chrome during an active test. Dark Forest
+uses forest neutrals and sage accents. Classic uses a light page, black controls
+and an orange typing caret. Preserve the established proportions and hierarchy.
 
-`src/styles/tokens.css` is the canonical authored value registry. Tailwind provides its standard utility scale; legacy color utilities alias this registry. Semantic roles are `--surface`, `--inset`, `--line`, `--ink`, `--muted`, `--accent`, `--accent-ink`, `--accent-wash`, `--caret`, and `--error`. Their dark/default and Classic selectors are defined centrally. Result plots use `--result-*`; race series and speed-band roles select palette tokens per theme. Exact duplicate colors share one primitive; distinct chart-series and feedback shades remain intentional.
+This document describes UI conventions. [CONTRAST.md](docs/CONTRAST.md) records
+current measurements and known contrast limitations; it is not a full
+accessibility certification.
 
-## Palette
+## Tokens and themes
 
-| Primitive token | Value |
+[`src/styles/tokens.css`](src/styles/tokens.css) is the canonical registry for
+palette primitives, semantic theme aliases, typography, precise dimensions,
+radii and motion values. Read values there rather than maintaining a second
+palette table. Tailwind's legacy color utilities alias that registry; standard
+Tailwind spacing/sizing utilities remain available.
+
+| Role | Use |
 | --- | --- |
-| `--palette-red-500` | `red` |
-| `--palette-gray-450` | `#999999` |
-| `--palette-forest-950` | `#151b1d` |
-| `--palette-forest-900` | `#242a2d` |
-| `--palette-slate-600` | `#475569` |
-| `--palette-silver-200` | `#dadada` |
-| `--palette-stone-500` | `#848887` |
-| `--palette-stone-400` | `#a4aaa9` |
-| `--palette-sage-300` | `#9bcd86` |
-| `--palette-forest-800` | `#343e39` |
-| `--palette-teal-200` | `#95dbd3` |
-| `--palette-rose-400` | `#ec646d` |
-| `--palette-white` | `#ffffff` |
-| `--palette-black` | `#000000` |
-| `--palette-gray-100` | `#f3f4f6` |
-| `--palette-gray-300` | `#d1d5db` |
-| `--palette-gray-650` | `#595959` |
-| `--palette-gray-200` | `#e5e7eb` |
-| `--palette-orange-500` | `#f97316` |
-| `--palette-red-700` | `#b91c1c` |
-| `--palette-ochre-700` | `#a95406` |
-| `--palette-sage-500` | `#87a383` |
-| `--palette-violet-400` | `#8385d9` |
-| `--palette-gold-500` | `#b2a45f` |
-| `--palette-gray-500` | `#8e8e8e` |
-| `--palette-gold-300` | `#f8d760` |
-| `--palette-stone-450` | `#a1a7a6` |
-| `--palette-forest-975` | `#111719` |
-| `--palette-amber-400` | `#df9a50` |
-| `--palette-rose-200` | `#ec9f9e` |
-| `--palette-slate-650` | `#565c62` |
-| `--palette-green-800` | `#225e37` |
-| `--palette-slate-100` | `#e9ecee` |
-| `--palette-slate-200` | `#d5dadd` |
-| `--palette-ochre-800` | `#915017` |
-| `--palette-red-800` | `#a12128` |
-| `--palette-slate-950` | `#171b1e` |
-| `--palette-gray-600` | `#666666` |
-| `--palette-zinc-400` | `#a1a1aa` |
-| `--palette-neutral-800` | `#262626` |
-| `--palette-blue-300` | `#77aaf5` |
-| `--palette-orange-300` | `#dc925d` |
-| `--palette-violet-300` | `#b19bea` |
-| `--palette-pink-300` | `#eb8b9e` |
-| `--palette-teal-400` | `#5ac5c3` |
-| `--palette-blue-700` | `#255da7` |
-| `--palette-orange-800` | `#994717` |
-| `--palette-violet-700` | `#6948aa` |
-| `--palette-pink-700` | `#a2375c` |
-| `--palette-teal-800` | `#176d68` |
-| `--palette-speed-orange` | `#ed9b4b` |
-| `--palette-speed-rose` | `#dfa9a4` |
-| `--palette-speed-ivory` | `#f1f2eb` |
-| `--palette-speed-sage` | `#cbdcbb` |
-| `--palette-speed-orange-dark` | `#984600` |
-| `--palette-speed-rose-dark` | `#a23e46` |
-| `--palette-speed-neutral-dark` | `#494b4e` |
-| `--palette-speed-sage-dark` | `#456939` |
+| `--inset` | Page canvas, typing areas and recessed controls. |
+| `--surface` | Panels, cards, toolbars and supporting surfaces. |
+| `--line` | Borders and separators; not a guarantee of sufficient control-boundary contrast. |
+| `--ink`, `--muted` | Primary and secondary text. |
+| `--accent`, `--accent-ink`, `--accent-wash` | Selected states, primary actions and their text/backgrounds. |
+| `--caret`, `--error` | Typing position and incorrect-input feedback. |
+| `--focus-highlight` | App-wide keyboard focus outline. |
+| `--profile-avatar-*` | Theme-specific avatar gradient and foreground. |
+| `--result-*` | Result surfaces, labels, plots, grids and error markers. |
+
+The two themes define their semantic aliases centrally. Race series and speed
+bands select theme-specific palette tokens in their owning presentation. Keep
+intentionally distinct chart and feedback colors; reuse existing primitives for
+exact duplicates. Never add raw hex/rgb/hsl values to application components.
+When a new role is needed, add its authored value and theme mapping centrally.
+
+## Layout and hierarchy
+
+The viewport shell uses flex layout. The shared page container is constrained by
+`--dimension-66_625rem` with `--dimension-2rem` total outer gutters. Content can
+center between header and footer on tall screens and scroll normally when it
+cannot fit. Keep `min-width: 0` on shrinking grid/flex children. Use horizontal
+overflow regions for wide result tables instead of widening the page.
+
+`App.svelte` renders the single global footer. Practice/live-race layouts add
+only contextual shortcut rows. Preserve footer spacing at the bottom of short
+pages and after long content; avoid viewport-height tricks that overlap content.
+
+Current page patterns:
+
+- **Practice:** settings and mode controls lead into the typing area. Active
+  tests replace configuration controls with live stats and suppress distracting
+  chrome; results bring back explicit replay actions and detailed feedback.
+- **About:** a short introduction and understated linked rows fill the parent
+  content width. Small icons, descriptions and arrows identify the practice modes.
+- **Room access:** an introduction and a clearly labeled join form sit side by
+  side when space permits and stack on narrow screens. The two-player preview
+  is scripted illustration, not a live room or fabricated player statistics.
+- **Account:** sign-in controls and a quiet introduction share the page; the
+  signed-in dashboard fills the container. The banner uses accent/caret roles,
+  avatars use profile roles, and statistics/bests/recent tests use the shared
+  surfaces. Show real loading, empty, failed and retained-snapshot states.
+- **Leaderboards:** filters and readable standings frame a horizontally
+  scrollable table. Sparse result pages do not reserve unused table-row space.
+
+Pages should compose shared layout and feature presentation. Keep generic icons
+and charts free of app/feature stores.
 
 ## Typography and geometry
 
-Comfortaa is the existing app face; Poppins is used for the brand, system UI for small chart labels, and `--mono` for technical labels. Keep the existing font loading/fallback behavior. `--text-*`, `--weight-*`, `--leading-*`, and `--tracking-*` preserve the existing scale, with responsive headings expressed as clamps. Use the small text sizes for secondary metadata, not primary actions.
+Comfortaa is the app face; Poppins is used for the brand, system UI for small
+chart labels, and `--mono` for technical labels and selected metrics. Font imports
+live in [`src/styles/app.css`](src/styles/app.css); keep their current loading and
+fallback behavior. Do not imply that remote fonts are always available.
 
-The account dashboard fills the shared page container. Its banner uses the accent
-and caret roles; the initial avatar uses theme-aware `--profile-avatar-*` roles.
-Statistics, bests and recent tests retain the quiet typography and surface palette.
+Use `--text-*`, `--weight-*`, `--leading-*` and `--tracking-*` for authored
+CSS typography, with responsive headings expressed as clamps. Small labels are
+for metadata; primary actions need readable text and adequate hit areas.
 
-Tailwind spacing follows its quarter-rem scale. `--dimension-*` records precise legacy spacing and layout dimensions; `--radius-*` records corner geometry. Reuse existing tokens. Do not round legacy dimensions merely for tidiness. No new decorative shadows are introduced. Caret and chrome motion use `--motion-*`. Structural zero, fractions, percentages, breakpoint conditions and SVG chart coordinates are not palette values.
+Reuse `--dimension-*` and `--radius-*` before adding precise dimensions. Preserve
+existing exact values rather than rounding them for tidiness. Tailwind spacing
+uses its standard scale. Structural zero, fractions, percentages, breakpoints
+and SVG drawing coordinates are structural values. Do not introduce decorative
+shadows as a substitute for the existing surface/border hierarchy.
 
-## Icons
+## Icons and charts
 
-Named `*Icon.svelte` components live under `src/lib/components/icons`. They use Icon.svelte, a consistent 24-unit viewBox, CSS utility sizing and inherited currentColor. Original silhouettes from other coordinate systems are transformed into that box. Filled and stroked glyphs retain their authored geometry. Logo and chart coordinate systems are intentional exceptions. Icons are decorative; accessible names and clicks belong on buttons/links.
+Named `*Icon.svelte` components live in `src/lib/components/icons` and use the
+shared [`Icon.svelte`](src/lib/components/icons/Icon.svelte): a 24-unit viewBox,
+inherited `currentColor`, utility sizing, `aria-hidden` and no interaction.
+Preserve the glyph silhouette and authored fill/stroke. Logo and data-chart
+coordinate systems remain intentional exceptions.
 
-## Examples
+Put accessible names and interaction on the enclosing button or link. For example,
+place `<ResetIcon />` inside a button labeled "Restart practice"; do not attach
+click handlers or feature state to SVGs.
 
-Do: `color: var(--accent); padding: var(--dimension-1rem);`.
-Do: put `<ResetIcon />` inside a button with `aria-label="Restart practice"`.
-Don't: add raw hex/rgb/hsl values, duplicate near-identical colors, attach click handlers to SVGs, or change typing metrics to simplify styling.
+Charts share the presentational renderer and pure path helper. Retain legends,
+labels, dashed variants and error shapes as additional distinctions. Color alone
+must not carry the only meaningful distinction. Chart labels and curves must
+continue to reflect the existing WPM and timing semantics.
 
-## Accessibility
+## Focus, keyboard and feedback
 
-Keyboard focus uses the app-wide `:focus-visible` highlighter in `app.css`, colored by `--focus-highlight`. Dark Forest uses sage; Classic uses black, with white on its black toolbars. Keep component focus styling limited to supporting feedback rather than replacing this indicator. The main typing areas stay outline-free and use the typing caret as their focus cue. Hidden typing inputs suppress their native outlines. Icon-prefixed `.focus-field` inputs forward the same global outline to the enclosing field so icons and text share one focus indicator; buttons inside retain their own indicator. Forced-color mode uses the system Highlight color. Tab and Shift+Tab follow document order in prose practice; code practice retains Tab for indentation and Shift+Tab to leave the editor. Mobile navigation closes with Escape and returns focus to its toggle.
+The global `:focus-visible` rule in `app.css` uses `--focus-highlight`: sage in
+Dark Forest, black in Classic, and white on Classic's black toolbars. The base
+layer supplies a rounded fallback while preserving authored control radii.
+Forced-color mode uses the system Highlight color. Component CSS may add
+supporting feedback but must not replace this global focus indicator.
 
-Both themes retain distinct text, error, caret and chart roles. Errors also use underlines; chart series include labels and dashed variants. Settings close controls are now keyboard-accessible buttons. Legacy muted/brand colors are preserved, so this refactor does not claim full WCAG compliance; contrast remediation should be reviewed as an explicit visual change.
+Icon-prefixed `.focus-field` inputs forward the outline to their enclosing field;
+buttons within that field retain their own outlines. The main hidden typing input
+and typing surface stay outline-free because the typing caret is their focus cue.
+Settings dialogs focus their heading for announcement; that noninteractive
+heading suppresses its outline, while dialog buttons retain keyboard highlights.
+
+Tab/Shift+Tab follow document order in prose practice. Code snippets use Tab for
+indentation and Shift+Tab to leave the editor. Mobile navigation closes with
+Escape and returns focus to its toggle. Preserve existing dialog/dropdown
+keyboard navigation and focus return. Errors use text/underlines as well as color.
+
+## Motion and verification
+
+Route/result entry is a short opacity fade using the motion tokens, enabled only
+when reduced motion is not requested. The room preview supports pause/resume,
+shows a static frame for reduced motion and stops advancing while the document
+is hidden. Its animation frame and media/visibility listeners are cleaned up.
+Account skeleton motion also respects reduced motion.
+
+Check both themes, narrow screens, keyboard use, loading/error states and reduced
+motion after visual changes. Keep known low-contrast cases visible in the
+[contrast report](docs/CONTRAST.md), including Classic placeholders/caret/icons
+and some shared borders or legacy muted text. A passing browser flow does not
+establish WCAG compliance. Update this document when a shared UI pattern changes
+and recalculate the report when relevant source colors/backgrounds change.

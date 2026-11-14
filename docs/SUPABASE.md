@@ -1,9 +1,16 @@
 # Supabase setup
 
+Last reviewed against the repository: **14 November 2026**. This is the maintained
+setup guide; source and local fixture tests do not establish the current state
+of a hosted Supabase project. See [the security audit](SECURITY_AUDIT.md) for the
+latest verification and limits, and [deployment](DEPLOYMENT.md) for hosting.
+
 Accounts are optional. Guest practice and the existing `#/login` room join flow
 remain available. `#/account` handles account access; `#/history` shows private
-practice and race history. The current leaderboard route still represents the
-latest race, including a saved latest race after refresh for signed-in users.
+practice and race history. `#/leaderboard` shows the public solo leaderboard;
+`#/ranking` shows the latest multiplayer race results, including a saved latest
+race after refresh for signed-in users. Authentication is optional for public
+solo rankings; a verified account adds the viewer’s own standing.
 
 ## Configure the project
 
@@ -55,6 +62,25 @@ Leaving both backend Supabase variables and both frontend Supabase variables
 unset provides guest-only operation. A partially configured backend fails with
 an actionable startup error. Keep all `.env` files out of source control.
 
+## Migration inventory
+
+Apply all five versioned migrations in order; do not stop after the original
+account tables. `npm run db:plan` shows pending changes without applying them.
+`npm run db:push` applies changes to the configured hosted project and is an
+operator action, not an application startup task.
+
+| Migration | Purpose |
+| --- | --- |
+| `20261112000100_accounts_and_results.sql` | Profiles, preferences, practice/race tables, RLS, restricted write RPCs, signup profile trigger. |
+| `20261112000200_anonymize_deleted_accounts.sql` | Anonymize retained race entries when an account is deleted. |
+| `20261113000100_account_dashboard.sql` | Service-only lifetime solo dashboard aggregation. |
+| `20261113000200_dashboard_characters.sql` | Extend dashboard aggregation with total typed characters. |
+| `20261113000300_solo_leaderboards.sql` | Service-only public solo score projection and ranking index. |
+
+The SQL source defines owner-only reads, no anonymous table access, and
+backend-only application writes. Verify migration history and grants in each
+deployed environment; this guide does not claim a new hosted database audit.
+
 ## GitHub sign-in
 
 The account page supports **Continue with GitHub** for both sign-in and account
@@ -99,11 +125,21 @@ See [Supabase's GitHub setup guide](https://supabase.com/docs/guides/auth/social
   role. The backend verifies access tokens and checks ownership independently.
   A participant's round scoreboard excludes opponent account UUIDs. Guest room
   IDs and old browser racer IDs do not authorize private account access.
+- `read_solo_leaderboard` exposes one best saved solo result per player after
+  filtering by mode, language, format, length and rolling range. Ten rows are
+  returned per page; a verified viewer’s standing can be outside that page.
+  The public projection contains display names and a pseudonymous player key,
+  not account UUIDs, emails, preferences or per-word typing history.
 - Deleting an Auth user cascades private profile/preferences/practice data and
   anonymizes retained shared race entries. Account deletion is an administrative
   Supabase operation; the app does not add a deletion UI.
 
-The [OpenAPI contract](account-api.openapi.json) describes the new HTTP endpoints.
+The [application API contract](api.openapi.json) describes all eleven HTTP
+operations: health, live-room roster, account status, account/preferences,
+dashboard, solo result writes/details, private practice/race history, saved race
+scoreboards, and public solo rankings. Its `x-socketio` extension documents all
+application event payloads, handshake authentication, limits, countdown and
+recovery behavior; Socket.IO is not a raw WebSocket or REST API.
 The browser-safe `backend/src/persistence.contract.ts` is the settings-validation
 source of truth; `backend/src/database.types.ts` is generated from the SQL schema.
 
@@ -114,7 +150,14 @@ with the current local settings. Hydration waits until the next practice session
 instead of replacing an active passage or results screen. Autosaves are debounced;
 a revision conflict stops overwriting and offers a reload through the account
 page. Sign-out/account switching restores guest preferences and leaves the old
-room session. The existing local storage keys remain in use.
+room session. The existing local storage keys remain in use. Prose preferences optionally
+include `quoteLength` (`short`, `medium`, or `long`); legacy settings remain
+accepted and quote selection defaults to medium. Short quotes have at most 100
+characters, medium quotes 101–300, and long quotes more than 300; text is never
+truncated to fit a length. The code snippet-length selector is currently a
+session-only UI choice and is not persisted in account preferences or saved
+result settings. Solo ranking filters currently group all quote lengths and all
+snippet lengths together.
 
 Signed-in solo results save in the background. Up to twenty pending results
 (approximately 2 MB of serialized data) may be retained in browser storage and
@@ -177,6 +220,7 @@ workspace, publishing, or external API credentials are needed for local runs.
 - [CLI local and hosted targets](https://supabase.com/docs/guides/local-development/local-and-hosted-projects)
 - [Versioned migrations](https://supabase.com/docs/guides/deployment/database-migrations)
 - [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+
 ## Account dashboard
 
 The signed-in profile reads `GET /api/account/dashboard`. Apply migration
@@ -194,3 +238,13 @@ Dashboard statistics also include all typed characters (correct + incorrect + ex
 and average test duration (total saved typing seconds / completed tests). Migration
 `20261113000200_dashboard_characters.sql` adds the character total; duration uses
 the existing totals and displays seconds to one decimal place.
+
+## Maintenance
+
+Update this guide together with account flows, preference/result contracts,
+SQL migrations, SDK adapters and public leaderboard behavior. Keep the migration
+inventory and [API spec](api.openapi.json) aligned with the handlers and
+browser-safe contracts. Record local fixture, real local database and hosted
+checks separately; do not promote a fixture or an earlier hosted result into a
+fresh provider/schema verification claim. Recheck real email delivery and OAuth
+consent when changing production callback/provider settings.

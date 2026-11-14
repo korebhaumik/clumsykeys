@@ -37,7 +37,7 @@ export const securityHeaders: RequestHandler = (_req, res, next) => {
 export function httpRateLimit(): RequestHandler {
 	const consume = createRateLimit(240, 60_000);
 	return (req, res, next) => {
-		// Do not trust arbitrary X-Forwarded-For headers. See deployment.md for proxy limits.
+		// Do not trust arbitrary X-Forwarded-For headers. See DEPLOYMENT.md for proxy limits.
 		const retry = consume(req.socket.remoteAddress ?? "unknown");
 		if (retry) { res.set("Retry-After", String(retry)).status(429).json({ error: "Too many requests. Please retry shortly." }); return; }
 		next();

@@ -1,8 +1,12 @@
 # Deployment: Vercel and Northflank
 
+Last reviewed against the code and build configuration: **14 November 2026**.
+See [SECURITY_AUDIT.md](SECURITY_AUDIT.md) for actual check results and unverified
+hosting/database settings. No production deployment is performed by this guide.
+
 Northflank deployment is temporarily disabled with `if: ${{ false }}` on the deploy job in `.github/workflows/deploy-northflank.yml`. Automatic and manual runs skip deployment. Docker Hub builds and pushes remain active. To re-enable deployment, restore the original condition preserved in the workflow comment. The deployment steps below describe behavior after re-enabling it.
 
-This mirrors Catan's two-workflow pipeline:
+The backend uses a two-workflow pipeline:
 
 1. A backend-related push to `main` (or manual build dispatch) runs **Build and Push Multiplayer Server**.
 2. GitHub Actions builds `backend/Dockerfile` from the repository root and pushes `DOCKERHUB_USERNAME/clumsykeys-server` to Docker Hub with both a unique UTC timestamp/run tag and `latest`.
@@ -23,10 +27,10 @@ command with an unpinned `pnpm install`.
 
 Set these **build-time** environment variables in Vercel before deploying:
 
-| Variable | Value |
-| --- | --- |
-| `VITE_SERVER_URL` | Northflank backend's public HTTPS origin, without a path or trailing slash |
-| `VITE_SUPABASE_URL` | Supabase project URL, if accounts are enabled |
+| Variable                        | Value                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| `VITE_SERVER_URL`               | Northflank backend's public HTTPS origin, without a path or trailing slash |
+| `VITE_SUPABASE_URL`             | Supabase project URL, if accounts are enabled                              |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | The same project's public publishable or anon key, if accounts are enabled |
 
 Leave both public Supabase values unset for guest-only operation. Never add
@@ -54,16 +58,16 @@ Confirm them on the hosted response after deploying. See the official
 
 Create a Docker Hub repository named `clumsykeys-server`. Add these GitHub repository Actions secrets:
 
-| Secret | Value |
-| --- | --- |
-| `DOCKERHUB_USERNAME` | Docker Hub account owning the image |
-| `DOCKERHUB_PASSWORD` | Docker Hub access token with push permission |
-| `NORTHFLANK_API_KEY` | Northflank token allowed to update the target service deployment |
-| `NORTHFLANK_PROJECT_ID` | Clumsy Keys Northflank project ID |
-| `NORTHFLANK_SERVICE_ID` | Clumsy Keys multiplayer deployment service ID |
-| `NORTHFLANK_CREDENTIALS_ID` | Northflank registry credential ID for Docker Hub |
+| Secret                      | Value                                                            |
+| --------------------------- | ---------------------------------------------------------------- |
+| `DOCKERHUB_USERNAME`        | Docker Hub account owning the image                              |
+| `DOCKERHUB_PASSWORD`        | Docker Hub access token with push permission                     |
+| `NORTHFLANK_API_KEY`        | Northflank token allowed to update the target service deployment |
+| `NORTHFLANK_PROJECT_ID`     | Clumsy Keys Northflank project ID                                |
+| `NORTHFLANK_SERVICE_ID`     | Clumsy Keys multiplayer deployment service ID                    |
+| `NORTHFLANK_CREDENTIALS_ID` | Northflank registry credential ID for Docker Hub                 |
 
-Use Clumsy Keys' own project and service IDs so this workflow does not update Catan's service. These values are configured in GitHub and Northflank, never committed.
+Use Clumsy Keys' own project and service IDs so this workflow targets only the intended multiplayer service. These values are configured in GitHub and Northflank, never committed.
 
 Run the build workflow once to publish the initial image. In Northflank, add Docker Hub registry credentials and create a **deployment service** using that external image. Configure:
 
@@ -86,7 +90,9 @@ both sides. Never pass the secret key as a frontend build variable or Docker
 build argument. The Docker context excludes `.env` files; configure secrets on
 the deployment service. Migration/CLI credentials do not belong in the runtime
 image. Apply reviewed migrations with `npm run db:plan` then `npm run db:push`
-before releasing code that depends on them. Configure Auth callbacks for the real
+before releasing code that depends on them. All five migrations listed in [Supabase setup](SUPABASE.md#migration-inventory)
+are needed for the current accounts, dashboard and public solo leaderboards.
+Configure Auth callbacks for the real
 frontend URL as described in [Supabase setup](SUPABASE.md). Same-origin proxies
 must forward `/api/` in addition to the existing room and Socket.IO routes.
 
@@ -108,8 +114,24 @@ curl --fail http://localhost:1440/health
 
 The multi-stage Node 24 image compiles TypeScript with frozen pnpm dependencies, packages only the backend and production dependencies into the final image, and runs as the unprivileged `node` user. The frontend is deployed separately.
 
-[Back to README](../README.md)
+The [general API spec](api.openapi.json) lists HTTP endpoints and Socket.IO event
+payloads. Update it when adding or changing a transport contract.
 
+For contract changes, run the local coverage/link check and an independent
+OpenAPI syntax/example validator:
+
+```sh
+npm run check:docs
+npx --yes @redocly/cli@2.78.0 lint docs/api.openapi.json --extends minimal --skip-rule no-unused-components --skip-rule no-server-example.com
+```
+
+The two excluded lint rules permit the intentional local development server and
+schemas referenced only by the `x-socketio` extension. `check:docs` still checks
+those extension references and event coverage. Neither check proves that every
+documented payload is accepted or returned by every handler; verify changed
+behavior through the HTTP/Socket.IO tests as well.
+
+[Back to README](../README.md)
 
 ## Security configuration
 
@@ -134,8 +156,8 @@ Do not enable blanket proxy trust or forward user-provided IP headers unchanged.
 Keep one backend replica until room coordination and shared quotas are designed.
 
 Express returns API-only security headers, sanitized errors and no-store
-responses. The frontend is hosted separately, so configure its response headers
-at that host: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+responses. `vercel.json` configures these frontend response headers; verify them
+on the deployed host: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
 `Referrer-Policy: no-referrer`, and a restrictive `Permissions-Policy`.
 Set HSTS at the HTTPS termination point after confirming all affected hosts
 support HTTPS; review `includeSubDomains` before using it. Start a document CSP
@@ -153,3 +175,12 @@ fails on high/critical advisories; moderate/low advisories remain visible and
 require triage. Enable branch protection to require this job. Review the
 [security audit](SECURITY_AUDIT.md) for remaining score-integrity and deployment
 actions.
+
+## Maintenance
+
+Update this guide with changes to `vercel.json`, package/build commands,
+`backend/Dockerfile`, runtime paths, environment handling, transport/proxy setup,
+workflow triggers or deployment controls. Keep the disabled-deployment notice
+until the workflow condition actually changes. Record hosted verification only
+after checking the intended live service; build success alone is not a deployed
+health, WebSocket, CORS or account-persistence check.

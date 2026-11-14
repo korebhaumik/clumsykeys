@@ -1,0 +1,2577 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Clumsy Keys API",
+    "version": "1.0.0",
+    "description": "Complete first-party HTTP API plus a documented x-socketio event contract. HTTP paths are registered by http.ts, account.http.ts and leaderboard.http.ts; Socket.IO transport is not a collection of REST endpoints. Supabase Auth/Data API and the local test fixture are external dependencies, not application endpoints. Account identity comes only from verified bearer tokens. API JSON bodies are limited to 1 MiB. All app HTTP responses are no-store. /api and /rooms share 240 requests/minute per transport IP; authenticated writes additionally share 30/minute per verified account; 429 has Retry-After. /health is exempt. Unknown application routes return 404. See SECURITY_AUDIT.md for trust limits and DEPLOYMENT.md for HTTPS origins and service setup."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:1440",
+      "description": "Local backend; replace with the Northflank public HTTPS origin for hosting."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Operations",
+      "description": "Process health and account configuration."
+    },
+    {
+      "name": "Multiplayer",
+      "description": "Public live-room roster; live events are in x-socketio."
+    },
+    {
+      "name": "Accounts",
+      "description": "Verified account preferences and dashboard."
+    },
+    {
+      "name": "Practice",
+      "description": "Validated solo results."
+    },
+    {
+      "name": "History",
+      "description": "Private saved results."
+    },
+    {
+      "name": "Leaderboards",
+      "description": "Public solo score projection."
+    }
+  ],
+  "security": [
+    {
+      "supabaseBearer": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Check the gameplay process",
+        "description": "Liveness/readiness endpoint, exempt from API/room quotas. Does not test Supabase or its migrations.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                },
+                "example": {
+                  "ok": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/rooms": {
+      "get": {
+        "operationId": "getRoomRoster",
+        "tags": [
+          "Multiplayer"
+        ],
+        "summary": "Read a public live-room roster",
+        "description": "Returns live display names, browser racer IDs, typed characters, WPM and accuracy; no bearer token is needed. Unknown rooms return 404.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoomRosterEntry"
+                  }
+                },
+                "example": []
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "query",
+            "required": true,
+            "description": "Exactly one nonblank room ID. Repeated query values are rejected.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "example": "weekend-race"
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/status": {
+      "get": {
+        "operationId": "getAccountStatus",
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Check account configuration",
+        "description": "Check account configuration",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountStatus"
+                },
+                "example": {
+                  "accounts": false
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/account": {
+      "get": {
+        "operationId": "getAccount",
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Read your account and preferences",
+        "description": "Read your account and preferences",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                },
+                "example": {
+                  "displayName": "Ada",
+                  "preferences": {
+                    "version": 1,
+                    "theme": "dark-forest",
+                    "prose": {
+                      "language": "english 2k",
+                      "timer": null,
+                      "words": 25,
+                      "quotes": null,
+                      "quoteLength": "medium",
+                      "numbers": null,
+                      "punctuations": null,
+                      "difficulty": {
+                        "wpmLimit": null,
+                        "timeLimit": null
+                      }
+                    },
+                    "code": {
+                      "mode": "snippets",
+                      "language": "randomPy",
+                      "limit": {
+                        "type": "words",
+                        "value": 25
+                      },
+                      "modifiers": {
+                        "numbers": false,
+                        "punctuation": false
+                      }
+                    }
+                  },
+                  "revision": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
+    },
+    "/api/account/dashboard": {
+      "get": {
+        "operationId": "getAccountDashboard",
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Read your lifetime solo-practice dashboard",
+        "description": "All saved solo tests; arithmetic per-test means; highest WPM per mode; five latest tests. Excludes guests, unsaved/abandoned tests and multiplayer. Characters = correct + incorrect + extra; mean duration is derived by the UI from seconds/tests.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDashboard"
+                },
+                "example": {
+                  "stats": {
+                    "tests": 1,
+                    "seconds": 10,
+                    "characters": 50,
+                    "averageWpm": 60,
+                    "averageRaw": 75,
+                    "averageAccuracy": 80,
+                    "bestWpm": 60
+                  },
+                  "bests": [
+                    {
+                      "id": "12345678-1234-4234-8234-123456789abc",
+                      "user_id": "22345678-1234-4234-8234-123456789abc",
+                      "mode": "prose",
+                      "language": "english 2k",
+                      "settings": {
+                        "language": "english 2k",
+                        "timer": null,
+                        "words": 25,
+                        "quotes": null,
+                        "quoteLength": "medium",
+                        "numbers": null,
+                        "punctuations": null,
+                        "difficulty": {
+                          "wpmLimit": null,
+                          "timeLimit": null
+                        }
+                      },
+                      "correct": 40,
+                      "incorrect": 10,
+                      "extra": 0,
+                      "elapsed_seconds": 10,
+                      "wpm": 60,
+                      "raw": 75,
+                      "accuracy": 80,
+                      "deviation": 0,
+                      "metric_version": 1,
+                      "created_at": "2026-11-14T00:00:00Z"
+                    }
+                  ],
+                  "recent": [
+                    {
+                      "id": "12345678-1234-4234-8234-123456789abc",
+                      "user_id": "22345678-1234-4234-8234-123456789abc",
+                      "mode": "prose",
+                      "language": "english 2k",
+                      "settings": {
+                        "language": "english 2k",
+                        "timer": null,
+                        "words": 25,
+                        "quotes": null,
+                        "quoteLength": "medium",
+                        "numbers": null,
+                        "punctuations": null,
+                        "difficulty": {
+                          "wpmLimit": null,
+                          "timeLimit": null
+                        }
+                      },
+                      "correct": 40,
+                      "incorrect": 10,
+                      "extra": 0,
+                      "elapsed_seconds": 10,
+                      "wpm": 60,
+                      "raw": 75,
+                      "accuracy": 80,
+                      "deviation": 0,
+                      "metric_version": 1,
+                      "created_at": "2026-11-14T00:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
+    },
+    "/api/account/preferences": {
+      "put": {
+        "operationId": "updateAccountPreferences",
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Save preferences with an optimistic revision",
+        "description": "Save preferences with an optimistic revision",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "revision"
+                  ]
+                },
+                "example": {
+                  "revision": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferenceUpdate"
+              },
+              "example": {
+                "preferences": {
+                  "version": 1,
+                  "theme": "dark-forest",
+                  "prose": {
+                    "language": "english 2k",
+                    "timer": null,
+                    "words": 25,
+                    "quotes": null,
+                    "quoteLength": "medium",
+                    "numbers": null,
+                    "punctuations": null,
+                    "difficulty": {
+                      "wpmLimit": null,
+                      "timeLimit": null
+                    }
+                  },
+                  "code": {
+                    "mode": "snippets",
+                    "language": "randomPy",
+                    "limit": {
+                      "type": "words",
+                      "value": 25
+                    },
+                    "modifiers": {
+                      "numbers": false,
+                      "punctuation": false
+                    }
+                  }
+                },
+                "revision": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/practice-results": {
+      "post": {
+        "operationId": "savePracticeResult",
+        "tags": [
+          "Practice"
+        ],
+        "summary": "Save a completed solo test idempotently",
+        "description": "Same-owner UUID retries return success without duplicate rows. The verified token supplies ownership; posted owner fields are ignored. Four-character WPM = floor(correct*15/elapsedSeconds). Plausible client counters are not proof of honest typing.",
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "201": {
+            "description": "Result saved, or same-owner retry already saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                },
+                "example": {
+                  "id": "12345678-1234-4234-8234-123456789abc"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeSubmission"
+              },
+              "example": {
+                "id": "12345678-1234-4234-8234-123456789abc",
+                "mode": "prose",
+                "language": "english 2k",
+                "settings": {
+                  "language": "english 2k",
+                  "timer": null,
+                  "words": 25,
+                  "quotes": null,
+                  "quoteLength": "medium",
+                  "numbers": null,
+                  "punctuations": null,
+                  "difficulty": {
+                    "wpmLimit": null,
+                    "timeLimit": null
+                  }
+                },
+                "stats": {
+                  "correct": 40,
+                  "incorrect": 10,
+                  "extra": 0,
+                  "elapsedSeconds": 10,
+                  "samples": [
+                    {
+                      "seconds": 10,
+                      "wpm": 60,
+                      "raw": 75,
+                      "errors": 10
+                    }
+                  ],
+                  "history": [
+                    {
+                      "word": "hello",
+                      "wpm": 60,
+                      "errors": 1
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/history": {
+      "get": {
+        "operationId": "getHistory",
+        "tags": [
+          "History"
+        ],
+        "summary": "Read your paginated practice or race history",
+        "description": "Twenty rows maximum, newest first with stable ID tie-breaks. nextOffset is null when fewer than 20 rows are returned; an exactly full last page can lead to an empty next page.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PracticeHistory"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RaceHistory"
+                    }
+                  ]
+                },
+                "example": {
+                  "results": [],
+                  "nextOffset": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": true,
+            "description": "Required history type; determines the response row schema.",
+            "schema": {
+              "enum": [
+                "practice",
+                "race"
+              ]
+            },
+            "example": "practice"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Optional zero-based offset, supplied as 1-6 decimal digits.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999,
+              "default": 0
+            },
+            "example": 0
+          }
+        ]
+      }
+    },
+    "/api/practice-results/{id}": {
+      "get": {
+        "operationId": "getPracticeResult",
+        "tags": [
+          "Practice"
+        ],
+        "summary": "Read your saved solo result and details",
+        "description": "Read your saved solo result and details",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeDetail"
+                },
+                "example": {
+                  "summary": {
+                    "id": "12345678-1234-4234-8234-123456789abc",
+                    "user_id": "22345678-1234-4234-8234-123456789abc",
+                    "mode": "prose",
+                    "language": "english 2k",
+                    "settings": {
+                      "language": "english 2k",
+                      "timer": null,
+                      "words": 25,
+                      "quotes": null,
+                      "quoteLength": "medium",
+                      "numbers": null,
+                      "punctuations": null,
+                      "difficulty": {
+                        "wpmLimit": null,
+                        "timeLimit": null
+                      }
+                    },
+                    "correct": 40,
+                    "incorrect": 10,
+                    "extra": 0,
+                    "elapsed_seconds": 10,
+                    "wpm": 60,
+                    "raw": 75,
+                    "accuracy": 80,
+                    "deviation": 0,
+                    "metric_version": 1,
+                    "created_at": "2026-11-14T00:00:00Z"
+                  },
+                  "samples": [
+                    {
+                      "seconds": 10,
+                      "wpm": 60,
+                      "raw": 75,
+                      "errors": 10
+                    }
+                  ],
+                  "history": [
+                    {
+                      "word": "hello",
+                      "wpm": 60,
+                      "errors": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Saved practice-result UUID.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "12345678-1234-4234-8234-123456789abc"
+          }
+        ]
+      }
+    },
+    "/api/race-results/{id}": {
+      "get": {
+        "operationId": "getRaceResult",
+        "tags": [
+          "History"
+        ],
+        "summary": "Read a saved race scoreboard as a participant",
+        "description": "Participation is resolved from the verified account. room IDs and browser racer IDs do not authorize reads. Opponent account UUIDs and participant IDs are excluded from shared results.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RaceDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Round UUID or latest for your most recently saved round.",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "const": "latest"
+                }
+              ]
+            },
+            "example": "latest"
+          }
+        ]
+      }
+    },
+    "/api/leaderboards/solo": {
+      "get": {
+        "operationId": "getSoloLeaderboard",
+        "tags": [
+          "Leaderboards"
+        ],
+        "summary": "Read public solo rankings and optional personal standing",
+        "description": "All six filters are required. Filters apply before selecting one best result per player, ordered by WPM, accuracy, earlier date, then result ID. Ten rows/page; currentUser may be outside the page. No token is needed for public rows; a supplied invalid token returns 401. Account UUIDs, emails and detailed keystrokes are excluded. Quote/snippet length selectors do not currently partition these boards.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardPage"
+                },
+                "example": {
+                  "rows": [],
+                  "currentUser": null,
+                  "total": 0,
+                  "page": 1,
+                  "pages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "description": "Practice family.",
+            "schema": {
+              "enum": [
+                "prose",
+                "dev"
+              ]
+            },
+            "example": "prose"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "description": "Prose display key, e.g. english 2k; Dev key, e.g. randomPy. Quotes use english.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "example": "english 2k"
+          },
+          {
+            "name": "test",
+            "in": "query",
+            "required": true,
+            "description": "Prose: time/words/quotes. Dev: snippets/keywords-time/keywords-words.",
+            "schema": {
+              "enum": [
+                "time",
+                "words",
+                "quotes",
+                "snippets",
+                "keywords-time",
+                "keywords-words"
+              ]
+            },
+            "example": "words"
+          },
+          {
+            "name": "length",
+            "in": "query",
+            "required": true,
+            "description": "0 for quotes/snippets; 15/30/60/120 for timed formats; 25/50/100/200 for word formats.",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                0,
+                15,
+                25,
+                30,
+                50,
+                60,
+                100,
+                120,
+                200
+              ]
+            },
+            "example": 25
+          },
+          {
+            "name": "range",
+            "in": "query",
+            "required": true,
+            "description": "All time, rolling 30 days, 7 days or 1 day.",
+            "schema": {
+              "enum": [
+                "all",
+                "month",
+                "week",
+                "day"
+              ]
+            },
+            "example": "all"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Required requested page; response clamps it to available pages.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "example": 1
+          }
+        ],
+        "security": [
+          {},
+          {
+            "supabaseBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "supabaseBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Supabase access token",
+        "description": "User access token verified through Supabase Auth; never use a publishable API key or server secret as the bearer identity."
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid query, identifier, preferences, result, or malformed JSON.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Invalid practice result."
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing, malformed, invalid or expired bearer token.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Sign in to access your account."
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Room or owner-visible result not found; ownership is not disclosed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Result not found."
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Stale preference revision or result UUID owned by another account.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Result identity conflict."
+            }
+          }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "JSON body exceeds the 1 MiB API limit.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Request is too large."
+            }
+          }
+        }
+      },
+      "Unavailable": {
+        "description": "Persistence is unconfigured or Auth/database service is unavailable. Retry transient failures.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Account service unavailable. Please retry."
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Request or verified-account write quota exceeded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Too many requests. Please retry shortly."
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds before retrying.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "AccountStatus": {
+        "type": "object",
+        "properties": {
+          "accounts": {
+            "type": "boolean",
+            "description": "Configuration present; does not establish database reachability or migration health."
+          }
+        },
+        "required": [
+          "accounts"
+        ]
+      },
+      "RoomRosterEntry": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "typedChars": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "username",
+          "userId",
+          "typedChars",
+          "wpm",
+          "accuracy"
+        ]
+      },
+      "ProseSettings": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "enum": [
+              "english",
+              "english 1k",
+              "english 2k",
+              "english 5k",
+              "hinglish"
+            ]
+          },
+          "timer": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 86400
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "words": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 86400
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quotes": {
+            "enum": [
+              null,
+              "Random Quotes"
+            ]
+          },
+          "quoteLength": {
+            "enum": [
+              "short",
+              "medium",
+              "long"
+            ]
+          },
+          "numbers": {
+            "enum": [
+              null,
+              "easy",
+              "mid",
+              "hard",
+              "insane"
+            ]
+          },
+          "punctuations": {
+            "enum": [
+              null,
+              "easy",
+              "mid",
+              "hard",
+              "insane"
+            ]
+          },
+          "difficulty": {
+            "type": "object",
+            "properties": {
+              "wpmLimit": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 86400
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "timeLimit": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 86400
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "wpmLimit",
+              "timeLimit"
+            ]
+          }
+        },
+        "required": [
+          "language",
+          "timer",
+          "words",
+          "quotes",
+          "numbers",
+          "punctuations",
+          "difficulty"
+        ],
+        "description": "Exactly one of timer, words, quotes is non-null. quoteLength is optional for legacy settings and defaults to medium when selecting a quote. Length filters preserve full quote text; short <=100, medium 101-300, long >300 characters.",
+        "oneOf": [
+          {
+            "properties": {
+              "timer": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "words": {
+                "const": null
+              },
+              "quotes": {
+                "const": null
+              }
+            }
+          },
+          {
+            "properties": {
+              "words": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "timer": {
+                "const": null
+              },
+              "quotes": {
+                "const": null
+              }
+            }
+          },
+          {
+            "properties": {
+              "quotes": {
+                "const": "Random Quotes"
+              },
+              "timer": {
+                "const": null
+              },
+              "words": {
+                "const": null
+              }
+            }
+          }
+        ]
+      },
+      "CodeSettings": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "snippets",
+              "keywords"
+            ]
+          },
+          "language": {
+            "enum": [
+              "randomPy",
+              "randomJs",
+              "randomTs",
+              "randomJava",
+              "randomCpp",
+              "randomC"
+            ]
+          },
+          "limit": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "const": "time"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "enum": [
+                      15,
+                      30,
+                      60,
+                      120
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "value"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "const": "words"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "enum": [
+                      25,
+                      50,
+                      100,
+                      200
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "value"
+                ]
+              }
+            ]
+          },
+          "modifiers": {
+            "type": "object",
+            "properties": {
+              "numbers": {
+                "type": "boolean"
+              },
+              "punctuation": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "numbers",
+              "punctuation"
+            ]
+          }
+        },
+        "required": [
+          "mode",
+          "language",
+          "limit",
+          "modifiers"
+        ]
+      },
+      "CodePracticeSettings": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CodeSettings"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "autoTabs": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "autoTabs"
+            ]
+          }
+        ],
+        "description": "Saved code results require autoTabs in addition to code preferences. Snippet length currently remains a session-only UI choice."
+      },
+      "Preferences": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": 1
+          },
+          "theme": {
+            "enum": [
+              "dark-forest",
+              "classic"
+            ]
+          },
+          "prose": {
+            "$ref": "#/components/schemas/ProseSettings"
+          },
+          "code": {
+            "$ref": "#/components/schemas/CodeSettings"
+          }
+        },
+        "required": [
+          "version",
+          "theme",
+          "prose",
+          "code"
+        ],
+        "description": "Unknown fields are discarded by the backend allowlist. A snippet-length preference is not currently persisted."
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Preferences"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "displayName",
+          "preferences",
+          "revision"
+        ]
+      },
+      "PreferenceUpdate": {
+        "type": "object",
+        "properties": {
+          "preferences": {
+            "$ref": "#/components/schemas/Preferences"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "preferences",
+          "revision"
+        ]
+      },
+      "Sample": {
+        "type": "object",
+        "properties": {
+          "seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 86400
+          },
+          "wpm": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "raw": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "errors": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          }
+        },
+        "required": [
+          "seconds",
+          "wpm",
+          "raw",
+          "errors"
+        ],
+        "description": "Sample seconds must increase strictly and must not exceed elapsedSeconds."
+      },
+      "Word": {
+        "type": "object",
+        "properties": {
+          "word": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "wpm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          }
+        },
+        "required": [
+          "word",
+          "wpm",
+          "errors"
+        ]
+      },
+      "PracticeSubmission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "enum": [
+              "prose",
+              "code-snippets",
+              "code-keywords"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProseSettings"
+              },
+              {
+                "$ref": "#/components/schemas/CodePracticeSettings"
+              }
+            ]
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "correct": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "incorrect": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "extra": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "elapsedSeconds": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 86400
+              },
+              "samples": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Sample"
+                },
+                "maxItems": 86400
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Word"
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "correct",
+              "incorrect",
+              "extra",
+              "elapsedSeconds",
+              "samples",
+              "history"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "mode",
+          "language",
+          "settings",
+          "stats"
+        ],
+        "description": "language must match settings.language. Code modes must match settings.mode. Attempts must be positive and attempts*15/elapsedSeconds <=1500. The backend recomputes WPM/raw/accuracy/deviation and ignores submitted summary metrics and unknown fields. Result UUID retries are idempotent for the same owner; cross-owner reuse conflicts."
+      },
+      "PracticeSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "enum": [
+              "prose",
+              "code-snippets",
+              "code-keywords"
+            ]
+          },
+          "language": {
+            "type": "string"
+          },
+          "settings": {
+            "type": "object"
+          },
+          "correct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "incorrect": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "extra": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "elapsed_seconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "raw": {
+            "type": "number",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "deviation": {
+            "type": "number",
+            "minimum": 0
+          },
+          "metric_version": {
+            "const": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "mode",
+          "language",
+          "settings",
+          "correct",
+          "incorrect",
+          "extra",
+          "elapsed_seconds",
+          "wpm",
+          "raw",
+          "accuracy",
+          "deviation",
+          "metric_version",
+          "created_at"
+        ]
+      },
+      "PracticeDetail": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/PracticeSummary"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sample"
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Word"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "samples",
+          "history"
+        ]
+      },
+      "SpeedPoint": {
+        "type": "object",
+        "properties": {
+          "seconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "seconds",
+          "wpm"
+        ]
+      },
+      "RaceHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "round_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "participant_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "racer_id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "typed_chars": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "finish_seconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "enum": [
+              "completed",
+              "time-limit",
+              "disconnected"
+            ]
+          },
+          "speed_history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpeedPoint"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "round_id",
+          "participant_id",
+          "account_id",
+          "racer_id",
+          "username",
+          "wpm",
+          "accuracy",
+          "typed_chars",
+          "finish_seconds",
+          "reason",
+          "speed_history",
+          "created_at"
+        ],
+        "description": "Private owner-only history row. Shared race scoreboards use RaceScoreboardEntry and omit account_id and participant_id."
+      },
+      "RaceScoreboardEntry": {
+        "type": "object",
+        "properties": {
+          "racer_id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "finish_seconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "enum": [
+              "completed",
+              "time-limit",
+              "disconnected"
+            ]
+          },
+          "speed_history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpeedPoint"
+            }
+          }
+        },
+        "required": [
+          "racer_id",
+          "username",
+          "wpm",
+          "accuracy",
+          "finish_seconds",
+          "reason",
+          "speed_history"
+        ]
+      },
+      "RaceRound": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "room_id": {
+            "type": "string"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/RaceSettings"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome": {
+            "enum": [
+              "completed",
+              "aborted"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "room_id",
+          "settings",
+          "started_at",
+          "ended_at",
+          "outcome"
+        ]
+      },
+      "RaceDetail": {
+        "type": "object",
+        "properties": {
+          "round": {
+            "$ref": "#/components/schemas/RaceRound"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RaceScoreboardEntry"
+            }
+          },
+          "ownRacerId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "round",
+          "results",
+          "ownRacerId"
+        ]
+      },
+      "PracticeHistory": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeSummary"
+            },
+            "maxItems": 20
+          },
+          "nextOffset": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "results",
+          "nextOffset"
+        ]
+      },
+      "RaceHistory": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RaceHistoryEntry"
+            },
+            "maxItems": 20
+          },
+          "nextOffset": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "results",
+          "nextOffset"
+        ]
+      },
+      "AccountDashboard": {
+        "type": "object",
+        "properties": {
+          "stats": {
+            "type": "object",
+            "properties": {
+              "tests": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "seconds": {
+                "type": "number",
+                "minimum": 0
+              },
+              "characters": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "averageWpm": {
+                "type": "number",
+                "minimum": 0
+              },
+              "averageRaw": {
+                "type": "number",
+                "minimum": 0
+              },
+              "averageAccuracy": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "bestWpm": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "tests",
+              "seconds",
+              "characters",
+              "averageWpm",
+              "averageRaw",
+              "averageAccuracy",
+              "bestWpm"
+            ]
+          },
+          "bests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeSummary"
+            },
+            "maxItems": 3
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeSummary"
+            },
+            "maxItems": 5
+          }
+        },
+        "required": [
+          "stats",
+          "bests",
+          "recent"
+        ]
+      },
+      "RankedSoloScore": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Pseudonymous player key, not an account UUID."
+          },
+          "username": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "prose",
+              "dev"
+            ]
+          },
+          "language": {
+            "type": "string"
+          },
+          "test": {
+            "enum": [
+              "time",
+              "words",
+              "quotes",
+              "snippets",
+              "keywords-time",
+              "keywords-words"
+            ]
+          },
+          "length": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "raw": {
+            "type": "number",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "deviation": {
+            "type": "number",
+            "minimum": 0
+          },
+          "correct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "incorrect": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "extra": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "username",
+          "mode",
+          "language",
+          "test",
+          "length",
+          "wpm",
+          "raw",
+          "accuracy",
+          "deviation",
+          "correct",
+          "incorrect",
+          "extra",
+          "date",
+          "rank"
+        ]
+      },
+      "LeaderboardPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankedSoloScore"
+            },
+            "maxItems": 10
+          },
+          "currentUser": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RankedSoloScore"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "rows",
+          "currentUser",
+          "total",
+          "page",
+          "pages"
+        ]
+      },
+      "RaceSettings": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "passage",
+              "time",
+              "words",
+              "quotes"
+            ]
+          },
+          "language": {
+            "enum": [
+              "english",
+              "english-1k",
+              "english-2k",
+              "english-5k",
+              "hinglish"
+            ]
+          },
+          "duration": {
+            "type": "integer",
+            "enum": [
+              15,
+              30,
+              60,
+              120
+            ]
+          },
+          "wordCount": {
+            "type": "integer",
+            "enum": [
+              25,
+              50,
+              100,
+              200
+            ]
+          },
+          "punctuation": {
+            "type": "boolean"
+          },
+          "numbers": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "mode",
+          "language",
+          "duration",
+          "wordCount",
+          "punctuation",
+          "numbers"
+        ]
+      },
+      "RoomIdentity": {
+        "type": "object",
+        "properties": {
+          "roomId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "roomId",
+          "userId"
+        ]
+      },
+      "RoomJoin": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "roomId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "resumeToken": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "username",
+          "roomId",
+          "userId"
+        ],
+        "description": "Identity strings must contain non-whitespace and exclude ASCII control characters. Reconnect uses the server-issued resumeToken for the same account/guest identity within 30 seconds."
+      },
+      "RoomRacer": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "vote": {
+            "type": "boolean"
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "typedChars": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "finished": {
+            "type": "boolean"
+          },
+          "isPlaying": {
+            "type": "boolean"
+          },
+          "speedHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpeedPoint"
+            }
+          },
+          "finishSeconds": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "username",
+          "userId",
+          "vote",
+          "wpm",
+          "typedChars",
+          "accuracy",
+          "finished",
+          "isPlaying"
+        ]
+      },
+      "RoomSnapshot": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "roundId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startsAt": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Countdown deadline in Unix milliseconds, when present."
+          },
+          "settings": {
+            "$ref": "#/components/schemas/RaceSettings"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoomRacer"
+            },
+            "maxItems": 50
+          },
+          "progress": {
+            "enum": [
+              "waiting",
+              "playing",
+              "finished"
+            ]
+          }
+        },
+        "required": [
+          "text",
+          "roundId",
+          "settings",
+          "users",
+          "progress"
+        ]
+      },
+      "TimeData": {
+        "type": "object",
+        "properties": {
+          "roomId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "typedChars": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1500
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "roomId",
+          "userId",
+          "typedChars",
+          "wpm",
+          "accuracy"
+        ],
+        "description": "Only the current socket owner may update an unfinished playing racer. typedChars cannot exceed the passage length; updates failing checks are ignored."
+      },
+      "SocketMessage": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "msg"
+        ]
+      },
+      "RaceSettingsPatch": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "passage",
+              "time",
+              "words",
+              "quotes"
+            ]
+          },
+          "language": {
+            "enum": [
+              "english",
+              "english-1k",
+              "english-2k",
+              "english-5k",
+              "hinglish"
+            ]
+          },
+          "duration": {
+            "type": "integer",
+            "enum": [
+              15,
+              30,
+              60,
+              120
+            ]
+          },
+          "wordCount": {
+            "type": "integer",
+            "enum": [
+              25,
+              50,
+              100,
+              200
+            ]
+          },
+          "punctuation": {
+            "type": "boolean"
+          },
+          "numbers": {
+            "type": "boolean"
+          }
+        },
+        "required": [],
+        "additionalProperties": false,
+        "description": "A valid changed subset is accepted only from a joined racer while waiting. Changes clear all votes and cancel the countdown. Empty, unchanged, invalid or unknown-field patches are ignored."
+      }
+    }
+  },
+  "x-socketio": {
+    "path": "/socket.io/",
+    "namespace": "/",
+    "transports": [
+      "polling",
+      "websocket"
+    ],
+    "description": "Socket.IO v4 framing/handshake, not a raw WebSocket JSON API. OpenAPI tooling ignores this extension; the event payloads use the same component schemas. The bundled Socket.IO client/Engine.IO handshake and transport endpoints are protocol implementation details, not separate app REST operations.",
+    "handshake": {
+      "auth": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8192
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": []
+      },
+      "description": "Absent/null/empty accessToken permits guest play. A supplied token must verify; failure raises connect_error and the authenticated socket disconnects on token expiration. Browser Origin must be allowed by FRONTEND_ORIGINS; clients with no Origin are allowed but still subject to identity/resume checks."
+    },
+    "limits": {
+      "connectionsPerMinutePerTransportIp": 60,
+      "maximumConnections": 1000,
+      "maximumRooms": 1000,
+      "maximumRacersPerRoom": 50,
+      "maximumPacketBytes": 16384,
+      "eventsPerSecondPerSocket": 60,
+      "recoveryMilliseconds": 30000,
+      "countdownMilliseconds": 5000
+    },
+    "clientToServer": {
+      "joinRoom": {
+        "payload": {
+          "$ref": "#/components/schemas/RoomJoin"
+        },
+        "description": "Create/join a waiting room or resume the same racer/account. Playing and finished rooms reject new racers; existing racers can resume with their recovery token. Success emits roomSession and roomData; rejected joins emit error.",
+        "example": {
+          "username": "Ada",
+          "roomId": "weekend-race",
+          "userId": "browser-ada"
+        }
+      },
+      "startVote": {
+        "payload": {
+          "$ref": "#/components/schemas/RoomIdentity"
+        },
+        "description": "Joined owner votes while waiting. All racers ready, with at least two racers, schedules a five-second countdown."
+      },
+      "stopVote": {
+        "payload": {
+          "$ref": "#/components/schemas/RoomIdentity"
+        },
+        "description": "Joined owner removes their vote and cancels the countdown while waiting."
+      },
+      "updateRaceSettings": {
+        "payload": {
+          "$ref": "#/components/schemas/RaceSettingsPatch"
+        },
+        "description": "Joined waiting racer applies a validated changed settings patch; votes reset."
+      },
+      "timeData": {
+        "payload": {
+          "$ref": "#/components/schemas/TimeData"
+        },
+        "description": "Report live progress for the owned playing racer; not cheat-resistant."
+      },
+      "finishGame": {
+        "payload": {
+          "$ref": "#/components/schemas/RoomIdentity"
+        },
+        "description": "Complete an owned racer only after reported typedChars equals text length. Ignored for time mode, whose completion is server-owned."
+      },
+      "resetGame": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "roomId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "roomId"
+          ]
+        },
+        "description": "Joined racer resets a finished room, preserving settings and redrawing content on the next start."
+      }
+    },
+    "serverToClient": {
+      "roomData": {
+        "payload": {
+          "$ref": "#/components/schemas/RoomSnapshot"
+        },
+        "description": "Room settings/roster/progress snapshot. Final snapshots add speedHistory and finishSeconds when available."
+      },
+      "roomSession": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "resumeToken": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "resumeToken"
+          ]
+        },
+        "description": "Opaque server-issued recovery token; keep it private and return it on reconnect."
+      },
+      "notif": {
+        "payload": {
+          "$ref": "#/components/schemas/SocketMessage"
+        },
+        "description": "Escaped user-facing room notification."
+      },
+      "error": {
+        "payload": {
+          "$ref": "#/components/schemas/SocketMessage"
+        },
+        "description": "Application-level join or ownership failure; distinct from connect_error."
+      },
+      "persistenceStatus": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "roundId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "state": {
+              "enum": [
+                "pending",
+                "saved",
+                "failed"
+              ]
+            }
+          },
+          "required": [
+            "roundId",
+            "state"
+          ]
+        },
+        "description": "Best-effort race archive save status when backend persistence is configured. At most 100 pending rounds and five attempts per round; process loss discards the queue."
+      }
+    },
+    "transportEvents": {
+      "connect_error": "Socket.IO connection/authentication failure, represented by an Error object, not the application {msg} payload.",
+      "disconnect": "Socket.IO lifecycle event, no application payload contract. Disconnected racers have a 30-second resume window; explicit leave is implemented by disconnecting."
+    },
+    "guarantees": "Server owns countdown deadlines and finish timestamps. Invalid/unauthorized vote, progress, patch, finish and reset messages are generally ignored without acknowledgements. Active rooms/timers/resume sessions are in memory and are lost on restart. Persisted result reads use the HTTP history routes."
+  }
+}
