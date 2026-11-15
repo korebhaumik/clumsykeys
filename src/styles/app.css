@@ -29,6 +29,11 @@ html {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+	background-color: var(--accent);
+	color: var(--accent-ink);
+}
+
 body {
 	margin: 0;
 }
@@ -50,6 +55,7 @@ body {
 .sr-only:focus-visible { outline: none; }
 
 @media (forced-colors: active) {
+	::selection { background-color: Highlight; color: HighlightText; }
 	:focus-visible, .focus-field:has(input:focus-visible) {
 		outline-color: Highlight;
 	}

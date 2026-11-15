@@ -42,6 +42,12 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await expect(profile.locator('dl > div').filter({ hasText: 'characters typed' }).locator('dd')).toHaveText('180');
     await expect(profile.locator('dl > div').filter({ hasText: 'average duration' }).locator('dd')).toHaveText('13.3s');
     await expect(profile.locator('tbody tr')).toHaveCount(3);
+    const recentHeading = await profile.getByRole('heading', { name: 'Recent tests', exact: true }).boundingBox();
+    const historyLink = await profile.getByRole('link', { name: 'View your history', exact: true }).boundingBox();
+    expect(historyLink!.x).toBeGreaterThan(recentHeading!.x + recentHeading!.width);
+    expect(Math.abs((historyLink!.y + historyLink!.height / 2) - (recentHeading!.y + recentHeading!.height / 2))).toBeLessThan(2);
+    await expect(profile.locator('table')).toHaveCSS('font-size', '13.12px');
+    for (const cell of await profile.locator('th, td').all()) await expect(cell).toHaveCSS('white-space', 'nowrap');
     await expect(profile.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Prose', exact: true }) })).toContainText('90 wpm');
     await expect(profile.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Code keywords', exact: true }) })).toContainText('JavaScript');
     const content = await profile.boundingBox(), container = await page.locator('.page-shell').boundingBox();

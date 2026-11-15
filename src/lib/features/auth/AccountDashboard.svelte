@@ -82,7 +82,10 @@
 			</div>
 		</section>
 		<section class="dashboard-section" aria-labelledby={`${id}-recent`} aria-busy={loading}>
-			<h2 id={`${id}-recent`}>Recent tests</h2>
+			<div class="recent-heading">
+				<h2 id={`${id}-recent`}>Recent tests</h2>
+				<a class="history-link" href="#/history">View your history <ArrowRightIcon /></a>
+			</div>
 			{#if initialLoading || dashboard?.recent.length}
 				<!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the results table.) -->
 				<div class="recent-scroll" role="region" aria-label="Recent test results, scroll for more columns" tabindex="0"><table>
@@ -94,7 +97,6 @@
 				</table></div>
 				<p class="table-note">¹ Characters: correct / incorrect / extra.</p>
 			{:else}<p class="empty-history">No saved results yet. Your next practice is a fresh start. <a href="#/">Start practising <ArrowRightIcon /></a></p>{/if}
-			<a class="history-link" href="#/history">View your history <ArrowRightIcon /></a>
 		</section>
 	{/if}
 	<footer class="account-controls">
@@ -132,12 +134,18 @@
 	.best-card a { margin-top: var(--dimension-0_75rem); }
 	.empty-best { color: var(--muted); }
 	.recent-scroll { margin-top: var(--dimension-1_25rem); overflow-x: auto; border-radius: var(--radius-0_3rem); }
-	table { width: 100%; border-collapse: collapse; text-align: left; font-size: var(--text-0_75rem); white-space: nowrap; }
+	table { width: 100%; border-collapse: collapse; text-align: left; font-size: var(--text-0_82rem); white-space: nowrap; }
 	th, td { padding: var(--dimension-0_75rem) var(--dimension-0_65rem); }
 	th { color: var(--muted); font-weight: var(--weight-400); }
 	tbody tr:nth-child(even) { background: var(--surface); }
 	.table-note { margin-top: var(--dimension-0_5rem); color: var(--muted); font-size: var(--text-0_72rem); }
-	.history-link { margin-top: var(--dimension-1rem); }
+	.recent-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--dimension-0_5rem); }
+	.recent-heading h2 { font-size: var(--text-1_25rem); font-weight: var(--weight-600); }
+	.history-link { flex-shrink: 0; white-space: nowrap; }
+	@media (max-width: 400px) {
+		.recent-heading h2 { font-size: var(--text-1rem); }
+		.history-link { font-size: var(--text-0_72rem); }
+	}
 	.empty-history { margin-top: var(--dimension-1_25rem); color: var(--muted); font-size: var(--text-0_875rem); line-height: var(--leading-1_65); }
 	.dashboard-error { margin-top: var(--dimension-1rem); color: var(--error); font-size: var(--text-0_82rem); }
 	.account-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--dimension-1rem); border-top: var(--dimension-1px) solid var(--line); margin-top: var(--dimension-2rem); padding-top: var(--dimension-1_25rem); font-size: var(--text-0_75rem); color: var(--muted); }

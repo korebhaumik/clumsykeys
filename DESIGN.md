@@ -45,7 +45,9 @@ center between header and footer on tall screens and scroll normally when it
 cannot fit. Keep `min-width: 0` on shrinking grid/flex children. Use horizontal
 overflow regions for wide result tables instead of widening the page.
 
-`App.svelte` renders the single global footer. Practice/live-race layouts add
+`App.svelte` adds no outer top/bottom padding and
+renders the single global footer. Security, Terms and Privacy links open local
+policy pages using the shared page shell and `src/styles/legal.css`; the header includes a history shortcut. Practice/live-race layouts add
 only contextual shortcut rows. Preserve footer spacing at the bottom of short
 pages and after long content; avoid viewport-height tricks that overlap content.
 
@@ -59,15 +61,19 @@ Current page patterns:
   Settings and mode controls lead into the typing area. Active
   tests replace configuration controls with live stats and suppress distracting
   chrome; results bring back explicit replay actions and detailed feedback.
-- **About:** a short introduction and understated linked rows fill the parent
-  content width. Small icons, descriptions and arrows identify the practice modes.
+- **About:** a compact About label sits above the brand title, using the same
+  700 weight as other page titles. One short muted line sits beneath the title;
+  there are no decorative cards or hero actions.
+  Understated linked rows fill the parent content width. Small icons, descriptions and arrows identify the practice modes.
 - **Room access:** an introduction and a clearly labeled join form sit side by
   side when space permits and stack on narrow screens. The two-player preview
   is scripted illustration, not a live room or fabricated player statistics.
 - **Account:** sign-in controls and a quiet introduction share the page; the
   signed-in dashboard fills the container. The banner uses accent/caret roles,
   avatars use profile roles, and statistics/bests/recent tests use the shared
-  surfaces. Show real loading, empty, failed and retained-snapshot states.
+  surfaces. Show real loading, empty, failed and retained-snapshot states. The Recent tests
+  heading and history link share a row, aligned left and right. Recent-test table
+  text uses `--text-0_82rem`, keeps cells on one line and scrolls within its region.
 - **History:** the practice/multiplayer switch leads directly into filters,
   inline summaries and a striped results table. Results load automatically on
   entry, reload and history-type changes; there is no manual refresh button. The
@@ -85,8 +91,11 @@ Current page patterns:
   details show the archived mode, language, active time/word limit and modifier
   switches above the chart, using only field labels and values without an
   introductory heading. Missing archived fields stay explicitly unavailable.
-- **Leaderboards:** filters and readable standings frame a horizontally
-  scrollable table. Sparse result pages do not reserve unused table-row space.
+- **Leaderboards:** filters use History’s compact `--text-0_82rem` scale,
+  9–11rem desktop widths and wrapping narrow-screen layout. Filters and readable standings frame a horizontally
+  scrollable table. Sparse result pages do not reserve unused table-row space. The personal
+  rank panel has a 78px minimum height (110px on narrow screens), expanding
+  naturally when its contents wrap.
 
 Pages should compose shared layout and feature presentation. Keep generic icons
 and charts free of app/feature stores.
@@ -129,6 +138,11 @@ labels, dashed variants and error shapes as additional distinctions. Color alone
 must not carry the only meaningful distinction. Chart labels and curves must
 continue to reflect the existing WPM and timing semantics. Reserve the SVG’s
 intrinsic height while measuring its container width to avoid resize feedback.
+
+Text selection uses `--accent` as the highlight background and `--accent-ink`
+for readable selected text throughout the app. Forced-color mode uses the system
+Highlight/HighlightText pair. The Appearance practice preview places its caret
+inside “rhythm” on the second line, with preceding text shown as typed.
 
 ## Focus, keyboard and feedback
 

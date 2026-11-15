@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-	import DiscordSvg from "../icons/DiscordIcon.svelte";
 	import DocumentSvg from "../icons/DocumentIcon.svelte";
 	import DollarSvg from "../icons/DollarIcon.svelte";
 	import GithubSvg from "../icons/GithubIcon.svelte";
@@ -54,7 +53,7 @@
 		class:active-test={active}
 		inert={active}
 		class={cn(
-			`footer-credits flex w-full flex-wrap items-center justify-between gap-3 text-dark-forest-credits`,
+			`footer-credits flex w-full flex-wrap items-center justify-between gap-4 text-dark-forest-credits`,
 			{
 				"text-dark-forest-credits": $theme === "dark-forest",
 				"text-classic-credits": $theme === "classic",
@@ -68,7 +67,7 @@
 				class="flex items-center transition cursor-pointer hover:text-classic-900"
 			>
 				<MailSvg />
-				<span class="ml-1.5 text-xs">Contact</span>
+				<span class="ml-2 text-xs">Contact</span>
 			</a>
 			<a
 				aria-label="Github"
@@ -77,32 +76,23 @@
 				class="flex items-center"
 			>
 				<GithubSvg />
-				<span class="ml-1.5 text-xs">Github</span>
+				<span class="ml-2 text-xs">Github</span>
 			</a>
-			<a
-				aria-label="Discord"
-				href="http://discord.gg"
-				target="_blank"
-				class="items-center flex"
-			>
-				<DiscordSvg />
-				<span class="ml-1.5 text-xs">Discord</span>
-			</a>
-			<div class="items-center flex">
+			<a aria-label="Security" href="#/security" class="flex items-center">
 				<ShieldSvg />
-				<span class="ml-1.5 text-xs">Security</span>
-			</div>
-			<div class="items-center flex">
+				<span class="ml-2 text-xs">Security</span>
+			</a>
+			<a aria-label="Terms" href="#/terms" class="flex items-center">
 				<DocumentSvg />
-				<span class="ml-1.5 text-xs">Terms</span>
-			</div>
-			<div class="items-center flex">
+				<span class="ml-2 text-xs">Terms</span>
+			</a>
+			<a aria-label="Privacy" href="#/privacy" class="flex items-center">
 				<LockSvg />
-				<span class="ml-1.5 text-xs">Privacy</span>
-			</div>
+				<span class="ml-2 text-xs">Privacy</span>
+			</a>
 			<div class="flex items-center">
 				<DollarSvg />
-				<span class="ml-1.5 text-xs">Support</span>
+				<span class="ml-2 text-xs">Support</span>
 			</div>
 		</div>
 		<p class="text-xs">
@@ -118,7 +108,7 @@
 
 <style>
 	.shortcuts-only .footer-shortcuts { margin-bottom: 0; }
-	.footer-credits > div { gap: var(--dimension-0_75rem); width: auto; }
+	.footer-credits > div { gap: var(--dimension-1_25rem); width: auto; }
 	.footer-credits { transition: opacity var(--motion-160ms) ease, visibility var(--motion-160ms); }
 	.footer-credits.active-test { opacity: 0; visibility: hidden; }
 	.footer-shortcuts { --key-bg: var(--palette-stone-500); --key-ink: var(--palette-forest-950); display: flex; flex-wrap: wrap; gap: var(--dimension-0_65rem) var(--dimension-2_5rem); margin-bottom: var(--dimension-1_25rem); color: var(--key-bg); font-size: var(--text-0_875rem); line-height: var(--dimension-1_25rem); }

@@ -81,6 +81,9 @@ when account identity changes.
 | `#/history` | Private saved practice/race history. |
 | `#/themes` | Theme selection. |
 | `#/about` | About and practice-mode navigation. |
+| `#/security` | Security policy and controls. |
+| `#/terms` | Terms of service. |
+| `#/privacy` | Privacy policy and data ownership. |
 
 Auth returns to the root with `auth_action` and PKCE query parameters, then moves
 to the account route. Hash navigation does not require a server catch-all rewrite.

@@ -3,6 +3,9 @@
 	import Game from "./features/practice/CodePractice.svelte";
 	import About from "../pages/About.svelte";
 	import Themes from "../pages/Themes.svelte";
+	import Security from "../pages/Security.svelte";
+	import Terms from "../pages/Terms.svelte";
+	import Privacy from "../pages/Privacy.svelte";
 	import Home from "../pages/Home.svelte";
 	import Login from "../pages/Login.svelte";
 	import Account from "../pages/Account.svelte";
@@ -17,7 +20,8 @@
 	import { emptyRoom, roomInfo } from "./features/multiplayer/room.store";
 
 	let practiceLayout = $derived(
-		router.location === "/" || router.location === "/game" || router.location === "/themes" || router.location === "/about"
+		router.location === "/" || router.location === "/game" || router.location === "/themes" || router.location === "/about" ||
+		router.location === "/security" || router.location === "/terms" || router.location === "/privacy"
 	);
 	let pageLayout = $derived(
 		router.location === "/login" || router.location === "/race" ||
@@ -39,6 +43,9 @@
 		"/race": Multiplayer,
 		"/ranking": Ranking,
 		"/leaderboard": Leaderboards,
+		"/security": Security,
+		"/terms": Terms,
+		"/privacy": Privacy,
 	};
 
 	$effect(() => {

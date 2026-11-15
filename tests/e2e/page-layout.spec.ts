@@ -6,14 +6,19 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1920])
     await page.setViewportSize({ width, height: 1200 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.addInitScript(theme => localStorage.setItem('theme', theme), theme);
-    for (const route of ['/', '/game', '/about', '/themes', '/account', '/login', '/history', '/leaderboard']) {
+    for (const route of ['/', '/game', '/about', '/themes', '/account', '/login', '/history', '/leaderboard', '/security', '/terms', '/privacy']) {
       await page.goto('/#' + route);
+      const policyTitles: Record<string, string> = { '/security': 'Application Security', '/terms': 'Terms of Service', '/privacy': 'Privacy Policy' };
+      if (policyTitles[route]) await expect(page.getByRole('heading', { level: 1, name: policyTitles[route], exact: true })).toBeVisible();
       const footer = page.getByRole('contentinfo');
       await expect(footer).toHaveCount(1);
       await expect(footer.getByRole('link', { name: 'Contact', exact: true })).toBeVisible();
-      await expect(footer.getByRole('link', { name: 'Discord', exact: true })).toBeVisible();
       await expect(footer.getByRole('link', { name: 'Kore Bhaumik', exact: true })).toBeVisible();
-      for (const label of ['Security', 'Terms', 'Privacy', 'Support']) await expect(footer.getByText(label, { exact: true })).toBeVisible();
+      for (const label of ['Security', 'Terms', 'Privacy']) await expect(footer.getByRole('link', { name: label, exact: true })).toBeVisible();
+      await expect(footer.getByText('Support', { exact: true })).toBeVisible();
+      for (const [label, href] of [['Security', '#/security'], ['Terms', '#/terms'], ['Privacy', '#/privacy']]) {
+        await expect(footer.getByRole('link', { name: label, exact: true })).toHaveAttribute('href', href);
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       const bottomSpace = await footer.evaluate(element => {
         const credits = element.querySelector('.footer-credits')!.getBoundingClientRect();
@@ -23,7 +28,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1920])
       if (width === 1920 && route !== '/leaderboard') {
         const geometry = await page.evaluate(() => {
           const footer = document.querySelector('.global-footer')!.getBoundingClientRect();
-          return { bottom: footer.bottom, expected: window.innerHeight - parseFloat(getComputedStyle(document.querySelector('.app-frame')!).paddingBottom) };
+          return { bottom: footer.bottom, expected: Math.max(window.innerHeight, document.documentElement.scrollHeight) - parseFloat(getComputedStyle(document.querySelector('.app-frame')!).paddingBottom) };
         });
         expect(Math.abs(geometry.bottom - geometry.expected)).toBeLessThan(2);
       }

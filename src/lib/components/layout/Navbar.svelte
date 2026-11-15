@@ -6,7 +6,7 @@
 	import KeyboardSvg from "../icons/KeyboardIcon.svelte";
 	import CodeSvg from "../icons/CodeIcon.svelte";
 	import LogoSvg from "../icons/LogoIcon.svelte";
-	import NotifSvg from "../icons/NotifIcon.svelte";
+	import HistorySvg from "../icons/HistoryIcon.svelte";
 	import UserSvg from "../icons/UserIcon.svelte";
 	import MenuSvg from "../icons/MenuIcon.svelte";
 	import cn from "../../utils";
@@ -34,8 +34,6 @@
 		}
 		void push("/");
 	}
-
-	let isVisible = $state(false);
 
 	let menuIsVisible = $state(false);
 	let menuToggle: HTMLButtonElement;
@@ -203,15 +201,15 @@
 			<UserSvg />
 		</a>
 		
-		<button
-			aria-label="Notifications"
+		<a
+			href="#/history"
+			aria-current={router.location === "/history" ? "page" : undefined}
+			aria-label="Your history"
+			title="Your history"
 			class="hidden p-2 rounded-full sm:inline-block"
-			onclick={() => {
-				isVisible = !isVisible;
-			}}
 		>
-			<NotifSvg />
-		</button>
+			<HistorySvg />
+		</a>
 		
 		<button
 			bind:this={menuToggle}

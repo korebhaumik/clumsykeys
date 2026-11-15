@@ -41,10 +41,10 @@
 				<p class="typing-frame theme-sample">
 					<span class="typing-word text-white">Small</span>
 					<span class="typing-word text-white">steps</span>
-					<span class="typing-word caret-word"><span class="text-white">ma</span><span class="text-red-500 underline">k</span><span class="text-zinc-600">e</span></span>
-					<span class="typing-word text-zinc-600">steady</span>
-					<span class="typing-word text-zinc-600">progress.</span>
-					<span class="sample-next-line text-zinc-600">Find your rhythm, one key at a time.</span>
+					<span class="typing-word"><span class="text-white">ma</span><span class="text-red-500 underline">k</span><span class="text-white">e</span></span>
+					<span class="typing-word text-white">steady</span>
+					<span class="typing-word text-white">progress.</span>
+					<span class="sample-next-line text-zinc-600"><span class="text-white">Find your</span> <span class="caret-word"><span class="text-white">rhy</span><span class="text-zinc-600">thm,</span></span> one key at a time.</span>
 				</p>
 			</div>
 

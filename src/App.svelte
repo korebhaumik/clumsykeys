@@ -38,7 +38,7 @@
 	});
 </script>
 
-<div class="app-frame py-5">
+<div class="app-frame">
 <main>
 	<Router />
 </main>
