@@ -8,6 +8,83 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Pre-push frontend review
+
+On **15 November 2026**, reviewed the pending UI, navigation and policy pages.
+Corrected unsupported claims about anti-cheat guarantees, guest multiplayer
+transmission, history export coverage, profile fields, token storage/revocation
+and source licensing. Consolidated shared policy styles and verified that removed
+Discord/notification icons have no remaining source references. The new history
+shortcut replaces the unused notification toggle; footer policy links open local
+routes. These checks describe source behavior, not legal enforceability or hosted
+provider settings.
+
+Frozen installation, lint, dead-code checks, frontend/backend types/docs, **53
+unit/integration tests** and both builds passed. The full Chrome run passed
+**140 cases** and found two viewport-only footer assertions on long policy pages.
+After correcting the assertion to account for document height, all **four layout
+cases** passed on rerun, including policy headings, link destinations and narrow
+layouts in both themes. Shared policy CSS and the final copy corrections were
+covered by that rerun. Existing Vite/Knip hints remain. No hosted mutation,
+SQL/Auth stack, dependency advisory scan or credential audit was repeated.
+
+## About introduction verification
+
+On **15 November 2026**, simplified About to an uppercase label, a brand title
+at the shared page-title 700 weight and one muted line beneath it. Removed the
+side introduction and supporting paragraph. Existing practice links remain.
+The initial redesign ran all **142 Chrome cases** and **53 unit/integration
+tests**. After the final title/copy adjustment, all **six About cases** passed
+at 320/768/1440px in both themes, covering keyboard links, overflow and footer
+placement; the final narrow screenshot was inspected. Lint, dead-code checks,
+frontend/backend types/docs and both builds passed. The full Chrome suite was
+not repeated after the final title/copy adjustment. Existing Vite/Knip hints
+remain; hosted, SQL/Auth, advisory and credential checks were not repeated.
+
+## Compact leaderboard filters verification
+
+On **15 November 2026**, matched leaderboard filters to History's .82rem text,
+9–11rem desktop widths and tighter spacing, with wrapping narrow layouts.
+Lint, dead-code/type/docs checks, both builds and **53 unit/integration tests**
+passed. The full Chrome run passed **141 cases**; one race-history case failed
+while closing its browser context because a trace artifact was missing (ENOENT).
+That exact case passed on a targeted rerun. Leaderboard checks passed in both
+themes at 320/768/1440px; a desktop screenshot was inspected. Existing Vite/Knip
+hints remain. No hosted, SQL/Auth, advisory or credential checks were repeated.
+
+## Selection, preview and rank-panel verification
+
+On **15 November 2026**, moved the Appearance preview caret inside “rhythm”,
+added global accent/contrast-ink text selection with forced-color system fallback,
+and reduced personal rank-panel minimum heights to 78px desktop and 110px narrow
+screens. The additional 2px trim is included in those heights. Panels expand for
+wrapped content. Selection contrast was recalculated from source tokens in
+[CONTRAST.md](CONTRAST.md); existing failures remain recorded.
+
+All **142 Chrome cases** and **53 unit/integration tests** passed. Four new browser
+cases verify preview caret placement and selection colors on differently colored
+text in both themes at 320/1440px; a rendered selection screenshot was inspected.
+Leaderboard checks passed at 320/768/1440px in both themes after the final trim.
+Lint, dead-code checks, frontend/backend types/docs and both builds passed; the
+frontend build was repeated after the final 2px trim. Existing Vite/Knip hints
+remain. No hosted or SQL/Auth checks or dependency advisory scans were repeated.
+
+## Dashboard typography and outer-spacing verification
+
+On **15 November 2026**, removed the app shell's 20px outer top/bottom
+padding, increased recent-test table text from 12px to 13.12px, and aligned
+Recent tests with its history link on one heading row. Cells remain single-line;
+narrow tables scroll inside their keyboard-accessible region. Source colors
+and focus tokens are unchanged.
+
+The spacing pass ran all **138 Chrome cases** and **53 unit/integration tests**.
+After the dashboard edit, **12 focused dashboard/layout cases** passed in both
+themes at narrow/desktop widths, including heading/link alignment, cell sizing,
+keyboard scrolling and footer placement. A narrow dashboard screenshot was
+visually inspected. Lint, dead-code checks, frontend/backend types/docs and both
+builds passed; existing Vite/Knip hints remain. The full browser suite was not
+repeated after the dashboard edit. Hosted and SQL/Auth checks were not rerun.
+
 ## First-visit defaults verification
 
 On **14 November 2026**, changed fresh guest prose defaults to English with a
