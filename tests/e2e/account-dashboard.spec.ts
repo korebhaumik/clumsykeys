@@ -59,8 +59,9 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
       expect(bounds!.width).toBeCloseTo(content!.width, 0);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    const scroll = page.getByRole('region', { name: 'Recent test results, scroll for more columns' });
+    await expect(scroll).toHaveAttribute('tabindex', width === 320 ? '0' : '-1');
     if (width === 320) {
-      const scroll = page.getByRole('region', { name: 'Recent test results, scroll for more columns' });
       await scroll.focus(); await page.keyboard.press('ArrowRight');
       await expect.poll(() => scroll.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
     }

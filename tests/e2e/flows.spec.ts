@@ -353,6 +353,16 @@ test('two browsers join, configure, vote, race, reconnect, see results and repla
     await a.getByRole('button', { name: 'Vote to start' }).click();
     await b.getByRole('button', { name: 'Vote to start' }).click();
     await expect(a.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled({ timeout: 10000 });
+    const settingsPreview = a.getByRole('region', { name: 'Race settings preview' });
+    await expect(settingsPreview).toHaveAttribute('tabindex', '-1');
+    await a.setViewportSize({ width: 320, height: 900 });
+    await expect(settingsPreview).toHaveAttribute('tabindex', '0');
+    await settingsPreview.focus();
+    await a.keyboard.press('ArrowRight');
+    await expect.poll(() => settingsPreview.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+    await a.setViewportSize({ width: 1440, height: 900 });
+    await expect(settingsPreview).toHaveAttribute('tabindex', '-1');
+    await a.getByRole('textbox', { name: 'Type the race passage' }).focus();
     const words = await a.locator('.race-passage .typing-word').allTextContents();
     await a.keyboard.type(words[0] + ' ');
     await a.reload();

@@ -8,6 +8,27 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Keyboard tab-order verification
+
+On **15 November 2026**, removed the static leaderboard panel from the tab
+order. Table wrappers and the locked race settings preview now become keyboard
+scroll stops only while their content overflows horizontally. Resize/content
+observers are disconnected when their view is destroyed. Control outlines,
+typing semantics and transport/authentication contracts are unchanged.
+
+Frozen installation with pnpm 12.18.0, lint, dead-code checks, frontend/backend
+types, documentation checks, **53 unit/integration tests**, the full **144-case
+Chrome suite** and both builds passed.
+The initial sandbox run could not bind local transport ports; the successful
+rerun used local servers outside the sandbox. Browser regressions cover forward
+and reverse tab order, both themes, desktop/narrow resizing, empty leaderboard
+content, and retained arrow-key scrolling in account/history/race views. The two
+new regression cases also check console/page errors; both-theme screenshots were
+inspected at desktop and narrow widths. Browser dependencies used the local
+modeled Supabase fixture, with selected responses modeled in Playwright. Existing
+Vite/Knip hints remain. No hosted mutation, SQL/Auth stack, dependency advisory
+scan or credential audit was repeated during this focused UI pass.
+
 ## Pre-push frontend review
 
 On **15 November 2026**, reviewed the pending UI, navigation and policy pages.
