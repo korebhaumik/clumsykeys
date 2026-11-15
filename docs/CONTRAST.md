@@ -48,6 +48,13 @@ their recorded scope.
 
 ## Focus, caret, icons and boundaries
 
+On **15 November 2026**, static panels were removed from sequential keyboard
+navigation, and scroll-region stops were limited to horizontal overflow. The
+global outline colors, width and offset are unchanged. Recalculation from
+`tokens.css` confirms Dark Forest focus on page/panel at **9.51/7.94:1**,
+Classic focus on page/panel at **19.08/21.00:1**, and inverted toolbar focus at
+**21.00:1**. Existing contrast limitations below remain open.
+
 | Theme | Current use | Foreground / background | Ratio | 3:1 comparison |
 | --- | --- | --- | --- | --- |
 | Dark Forest | Page keyboard focus / page | `#9bcd86` / `#151b1d` | 9.51:1 | Pass |

@@ -62,6 +62,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await page.getByRole('button', { name: 'Export CSV' }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBe('clumsy-keys-practice-history.csv');
+    await expect(table).toHaveAttribute('tabindex', width === 320 ? '0' : '-1');
     if (width === 320) {
       await table.focus(); await page.keyboard.press('ArrowRight');
       await expect.poll(() => table.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);

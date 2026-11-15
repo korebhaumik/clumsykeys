@@ -58,7 +58,7 @@
 			<button type="button" role="tab" id={`${id}-${mode.value}`} aria-controls={`${id}-board`} aria-selected={filters.mode === mode.value} tabindex={filters.mode === mode.value ? 0 : -1} onkeydown={tabKey} onclick={() => change({ mode: mode.value as LeaderboardMode })}><span>{mode.label}</span><small>{mode.hint}</small></button>
 		{/each}
 	</div>
-	<div id={`${id}-board`} role="tabpanel" aria-labelledby={`${id}-${filters.mode}`} class="board-panel" tabindex="0">
+	<div id={`${id}-board`} role="tabpanel" aria-labelledby={`${id}-${filters.mode}`} class="board-panel">
 		<div class="filters">
 			<div class="filter"><span>Language</span><Dropdown label="Leaderboard language" value={filters.language} options={languageOptions(filters.mode)} disabled={filters.test === "quotes"} onchange={language => change({ language })} /></div>
 			<div class="filter"><span>Test</span><Dropdown label="Leaderboard test" value={filters.test} options={testOptions(filters.mode)} onchange={test => change({ test })} /></div>

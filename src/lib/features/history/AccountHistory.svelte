@@ -8,6 +8,7 @@
 	import ResultDetailSkeleton from "./ResultDetailSkeleton.svelte";
 	import ResultsChart from "../../components/charts/ResultsChart.svelte";
 	import Dropdown from "../../components/Dropdown.svelte";
+	import { scrollFocus } from "../../components/scroll-focus";
 	import ArrowRightIcon from "../../components/icons/ArrowRightIcon.svelte";
 	import { practiceModes, testLanguage } from "../auth/dashboard";
 	import { historyCsv, modeLabel, resultKey, savedRaceSettings, selectHistory, type SavedRaceSetting, type HistoryRow, type SortKey } from "./history";
@@ -132,8 +133,7 @@
 			{#if error}<div class="error-message" role="alert">{error}{#if rows.length} Showing previously loaded results.{/if} <button disabled={loading} onclick={() => load(failedOffset)}>Retry history</button></div>{/if}
 			{#if rows.length || loading}
 				<p class="scroll-hint">Scroll to see all columns →</p>
-				<!-- svelte-ignore a11y_no_noninteractive_tabindex (The overflow table must be scrollable using the keyboard.) -->
-				<div class="history-table-scroll" role="region" aria-label="Saved results, scroll for more columns" tabindex="0" aria-busy={loading}>
+				<div class="history-table-scroll" role="region" aria-label="Saved results, scroll for more columns" tabindex="-1" use:scrollFocus aria-busy={loading}>
 					<table class:race-table={kind === "race"}>
 						<caption class="sr-only">Saved {kind === "practice" ? "practice tests" : "multiplayer races"}. Sort using column headings, or open a result for details.</caption>
 						<thead><tr>

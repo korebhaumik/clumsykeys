@@ -12,6 +12,73 @@ async function expectHighlight(control: Locator, theme: string) {
     : 'rgb(155, 205, 134)');
 }
 
+for (const theme of ['dark-forest', 'classic']) {
+  test(`Tab skips static panels and only stops on overflowing tables in ${theme}`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.addInitScript(theme => localStorage.setItem('theme', theme), theme);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.route('**/src/lib/features/leaderboards/leaderboard-service.ts*', route => route.fulfill({
+      contentType: 'text/javascript', body: `
+        import { leaderboardService as fixture } from '/tests/fixtures/leaderboard-service.ts';
+        export const previewUserId = '';
+        export const leaderboardService = { ...fixture, isDemo: false, async read(...args) {
+          const result = await fixture.read(...args);
+          return args[0].range === 'day' ? { ...result, rows: [], total: 0, pages: 1 } : result;
+        }};`,
+    }));
+    await page.goto('/#/leaderboard');
+    await expect(page.locator('tbody tr:not(.skeleton-row)')).toHaveCount(10);
+    const prose = page.getByRole('tab', { name: 'Prose', exact: false });
+    const language = page.getByRole('combobox', { name: 'Leaderboard language' });
+    const table = page.getByRole('region', { name: 'Solo rankings, scroll for more columns' });
+    await prose.focus();
+    await page.keyboard.press('Tab');
+    await expectHighlight(language, theme);
+    await page.keyboard.press('Shift+Tab');
+    await expect(prose).toBeFocused();
+    await expect(table).toHaveAttribute('tabindex', '-1');
+    const signIn = page.getByRole('link', { name: 'Sign in →', exact: true });
+    const next = page.getByRole('button', { name: 'Next leaderboard page' });
+    await signIn.focus();
+    await page.keyboard.press('Tab');
+    await expectHighlight(next, theme);
+    await page.keyboard.press('Shift+Tab');
+    await expect(signIn).toBeFocused();
+
+    // Resizing must retain arrow-key access when columns actually need scrolling.
+    await page.setViewportSize({ width: 320, height: 900 });
+    await expect(table).toHaveAttribute('tabindex', '0');
+    await signIn.focus();
+    await page.keyboard.press('Tab');
+    await expectHighlight(table, theme);
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(() => table.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+    await page.keyboard.press('Tab');
+    await expect(next).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(table).toBeFocused();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(table).toHaveAttribute('tabindex', '-1');
+    await signIn.focus();
+    await page.keyboard.press('Tab');
+    await expect(next).toBeFocused();
+
+    // A narrow empty state has controls, but no hidden columns to scroll.
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.getByRole('combobox', { name: 'Time range' }).click();
+    await page.getByRole('option', { name: 'Past 24 hours', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'A fresh leaderboard.' })).toBeVisible();
+    await expect(table).toHaveAttribute('tabindex', '-1');
+    await signIn.focus();
+    await page.keyboard.press('Tab');
+    await expectHighlight(table.getByRole('link', { name: 'Start a solo test' }), theme);
+    expect(errors).toEqual([]);
+  });
+}
+
 for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440]) {
   test(`custom keyboard highlights across routes in ${theme} at ${width}px`, async ({ page }, testInfo) => {
     const errors: string[] = [];

@@ -5,6 +5,7 @@
 	import { preferenceSync } from "../../state/preferences.store";
 	import { reloadAccountPreferences } from "../settings/account-preferences";
 	import ArrowRightIcon from "../../components/icons/ArrowRightIcon.svelte";
+	import { scrollFocus } from "../../components/scroll-focus";
 	import GlobeIcon from "../../components/icons/GlobeIcon.svelte";
 	import { practiceModes, safeWebsite, testLabel, testLanguage, typingTime } from "./dashboard";
 
@@ -87,8 +88,7 @@
 				<a class="history-link" href="#/history">View your history <ArrowRightIcon /></a>
 			</div>
 			{#if initialLoading || dashboard?.recent.length}
-				<!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the results table.) -->
-				<div class="recent-scroll" role="region" aria-label="Recent test results, scroll for more columns" tabindex="0"><table>
+				<div class="recent-scroll" role="region" aria-label="Recent test results, scroll for more columns" tabindex="-1" use:scrollFocus><table>
 					<caption class="sr-only">Your five most recent saved solo practice tests</caption>
 					<thead><tr>{#each ["wpm", "wpm (raw)", "accuracy", "wpm std", "chars¹", "mode", "language", "date"] as label}<th scope="col">{label}</th>{/each}</tr></thead>
 					<tbody>{#if initialLoading}

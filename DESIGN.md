@@ -158,6 +158,12 @@ and typing surface stay outline-free because the typing caret is their focus cue
 Settings dialogs focus their heading for announcement; that noninteractive
 heading suppresses its outline, while dialog buttons retain keyboard highlights.
 
+Static panels stay out of the tab order; tabs lead directly to the first control
+inside their panel. Shared `scroll-focus.ts` makes table wrappers and the locked
+race settings preview tabbable only while they overflow horizontally, updating
+after content changes and resizing. These scroll stops retain the global outline
+and arrow-key scrolling so hidden columns remain accessible on narrow screens.
+
 Tab/Shift+Tab follow document order in prose practice. Code snippets use Tab for
 indentation and Shift+Tab to leave the editor. Mobile navigation closes with
 Escape and returns focus to its toggle. Preserve existing dialog/dropdown

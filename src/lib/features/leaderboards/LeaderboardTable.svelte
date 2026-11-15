@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import { scrollFocus } from "../../components/scroll-focus";
 	import { languageOptions, type RankedScore } from "./leaderboard";
 	let { rows, loading, currentUserId, children }: {
 		rows: RankedScore[]; loading: boolean; currentUserId: string | null; children: Snippet;
@@ -8,8 +9,7 @@
 	const number = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 1 });
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_tabindex (The overflow table must be scrollable using the keyboard.) -->
-<div class="table-scroll" role="region" aria-label="Solo rankings, scroll for more columns" tabindex="0" aria-busy={loading}>
+<div class="table-scroll" role="region" aria-label="Solo rankings, scroll for more columns" tabindex="-1" use:scrollFocus aria-busy={loading}>
 	{#if !loading && !rows.length}
 		<div class="table-state">{@render children()}</div>
 	{:else}
