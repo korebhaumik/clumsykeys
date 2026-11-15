@@ -75,6 +75,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await expect(page.locator('tbody tr[aria-current="true"]')).toContainText(newName);
     await page.goto('/#/login');
     await expect(page.getByLabel('Username', { exact: true })).toHaveValue(newName);
+    await expect(page.locator('.join-note')).toHaveCount(0);
     await page.getByLabel('Username', { exact: true }).fill('Room alias');
     await page.getByLabel('Room ID', { exact: true }).fill(`alias-${randomUUID()}`);
     await page.getByRole('button', { name: 'Join room', exact: true }).click();
@@ -98,6 +99,12 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
       await page.getByRole('button', { name: 'Save display name' }).click();
       await expect(page.getByRole('status').filter({ hasText: 'Display name saved.' })).toBeVisible();
     }
+    await page.getByRole('region', { name: 'Your account.', exact: true }).getByRole('button', { name: 'Sign out', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Sign in to account', exact: true })).toBeVisible();
+    await page.goto('/#/login');
+    await expect(page.locator('.join-note')).toContainText('Guest rooms work without an account.');
+    await expect(page.locator('.join-note').getByRole('link', { name: 'Sign in', exact: true })).toHaveAttribute('href', '#/account');
+    await expect(page.getByLabel('Username', { exact: true })).toHaveValue('');
     expect(errors).toEqual([]);
   });
 }

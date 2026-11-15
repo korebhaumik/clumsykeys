@@ -19,6 +19,16 @@ names, distinct handles for duplicate display names and inline marker geometry.
 Lint, frontend/backend type/docs checks and the frontend build passed; the
 updated table screenshot was inspected. No hosted or database change was made.
 
+## Guest room notice verification
+
+On **15 November 2026**, limited the room-access guest/sign-in explanation to a
+settled signed-out session. Signed-in users and pending session restoration do
+not render it. Four account browser cases passed at 320/1440px in both themes,
+checking its absence while signed in and its return, link destination and blank
+room alias after signing out. Lint, frontend/backend type/docs checks and the
+frontend build passed. No transport, authentication control or hosted state was
+changed; the broader test evidence below retains its earlier scope.
+
 ## Hosted handle seed and hover verification
 
 On **15 November 2026**, the requested hosted inspection found that

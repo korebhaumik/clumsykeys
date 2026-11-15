@@ -72,7 +72,9 @@
 			<button class="button button-primary" type="submit">
 				Join room <span aria-hidden="true">→</span>
 			</button>
-			<p class="muted join-note">Guest rooms work without an account. <a href="#/account">Sign in</a> to save your races.</p>
+			{#if $account.ready && !$account.session}
+				<p class="muted join-note">Guest rooms work without an account. <a href="#/account">Sign in</a> to save your races.</p>
+			{/if}
 		</form>
 	</section>
 </div>

@@ -68,6 +68,8 @@ Current page patterns:
 - **Room access:** an introduction and a clearly labeled join form sit side by
   side when space permits and stack on narrow screens. The two-player preview
   is scripted illustration, not a live room or fabricated player statistics.
+  The guest explanation and sign-in link appear only after session restoration
+  confirms the visitor is signed out.
 - **Account:** sign-in controls and a quiet introduction share the page; the
   signed-in dashboard fills the container. The centered display name opens its editor on double-click; keyboard activation
   with Enter or Space works through its semantic button. Hover adds an accent-wash highlight, accent text and an underline; the tooltip
