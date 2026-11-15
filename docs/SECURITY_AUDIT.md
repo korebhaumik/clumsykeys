@@ -8,6 +8,22 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## README showcase verification
+
+On **15 November 2026**, refreshed the README and added seven screenshots of the
+actual local application, using fictional account/result data and a real local
+Socket.IO room. Both themes are represented, and every image was visually
+inspected. The README labels the demo data; image paths, alternative text, local
+links and GitHub Markdown rendering were checked. The linked live app returned
+HTTP 200.
+
+Against baseline `fd7873f` plus these documentation assets, frozen dependency
+installation, lint/design audit, dead-code checks, frontend/backend type/docs
+checks, **56 unit/HTTP/socket tests**, **152 browser cases** and both builds passed.
+The complete browser rerun resolves the earlier shared leaderboard-fixture
+failure recorded below. No application behavior changed; credential/advisory
+scans, SQL/Auth integration and hosted mutation checks were not repeated.
+
 ## Compact leaderboard player verification
 
 On **15 November 2026**, simplified each player cell to its unique `@handle`,
