@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { account, authRedirect } from "../../state/account.store";
 	import { supabase } from "../../services/supabase";
+	import { displayName as publicName } from "./display-name";
 	import AccountDashboard from "./AccountDashboard.svelte";
 	import GithubIcon from "../../components/icons/GithubIcon.svelte";
 	import ArrowRightIcon from "../../components/icons/ArrowRightIcon.svelte";
@@ -17,7 +18,7 @@
 	let passwordVisible = $state(false);
 	let githubPending = $state(false);
 	let signedIn = $derived(!!$account.session && !$account.recovering);
-	let profileName = $derived(String($account.session?.user.user_metadata.display_name || $account.session?.user.user_metadata.full_name || "Welcome back"));
+	let profileName = $derived(publicName($account.session?.user.user_metadata) || "Welcome back");
 
 	async function signInWithGithub() {
 		if (!supabase || busy) return;
@@ -77,7 +78,7 @@
 <section class="account-page" class:signed-in={signedIn} aria-labelledby="account-title">
 	{#if signedIn}
 		{@render notices()}
-		<AccountDashboard user={$account.session!.user} name={profileName} {busy} onsignout={signOut} />
+		{#key $account.session!.user.id}<AccountDashboard user={$account.session!.user} name={profileName} {busy} onsignout={signOut} />{/key}
 	{:else}
 		<div class="account-intro">
 			<p class="eyebrow">Your typing journey</p>

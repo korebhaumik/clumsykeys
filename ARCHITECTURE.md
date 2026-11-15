@@ -20,7 +20,8 @@ flowchart LR
     Server -->|"Token verification + Data API/RPC · server secret"| Supabase
 ```
 
-The browser uses Supabase for Auth. Application account/history/leaderboard
+The browser uses Supabase for Auth and display-name metadata edits. A database
+trigger synchronizes that name to the public profile used by solo rankings. Application account/history/leaderboard
 requests go through Express. The server verifies user tokens through Supabase
 Auth and derives ownership itself; request fields do not establish an account
 identity. Its privileged Data API client must enforce authorization independently
@@ -149,7 +150,15 @@ the secret at runtime. Backend startup loads root `.env` for local use without
 overriding inherited deployment variables. Supabase credentials and migration
 operator credentials have separate purposes.
 
-All application database writes go through validated backend services and
+Handle claims use authenticated `PUT /api/account/handle` and a service-only RPC.
+A lowercase format constraint and unique index arbitrate simultaneous claims;
+handles are stored separately from Auth metadata, display names and room aliases.
+A one-time migration seeds existing unclaimed profiles from public provider/name
+metadata with collision suffixes. New accounts retain a null handle until their
+owner chooses one. Leaderboard
+projections include the current handle alongside the display name.
+
+Saved-result and preference database writes go through validated backend services and
 restricted RPC functions. RLS separately permits owner-scoped authenticated
 reads; anonymous roles have no application-table grants. Practice summary/detail
 and race/participant writes are atomic and retry-safe. Preferences use optimistic
@@ -183,7 +192,7 @@ Public output contains display names and score fields with pseudonymous player
 keys, not account UUIDs, preferences or per-word history. Runtime failures are
 shown as failures; synthetic scores belong only in tests.
 
-The [Supabase guide](docs/SUPABASE.md) lists all five migrations, setup, grants,
+The [Supabase guide](docs/SUPABASE.md) lists all eight migrations, setup, grants,
 callbacks and database verification. Plausibility checks are not cheat resistance.
 
 ## Build and verification boundaries

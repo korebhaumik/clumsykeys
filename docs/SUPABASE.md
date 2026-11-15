@@ -64,7 +64,7 @@ an actionable startup error. Keep all `.env` files out of source control.
 
 ## Migration inventory
 
-Apply all five versioned migrations in order; do not stop after the original
+Apply all eight versioned migrations in order; do not stop after the original
 account tables. `npm run db:plan` shows pending changes without applying them.
 `npm run db:push` applies changes to the configured hosted project and is an
 operator action, not an application startup task.
@@ -76,9 +76,13 @@ operator action, not an application startup task.
 | `20261113000100_account_dashboard.sql` | Service-only lifetime solo dashboard aggregation. |
 | `20261113000200_dashboard_characters.sql` | Extend dashboard aggregation with total typed characters. |
 | `20261113000300_solo_leaderboards.sql` | Service-only public solo score projection and ranking index. |
+| `20261115000100_account_display_names.sql` | Synchronize public profile names on Auth metadata updates and repair blank OAuth profiles. |
+| `20261115000200_unique_account_handles.sql` | Nullable unique handles, a service-only claim RPC, and handle projection in solo rankings. |
+| `20261115000300_seed_existing_handles.sql` | Seed existing unclaimed handles from public names, preserving claims and resolving collisions. |
 
 The SQL source defines owner-only reads, no anonymous table access, and
-backend-only application writes. Verify migration history and grants in each
+backend-only result/preference writes. Auth signup and metadata updates maintain
+profiles through a restricted database trigger. Verify migration history and grants in each
 deployed environment; this guide does not claim a new hosted database audit.
 
 ## GitHub sign-in
@@ -137,7 +141,7 @@ See [Supabase's GitHub setup guide](https://supabase.com/docs/guides/auth/social
   anonymizes retained shared race entries. Account deletion is an administrative
   Supabase operation; the app does not add a deletion UI.
 
-The [application API contract](api.openapi.json) describes all eleven HTTP
+The [application API contract](api.openapi.json) describes all twelve HTTP
 operations: health, live-room roster, account status, account/preferences,
 dashboard, solo result writes/details, private practice/race history, saved race
 scoreboards, and public solo rankings. Its `x-socketio` extension documents all
@@ -257,12 +261,65 @@ abandoned and multiplayer activity is excluded. Different test settings can
 produce different bests; each card shows its language and test type.
 The page supports loading, empty, failed and refresh states without replacing a
 failed request with fabricated statistics. Name, join date and optional bio/website
-come from the authenticated profile metadata; no profile editor is added here.
+come from authenticated metadata. The display-name editor saves through Supabase
+Auth `updateUser`; double-click the centered display name, or activate it with
+Enter/Space, to open its editor. The database trigger updates `profiles.display_name` in the same
+transaction so existing solo leaderboard results use the current name. Apply the
+display-name migration before deploying the editor. It backfills blank or
+email-like profile names from Auth metadata without replacing existing public
+names. Names use nonblank `display_name`, `full_name`, `name`, `user_name`, then
+`preferred_username`, bounded to 50 characters and excluding email-like values.
+Edits require 1–50 trimmed characters without `@`. Failed saves retain the draft
+for retry. Other profile fields remain read-only.
+
+Room access prefills the signed-in display name, including OAuth fallbacks, while
+allowing an independent room alias. Typing into the field protects that draft
+from session refreshes; account switching resets it to the new account default.
+Changing a public name does not rewrite archived multiplayer aliases.
 
 Dashboard statistics also include all typed characters (correct + incorrect + extra)
 and average test duration (total saved typing seconds / completed tests). Migration
 `20261113000200_dashboard_characters.sql` adds the character total; duration uses
 the existing totals and displays seconds to one decimal place.
+
+## Unique public handles
+
+Display names remain editable and may be shared. New accounts have no handle until the owner chooses one on the account page.
+The one-time existing-user backfill assigns unclaimed profiles a handle from
+provider `user_name`, `preferred_username`, then public display name. It lowercases
+and replaces unsupported characters with underscores, bounds the result to 24
+characters and falls back to `typist` without exposing email addresses. Collisions
+use `_2`, `_3`, etc., shortening the base to keep the limit. Existing claims and
+display names stay unchanged. A short table lock serializes the seed with handle
+updates. Its maintenance helper is denied to browser and backend API roles; only
+a migration operator can rerun it. Reruns skip profiles that already have a handle.
+`GET /api/account` returns a nullable `handle`. Authenticated
+`PUT /api/account/handle` trims and lowercases 3–24 ASCII letters, digits or
+underscores, and saves only for the verified token owner through
+`save_account_handle`. The database format constraint and unique index enforce
+case-insensitive uniqueness even for concurrent requests. Browser/anonymous
+roles cannot call that RPC or write profiles directly. Auth metadata edits do
+not change a claimed handle.
+
+Invalid input returns 400; an already claimed value returns 409 with an inline
+“Handle already taken” message and leaves the previous value intact. Saves share
+the account write quota (429 with Retry-After); transient Auth/database failures
+return 503. The form retains failed drafts for retry. Same-owner retries are
+idempotent; competing edits by the same account use the last successful write.
+Double-click the accent-colored handle, or activate it with Enter/Space, to edit
+it without a separate Change button. Changing a handle releases its previous value; account deletion releases its
+handle as the profile is deleted. The public solo projection retains the current display name and handle; the
+player column displays only `@handle`, falling back to the display name when
+no handle is assigned. The “you” marker stays on the same line;
+no account UUID is added to the public projection. Handles are public identifiers,
+not credentials. Room aliases and archived race names remain independent.
+
+Apply the display-name, handle and existing-user seed migrations before deploying these features.
+On 15 November 2026 these three migrations were explicitly applied to the
+configured hosted project for the requested existing-user seed. The one existing
+profile and its public solo-ranking projection were verified with the seeded
+handle. This is scoped database/read evidence, not a new provider, frontend
+deployment or hosted Auth write test.
 
 ## Maintenance
 

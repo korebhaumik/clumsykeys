@@ -94,7 +94,7 @@ both sides. Never pass the secret key as a frontend build variable or Docker
 build argument. The Docker context excludes `.env` files; configure secrets on
 the deployment service. Migration/CLI credentials do not belong in the runtime
 image. Apply reviewed migrations with `npm run db:plan` then `npm run db:push`
-before releasing code that depends on them. All five migrations listed in [Supabase setup](SUPABASE.md#migration-inventory)
+before releasing code that depends on them. All eight migrations listed in [Supabase setup](SUPABASE.md#migration-inventory)
 are needed for the current accounts, dashboard and public solo leaderboards.
 Configure Auth callbacks for the real
 frontend URL as described in [Supabase setup](SUPABASE.md). Same-origin proxies

@@ -99,16 +99,19 @@ export type Database = {
                 Row: {
                     created_at: string;
                     display_name: string;
+                    handle: string | null;
                     id: string;
                 };
                 Insert: {
                     created_at?: string;
                     display_name?: string;
+                    handle?: string | null;
                     id: string;
                 };
                 Update: {
                     created_at?: string;
                     display_name?: string;
+                    handle?: string | null;
                     id?: string;
                 };
                 Relationships: [
@@ -226,6 +229,9 @@ export type Database = {
             [_ in never]: never;
         };
         Functions: {
+            seed_existing_account_handles: { Args: Record<PropertyKey, never>; Returns: undefined };
+            account_display_name: { Args: { metadata: Json }; Returns: string };
+            save_account_handle: { Args: { p_user_id: string; p_handle: string }; Returns: string };
             read_account_dashboard: {
                 Args: {
                     p_user_id: string;

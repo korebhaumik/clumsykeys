@@ -25,7 +25,7 @@
 				{#each rows as row (row.id)}
 					<tr class:own={row.userId === currentUserId} aria-current={row.userId === currentUserId ? "true" : undefined}>
 						<td><span class="rank" class:podium={row.rank <= 3} aria-label={`Rank ${row.rank}`}>{row.rank <= 3 ? "✦ " : ""}{row.rank}</span></td>
-						<th scope="row" class="player">{row.username}{#if row.userId === currentUserId}<span class="you">you</span>{/if}</th>
+						<th scope="row" class="player">{#if row.handle}<span class="handle">@{row.handle}</span>{:else}{row.username}{/if}{#if row.userId === currentUserId}<span class="you">you</span>{/if}</th>
 						<td>{number(row.wpm)}</td><td>{number(row.raw)}</td><td>{number(row.accuracy)}%</td><td>{number(row.deviation)}</td><td>{row.correct}/{row.incorrect}/{row.extra}</td>
 						<td>{languageOptions(row.mode).find(option => option.value === row.language)?.label}</td><td><time datetime={row.date}>{date(row.date)}</time></td>
 					</tr>
@@ -45,6 +45,7 @@
 	thead th { color: var(--muted); font-weight: var(--weight-400); }
 	tbody tr:nth-child(even) { background: var(--surface); }
 	abbr { text-decoration: none; }
+	.handle { color: var(--accent); }
 	.player { font-weight: var(--weight-400); }
 	.rank { color: var(--muted); }
 	.podium { color: var(--accent); font-weight: var(--weight-700); }

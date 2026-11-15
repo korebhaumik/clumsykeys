@@ -8,6 +8,121 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Compact leaderboard player verification
+
+On **15 November 2026**, simplified each player cell to its unique `@handle`,
+falling back to the display name for unassigned accounts. The current-player
+marker stays inline at the existing compact table scale. The public API retains
+both fields; this is presentation only. All **15 handle/leaderboard browser
+cases** passed across both themes and narrow/desktop widths, including fallback
+names, distinct handles for duplicate display names and inline marker geometry.
+Lint, frontend/backend type/docs checks and the frontend build passed; the
+updated table screenshot was inspected. No hosted or database change was made.
+
+## Hosted handle seed and hover verification
+
+On **15 November 2026**, the requested hosted inspection found that
+`profiles.handle` was missing (PostgREST 42703), causing the account read failure.
+The reviewed migration plan contained the pending display-name/unique-handle
+migrations plus `20261115000300_seed_existing_handles.sql`. After local validation,
+all three were applied to the configured hosted project under the user's request
+to seed existing accounts. The single existing profile received `korebhaumik`;
+read-only verification through the real account adapter and solo leaderboard
+projection confirmed it, with zero unassigned profiles. No provider configuration
+or deployed frontend/backend service was changed.
+
+The seed preserves claimed handles, prefers non-email public provider/name
+metadata, uses bounded collision suffixes and serializes profile writes during
+the short backfill. Its security-definer helper has an empty search path and is
+revoked from public, anonymous, authenticated and backend API roles. Local tests
+verify collisions, email fallback, claim preservation, reruns and access grants.
+New accounts still choose their handle explicitly.
+
+The Change handle button was replaced by direct double-click/Enter/Space editing
+of the handle. Handles use the accent by default on accounts and rankings;
+editable display names/handles gain an accent-wash background and underline on
+hover. Lint/dead-code/type/docs checks, both builds, **56 unit/transport tests**,
+**86 local SQL assertions**, real local Supabase integration and **eight affected
+browser cases** passed. A local SQL test initially could not include a host file
+inside the database container; it now exercises the maintenance helper directly.
+The hover cases explicitly select their theme after shared OAuth preference
+restoration; the corrected rerun passed both themes at 320/1440px. No wider browser
+suite, credential scan or dependency advisory audit was repeated for this pass.
+
+## Display-name double-click verification
+
+On **15 November 2026**, replaced the display-name pencil with direct double-click
+editing of the centered name. The native button retains Enter/Space activation,
+the global focus outline, a hover hint and focus return after Save/Cancel. A
+single pointer click does not open the editor. The now-unreferenced new icon was
+removed after checking its imports. Display-name persistence and handle claims
+are unchanged.
+
+Lint/design audit, dead-code checks, frontend/backend type/docs checks and both
+builds passed. **16 account/name/handle browser cases** passed in both themes at
+320/1440px. A further **four name cases** passed with explicit Enter/Space,
+single/double-click, centering and focus-return assertions. The wider suite and
+database evidence below retain their earlier scopes; no hosted changes were made.
+
+## Unique-handle verification
+
+On **15 November 2026**, added nullable lowercase handles separate from display
+names, Auth metadata and multiplayer aliases. The authenticated handle endpoint
+uses verified owner identity and shares the existing account write quota.
+Validation allows 3–24 ASCII letters/digits/underscores; a database constraint and
+case-insensitive unique index arbitrate concurrent claims. Only the backend may
+execute the write RPC. Same-owner retries are safe; conflicts return 409 without
+replacing either owner's handle. Existing accounts choose a handle explicitly.
+Handle changes and account deletion release previous values. Public rankings
+include current handles without exposing additional private profile fields.
+
+Lint/design audit, dead-code checks, frontend/backend types, documentation checks,
+**56 unit/HTTP/socket tests**, both builds and independent Redocly OpenAPI
+validation passed. **78 pgTAP assertions** and real local Auth/Data API integration
+passed, including concurrent claims with exactly one winner and current handle
+projection on existing solo results after a rename. The local modeled fixture
+covers the HTTP adapter; it does not establish hosted settings. Initial test
+failures exposed a shared quota exhausted by another test and a handle-prefix
+selector matching two rows; the corrected isolated accounts/exact selectors pass.
+An invalid nullable-handle schema was corrected and independent validation rerun.
+The full Chrome run passed **151 of 152 cases**; new high-score fixture users
+pushed an existing test's owner beyond its assumed first leaderboard page. The
+handle fixtures now use a separate 120-second board, and all **15 handle and
+leaderboard cases passed together on rerun**, including the previously failing
+case. The full suite was not repeated after this test-data-only correction. Browser screenshots were
+inspected in both themes at narrow/desktop sizes. The Postman CLI does not support
+`status`; verification used the existing fixture directly, real local Supabase
+and Redocly, with no Postman workspace publication. No hosted migration, new
+dependency audit or credential scan was performed.
+
+## Account display-name verification
+
+On **15 November 2026**, added public display-name editing through Supabase
+Auth metadata. A security-definer trigger with an empty search path synchronizes
+`profiles.display_name` on metadata updates; its helper is unavailable to browser
+roles. OAuth fallback names are bounded to 50 characters and skip email-like
+values. The migration backfills blank/email-like profiles without replacing
+existing public names. Saved multiplayer aliases remain historical snapshots.
+The room form defaults to account metadata but preserves a typed alias during
+same-account session updates, resetting on account switches.
+
+Frozen installation, lint/design audit, dead-code checks, frontend/backend
+checks, documentation checks, **54 unit/integration tests** and both builds
+passed. The migration was applied only to local Supabase: **68 pgTAP assertions**
+and the real local Auth/Data API integration passed, including a name update
+observed through the backend profile read. Browser dependencies use the local
+modeled fixture; real GitHub consent/provider refresh and hosted migration are
+not freshly verified. Initial browser test failures came from an incomplete
+practice payload and an assertion targeting the hidden result table rather than
+the lobby roster; the corrected name flows pass. The full **148-case Chrome suite** passed; a
+subsequent **12-case account/name rerun** covered the pencil control and editor
+layout in both themes at 320/1440px. The final supplied icon passed another
+four name-flow cases; a further four-case rerun verified that the name itself
+stays centered before and during editing with the pencil alongside. Screenshots were inspected in both themes. Existing
+Vite/Knip hints remain.
+No hosted migration, provider configuration, dependency advisory scan or
+credential audit was performed.
+
 ## Keyboard tab-order verification
 
 On **15 November 2026**, removed the static leaderboard panel from the tab
@@ -206,7 +321,7 @@ security workflow. No hosted account, migration, provider or deployment setting
 was changed or freshly verified. Local database checks used the local stack;
 they do not establish the state of a hosted project.
 
-The general [API specification](api.openapi.json) describes all eleven HTTP
+The general [API specification](api.openapi.json) describes all twelve HTTP
 operations and the application Socket.IO events. [DEPLOYMENT.md](DEPLOYMENT.md)
 covers hosting controls; [SUPABASE.md](SUPABASE.md) covers schema and Auth setup.
 
@@ -256,7 +371,7 @@ still require triage. Re-run the audit whenever dependencies or the registry cha
 
 ## Database controls and verification boundary
 
-The five migration files define six RLS-enabled application tables, owner-scoped
+The eight migration files define six RLS-enabled application tables, owner-scoped
 SELECT policies, no anonymous table grants, backend-only application writes, and
 restricted RPC execution. Functions set an explicit empty `search_path`.
 The public solo board is a service-only projection; private table access remains
@@ -322,7 +437,7 @@ handler input/output; `check:docs` also does not prove semantic equivalence.
   fabricated counters before calling rankings verified competition.
 - Configure and verify exact production origins, frontend CSP/HTTPS headers,
   proxy-aware abuse controls and single-replica backend deployment.
-- Confirm all five migrations, RLS/grants, exposed schemas, provider settings,
+- Confirm all eight migrations, RLS/grants, exposed schemas, provider settings,
   Auth redirects and real email delivery on the intended hosted project.
 - Triage the two development advisories and keep dependency/Action/image update
   processes active. Require Security checks through repository branch protection.

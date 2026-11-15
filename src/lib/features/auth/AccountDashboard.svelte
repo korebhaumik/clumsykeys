@@ -1,4 +1,6 @@
 <script lang="ts">
+	import AccountHandle from "./AccountHandle.svelte";
+	import DisplayNameEditor from "./DisplayNameEditor.svelte";
 	import type { User } from "@supabase/supabase-js";
 	import type { AccountDashboard } from "../../../../backend/src/persistence.contract";
 	import { accountApi } from "../../services/account-api";
@@ -54,7 +56,8 @@
 	<div class="profile-banner" aria-hidden="true"></div>
 	<header class="profile-identity">
 		<div class="profile-avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}</div>
-		<h2>{name}</h2>
+		<DisplayNameEditor {name} accountId={user.id} />
+		<AccountHandle accountId={user.id} />
 		{#if Number.isFinite(joined.getTime())}<p class="joined">Joined <time datetime={user.created_at}>{joined.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</time></p>{/if}
 		<p class="profile-bio">{bio}</p>
 		{#if website}<a class="profile-website" href={website.href} target="_blank" rel="noopener noreferrer"><GlobeIcon />{website.hostname}</a>{/if}
@@ -110,7 +113,6 @@
 	.profile-banner { height: clamp(var(--dimension-6rem), var(--dimension-7vw), var(--dimension-9rem)); border-radius: var(--radius-0_55rem); background: linear-gradient(110deg, var(--accent), var(--caret)); }
 	.profile-identity { text-align: center; max-width: var(--dimension-38rem); margin-inline: auto; }
 	.profile-avatar { position: relative; display: grid; place-items: center; width: var(--dimension-5rem); height: var(--dimension-5rem); margin: calc(var(--dimension-2_5rem) * -1) auto 0; border: var(--dimension-0_35rem) solid var(--inset); border-radius: 50%; background: linear-gradient(135deg, var(--profile-avatar-start), var(--profile-avatar-end)); color: var(--profile-avatar-ink); font-size: var(--text-1_8rem); font-weight: var(--weight-700); }
-	.profile-identity h2 { margin-top: var(--dimension-0_5rem); font-size: var(--text-1_8rem); letter-spacing: var(--tracking-negative-_045em); overflow-wrap: anywhere; }
 	.joined { margin-top: var(--dimension-0_25rem); color: var(--muted); font-size: var(--text-0_75rem); }
 	.profile-bio { margin-top: var(--dimension-0_75rem); font-size: var(--text-0_9rem); line-height: var(--leading-1_65); overflow-wrap: anywhere; }
 	.profile-website { display: inline-flex; align-items: center; gap: var(--dimension-0_35rem); margin-top: var(--dimension-0_65rem); color: var(--accent); font-size: var(--text-0_875rem); overflow-wrap: anywhere; }
@@ -166,6 +168,5 @@
 		.stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--dimension-1_25rem) var(--dimension-0_75rem); }
 		dd { font-size: var(--text-1_45rem); }
 		.bests-grid { grid-template-columns: minmax(0, 1fr); }
-		.profile-identity h2 { font-size: var(--text-1_45rem); }
 	}
 </style>

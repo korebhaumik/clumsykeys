@@ -6,7 +6,7 @@ export type LeaderboardFilters = {
 	range: "all" | "month" | "week" | "day"; page: number;
 };
 export type SoloScore = {
-	id: string; userId: string; username: string; mode: LeaderboardMode; language: string;
+	id: string; userId: string; username: string; handle?: string | null; mode: LeaderboardMode; language: string;
 	test: TestFormat; length: number; wpm: number; raw: number; accuracy: number; deviation: number;
 	correct: number; incorrect: number; extra: number; date: string;
 };

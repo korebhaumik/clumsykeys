@@ -13,6 +13,7 @@ export type Persistence = {
 	leaderboard(filters: LeaderboardFilters, viewer: string | null): Promise<LeaderboardPage>;
 	verify(token: string): Promise<Identity>;
 	account(userId: string): Promise<AccountData>;
+	saveHandle(userId: string, handle: string): Promise<string>;
 	dashboard(userId: string): Promise<AccountDashboard>;
 	savePreferences(userId: string, data: Json, revision: number): Promise<number>;
 	savePractice(userId: string, result: PracticeSubmission): Promise<void>;
@@ -51,12 +52,17 @@ export function createSupabasePersistence(config: { url: string; secret: string 
 		},
 		async account(userId) {
 			const [profile, preferences] = await Promise.all([
-				client.from("profiles").select("display_name").eq("id", userId).maybeSingle(),
+				client.from("profiles").select("display_name, handle").eq("id", userId).maybeSingle(),
 				client.from("user_preferences").select("data, revision").eq("user_id", userId).maybeSingle(),
 			]);
 			check(profile.error); check(preferences.error);
-			return { displayName: profile.data?.display_name ?? "", preferences: parsePreferences(preferences.data?.data) ?? null,
+			return { displayName: profile.data?.display_name ?? "", handle: profile.data?.handle ?? null, preferences: parsePreferences(preferences.data?.data) ?? null,
 				revision: preferences.data?.revision ?? 0 };
+		},
+		async saveHandle(userId, handle) {
+			const { data, error } = await client.rpc("save_account_handle", { p_user_id: userId, p_handle: handle });
+			if (error?.code === "23505") throw new PersistenceError(409, "Handle already taken. Choose another handle.");
+			check(error); return data!;
 		},
 		async dashboard(userId) {
 			const { data, error } = await client.rpc("read_account_dashboard", { p_user_id: userId });

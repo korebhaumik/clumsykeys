@@ -20,11 +20,25 @@ try {
   const db = createSupabasePersistence({ url: config.API_URL, secret: config.SECRET_KEY });
   const identity = await db.verify(first.data.session.access_token); assert.equal(identity.id, users[0]);
   assert.equal((await db.account(users[0])).displayName, 'Local smoke test');
-  const result = { id: randomUUID(), mode: 'prose' as const, language: 'english', settings: {}, stats: {
+  const renamed = await browser.auth.updateUser({ data: { display_name: 'Renamed typist' } });
+  assert.ifError(renamed.error);
+  assert.equal((await db.account(users[0])).displayName, 'Renamed typist');
+  const suffix = randomUUID().slice(0, 8);
+  assert.equal(await db.saveHandle(users[0], `  Alex_${suffix}  `), `alex_${suffix}`);
+  await assert.rejects(db.saveHandle(users[1], `ALEX_${suffix}`), /already taken/);
+  const claims = await Promise.allSettled(users.map(id => db.saveHandle(id, `race_${suffix}`)));
+  assert.equal(claims.filter(result => result.status === 'fulfilled').length, 1);
+  assert.equal(claims.filter(result => result.status === 'rejected').length, 1);
+  assert.ok((await db.account(users[0])).handle);
+  const result = { id: randomUUID(), mode: 'prose' as const, language: 'english', settings: { timer: 30 }, stats: {
     correct: 40, incorrect: 0, extra: 0, elapsedSeconds: 10, wpm: 60, raw: 60, accuracy: 100, deviation: 0, samples: [], history: [],
   } };
   await db.savePractice(users[0], result); await db.savePractice(users[0], result);
   assert.equal((await db.practiceHistory(users[0], 0)).length, 1);
+  const filters = { mode: 'prose' as const, language: 'english', test: 'time' as const, length: 30, range: 'all' as const, page: 1 };
+  assert.equal((await db.leaderboard(filters, users[0])).currentUser?.handle, (await db.account(users[0])).handle);
+  await db.saveHandle(users[0], `renamed_${suffix}`);
+  assert.equal((await db.leaderboard(filters, users[0])).currentUser?.handle, `renamed_${suffix}`);
   assert.equal(await db.practiceDetail(users[1], result.id), null);
   const ownRead = await browser.from('practice_results').select('id'); assert.ifError(ownRead.error); assert.equal(ownRead.data!.length, 1);
   const deniedWrite = await browser.from('practice_results').delete().eq('id', result.id); assert.ok(deniedWrite.error);

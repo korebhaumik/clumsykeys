@@ -5,11 +5,20 @@
 	import RocketIcon from "../lib/components/icons/RocketIcon.svelte";
 	import UserIcon from "../lib/components/icons/UserIcon.svelte";
 	import HashIcon from "../lib/components/icons/HashIcon.svelte";
+	import { account } from "../lib/state/account.store";
+	import { displayName } from "../lib/features/auth/display-name";
 	import RacePreview from "../lib/features/multiplayer/RacePreview.svelte";
 
 	const userId = uuidv4();
 	let username = $state("");
 	let roomId = $state("");
+	let edited = $state(false);
+	let owner = $state<string | undefined>();
+	$effect(() => {
+		const current = $account.session?.user;
+		if (owner !== current?.id) { owner = current?.id; edited = false; }
+		if (!edited) username = displayName(current?.user_metadata);
+	});
 
 	$effect(() => {
 		roomId = new URLSearchParams(router.querystring).get("room") ?? "";
@@ -54,7 +63,7 @@
 		<form class="stack" onsubmit={(event) => { event.preventDefault(); handleSubmit(); }}>
 			<label class="field">
 				Username
-				<span class="join-input"><UserIcon /><input type="text" placeholder="e.g. Ada" required autocomplete="nickname" bind:value={username} /></span>
+				<span class="join-input"><UserIcon /><input type="text" placeholder="e.g. Ada" required maxlength="50" autocomplete="nickname" oninput={() => edited = true} bind:value={username} /></span>
 			</label>
 			<label class="field">
 				Room ID

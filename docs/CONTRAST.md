@@ -127,6 +127,19 @@ pairwise line distinguishability, every overlap or full chart accessibility.
 - Account-avatar gradients, translucent backgrounds, hover/disabled states, colored navigation glyphs, Tailwind-colored credit links, all rendered race overlaps, speed bands, and every chart annotation are not exhaustively measured here. Charts also use legends/labels and dashed variants; those do not establish color-contrast compliance on their own.
 - Forced-color rendering, alternate browser engines, real font loading, zoom, focus visibility through every overlay, and assistive-technology behavior need separate verification.
 
+The account display-name editor added on **15 November 2026** reuses page ink,
+muted text, error text, inset inputs and existing primary/secondary buttons.
+Source-token recalculation gives Classic ink/muted/error on page at
+19.08/6.36/5.88:1, Dark Forest accent/focus on page at 9.51:1 and error
+on page at 5.48:1. The editable display name uses page ink and the global focus outline; its
+previous pencil control has been removed. The unique-handle form uses the same
+input, error and action roles. Account and leaderboard handles now use the accent
+by default; editable names/handles gain an accent-wash background and underline
+on hover. Recalculated on **15 November 2026**, accent on page/hover (also the
+selected leaderboard row) is **9.51/6.06:1** in Dark Forest and
+**19.08/16.96:1** in Classic. These pairs pass normal-text contrast. No new palette or
+background was added; existing control-boundary limitations remain applicable.
+
 ## Maintenance
 
 Recalculate this report whenever palette tokens, theme aliases, opacity, component backgrounds, focus indicators or chart colors change. Record the actual source pair and transparency, keep failing cases visible, and update the reviewed date only after recalculation. `DESIGN.md` describes the semantic roles; this file records measurements and remaining contrast work.
