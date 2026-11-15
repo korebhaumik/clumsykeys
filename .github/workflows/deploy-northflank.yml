@@ -25,10 +25,7 @@ jobs:
   deploy:
     name: Update Northflank Deployment
     runs-on: ubuntu-latest
-    # Temporarily disabled for both automatic and manual runs.
-    # To re-enable, restore the condition below:
-    # if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
-    if: ${{ false }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Download Build Tag Artifact
         if: ${{ github.event_name == 'workflow_run' }}

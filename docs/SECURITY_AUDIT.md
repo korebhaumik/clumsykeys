@@ -8,6 +8,16 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Northflank CD re-enablement
+
+On **15 November 2026**, restored the existing deploy-job condition allowing
+manual dispatch or a successful main-branch Docker build. Failed builds remain
+excluded. Pinned actions, image-tag validation and serialized production deploys
+are unchanged. Documentation/link checks and whitespace validation passed.
+This is a workflow configuration change; no workflow was dispatched and no
+hosted deployment or service health was verified. The application test/build
+results below retain their recorded scope.
+
 ## README showcase verification
 
 On **15 November 2026**, refreshed the README and added seven screenshots of the
