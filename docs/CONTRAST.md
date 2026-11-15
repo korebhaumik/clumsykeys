@@ -10,6 +10,16 @@ Ratios use WCAG sRGB relative luminance: linearize each channel (`c / 12.92` whe
 
 These are source-color calculations for representative current combinations, not a screenshot-wide WCAG certification. The latest Chrome suite exercises both themes, keyboard focus and narrow layouts; it does not measure every rendered color pair.
 
+## Text selection
+
+Selection pairs were recalculated from source tokens on **15 November 2026**.
+The global `::selection` uses `--accent-ink` on `--accent`, including text with
+its own foreground color. Dark Forest uses `#151b1d` on `#9bcd86`
+(**9.51:1**); Classic uses `#ffffff` on `#000000` (**21.00:1**).
+Both pass the normal-text threshold. Forced-color mode delegates to system
+Highlight/HighlightText. Earlier measurements and known failures below retain
+their recorded scope.
+
 ## Text and primary actions
 
 | Theme | Current use | Foreground / background | Ratio | Normal text (4.5:1) |
