@@ -4,7 +4,7 @@ Last reviewed against the code and build configuration: **14 November 2026**.
 See [SECURITY_AUDIT.md](SECURITY_AUDIT.md) for actual check results and unverified
 hosting/database settings. No production deployment is performed by this guide.
 
-Northflank deployment is temporarily disabled with `if: ${{ false }}` on the deploy job in `.github/workflows/deploy-northflank.yml`. Automatic and manual runs skip deployment. Docker Hub builds and pushes remain active. To re-enable deployment, restore the original condition preserved in the workflow comment. The deployment steps below describe behavior after re-enabling it.
+Northflank CD is enabled in `.github/workflows/deploy-northflank.yml`. Successful Docker builds on `main` deploy automatically; failed builds skip deployment. Manual dispatch can deploy a previously published image tag. The workflow change takes effect after it reaches the default branch.
 
 The backend uses a two-workflow pipeline:
 
@@ -94,7 +94,7 @@ both sides. Never pass the secret key as a frontend build variable or Docker
 build argument. The Docker context excludes `.env` files; configure secrets on
 the deployment service. Migration/CLI credentials do not belong in the runtime
 image. Apply reviewed migrations with `npm run db:plan` then `npm run db:push`
-before releasing code that depends on them. All five migrations listed in [Supabase setup](SUPABASE.md#migration-inventory)
+before releasing code that depends on them. All eight migrations listed in [Supabase setup](SUPABASE.md#migration-inventory)
 are needed for the current accounts, dashboard and public solo leaderboards.
 Configure Auth callbacks for the real
 frontend URL as described in [Supabase setup](SUPABASE.md). Same-origin proxies
@@ -184,7 +184,7 @@ actions.
 
 Update this guide with changes to `vercel.json`, package/build commands,
 `backend/Dockerfile`, runtime paths, environment handling, transport/proxy setup,
-workflow triggers or deployment controls. Keep the disabled-deployment notice
-until the workflow condition actually changes. Record hosted verification only
+workflow triggers or deployment controls. Keep the deployment status
+aligned with the workflow condition. Record hosted verification only
 after checking the intended live service; build success alone is not a deployed
 health, WebSocket, CORS or account-persistence check.

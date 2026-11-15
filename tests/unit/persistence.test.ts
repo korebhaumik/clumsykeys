@@ -207,3 +207,21 @@ test('account write quota is tied to the verified account and exposes a retry de
   assert.equal(last!.status, 429); assert.ok(Number(last!.headers.get('retry-after')) > 0);
   assert.equal((await request('/api/account', tokenB)).status, 200);
 });
+
+test('handle claims authenticate owners, normalize case, reject conflicts and retain prior values', async () => {
+  const login = async (email: string) => (await (await fetch(upstream + '/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email, password: 'password123' }) })).json()).access_token as string;
+  const [tokenA, tokenB] = await Promise.all([login('handle-a@test.local'), login('handle-b@test.local')]);
+  const put = (token: string | null, body: unknown) => fetch(base + '/api/account/handle', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
+  assert.equal((await put(null, { handle: 'alexkeys' })).status, 401);
+  assert.equal((await put(tokenA, { handle: '@invalid' })).status, 400);
+  const own = await put(tokenA, { handle: '  AlexKeys  ', userId: 'somebody-else' });
+  assert.equal(own.status, 200); assert.deepEqual(await own.json(), { handle: 'alexkeys' });
+  assert.equal((await put(tokenA, { handle: 'ALEXKEYS' })).status, 200);
+  const conflict = await put(tokenB, { handle: 'AlexKeys' });
+  assert.equal(conflict.status, 409); assert.match((await conflict.json()).error, /Handle already taken/);
+  const read = (token: string) => fetch(base + '/api/account', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json());
+  assert.equal((await read(tokenA)).handle, 'alexkeys'); assert.equal((await read(tokenB)).handle, null);
+  assert.equal((await put(tokenB, { handle: 'alexcodes' })).status, 200);
+  const races = await Promise.all([put(tokenA, { handle: 'racing_handle' }), put(tokenB, { handle: 'RACING_HANDLE' })]);
+  assert.deepEqual(races.map(r => r.status).sort(), [200, 409]);
+});

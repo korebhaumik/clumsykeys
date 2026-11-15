@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from "express";
-import { isRecord, isUuid, parsePractice, parsePreferences } from "./persistence.contract";
+import { isRecord, isUuid, parseHandle, parsePractice, parsePreferences } from "./persistence.contract";
 import { PersistenceError, type Persistence } from "./persistence";
 import { createRateLimit } from "./security";
 
@@ -26,6 +26,11 @@ export function registerAccountRoutes(app: Express, persistence?: Persistence) {
 		};
 	}
 	app.get("/api/account", route(async (_req, res, id, db) => res.json(await db.account(id))));
+	app.put("/api/account/handle", route(async (req, res, id, db) => {
+		const handle = parseHandle(req.body?.handle);
+		if (!handle) throw new PersistenceError(400, "Use 3–24 letters, numbers or underscores for your handle.");
+		res.json({ handle: await db.saveHandle(id, handle) });
+	}));
 	app.get("/api/account/dashboard", route(async (_req, res, id, db) => res.json(await db.dashboard(id))));
 	app.put("/api/account/preferences", route(async (req, res, id, db) => {
 		const preferences = parsePreferences(req.body?.preferences);

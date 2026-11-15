@@ -2,6 +2,27 @@ purpose:
   stands_in_for: Supabase Auth and the application-specific PostgREST RPC/read paths; not the PostgreSQL engine.
   unblocks: Deterministic HTTP and browser account flows, upstream write outages, and retry verification without hosted data.
 assumptions:
+  - id: existing-handle-seed
+    status: supported
+    claim: The one-time database seed fills existing unclaimed handles while preserving claims and producing valid unique public values.
+    reason: Local SQL tests exercise the actual maintenance helper for duplicate names, existing claims, email-safe fallback and reruns. The requested hosted migration applied the missing name/handle schema and seed, then read-only adapter verification confirmed the one existing profile and leaderboard handle with no unassigned profiles.
+    verification: On 2026-11-15 all 86 local SQL assertions, 56 unit/transport tests and real local Supabase integration passed. Eight affected browser cases verify hover, direct name/handle editing and default accent colors against the fixture. Hosted changes were limited to the three reviewed migrations; no provider settings or deployed application was changed.
+    source: supabase/migrations/20261115000300_seed_existing_handles.sql; supabase/tests/database/seed_handles.test.sql; docs/SECURITY_AUDIT.md; tests/e2e/display-name.spec.ts; tests/e2e/handles.spec.ts
+    updated_at: "2026-11-15"
+  - id: unique-account-handles
+    status: supported
+    claim: Verified owners can claim canonical lowercase public handles independently of display names and room aliases; duplicate concurrent claims cannot both succeed.
+    reason: The local HTTP fixture models the service-only handle RPC and current handle projection. Real local PostgreSQL enforces the format and unique index; real local Auth/Data API integration races two claims and checks current handles on existing leaderboard results.
+    verification: On 2026-11-15 all 56 unit/HTTP/socket tests, 78 SQL assertions, and real local Auth/Data API integration passed. Four new browser flows against the fixture cover duplicate display names, conflicts, invalid input, failed-save retry, reload, leaderboard presentation and independent room aliases. A complete browser run had 151 passes and one fixture-data overlap failure; isolating handle scores to the 120-second board resolved it in a combined 15-case handle/leaderboard rerun. This does not verify hosted migrations.
+    source: backend/src/account.http.ts; backend/src/persistence.ts; supabase/migrations/20261115000200_unique_account_handles.sql; tests/e2e/handles.spec.ts; tests/integration/local-supabase.ts; supabase/tests/database/handles.test.sql
+    updated_at: "2026-11-15"
+  - id: account-display-name-sync
+    status: supported
+    claim: Auth metadata edits update the public profile used by solo leaderboards, while room aliases remain independent.
+    reason: The fixture models PUT /auth/v1/user metadata merging and OAuth full_name/user_name metadata. Separate local PostgreSQL tests exercise the real synchronization trigger and leaderboard projection; real local Auth confirms an SDK update reaches the profile.
+    verification: On 2026-11-15 all 68 local SQL assertions and the real local Supabase integration passed. Browser verification uses the fixture, not real GitHub consent. Hosted migration and provider refresh behavior remain unverified.
+    source: supabase/migrations/20261115000100_account_display_names.sql; supabase/tests/database/display_names.test.sql; tests/integration/local-supabase.ts; tests/e2e/display-name.spec.ts; postman/mocks/supabase/default.cjs
+    updated_at: "2026-11-15"
   - id: github-pkce-caller
     status: supported
     claim: The browser requests GitHub OAuth with an S256 PKCE challenge and restores its session from the modeled Supabase callback.

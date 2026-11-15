@@ -155,7 +155,7 @@
           "Accounts"
         ],
         "summary": "Read your account and preferences",
-        "description": "Read your account and preferences",
+        "description": "Read your display name, nullable unique handle and preferences. Existing accounts without a claimed handle return null.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -195,7 +195,8 @@
                       }
                     }
                   },
-                  "revision": 1
+                  "revision": 1,
+                  "handle": null
                 }
               }
             }
@@ -875,6 +876,89 @@
           }
         ]
       }
+    },
+    "/api/account/handle": {
+      "put": {
+        "operationId": "saveAccountHandle",
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Choose or change your unique public handle",
+        "description": "Authenticated owner only. Trim and lowercase the submitted handle; accept 3\u201324 ASCII letters, digits or underscores. The database atomically enforces case-insensitive uniqueness. A conflicting claim returns 409 with Handle already taken; the previous handle is retained. Retrying the same owner/handle is safe. Display names and room aliases are unaffected. Shares the account write quota; transient verification/database failures return 503.",
+        "responses": {
+          "200": {
+            "description": "Saved canonical handle.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "handle"
+                  ],
+                  "properties": {
+                    "handle": {
+                      "$ref": "#/components/schemas/Handle"
+                    }
+                  }
+                },
+                "example": {
+                  "handle": "alexkeys"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "409": {
+            "description": "Handle already claimed by another account. Choose another handle; the prior value is retained.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Handle already taken. Choose another handle."
+                }
+              }
+            }
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "handle"
+                ],
+                "properties": {
+                  "handle": {
+                    "type": "string",
+                    "pattern": "^\\s*[A-Za-z0-9_]{3,24}\\s*$"
+                  }
+                }
+              },
+              "example": {
+                "handle": "AlexKeys"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1362,12 +1446,23 @@
           "revision": {
             "type": "integer",
             "minimum": 0
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Handle"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "displayName",
           "preferences",
-          "revision"
+          "revision",
+          "handle"
         ]
       },
       "PreferenceUpdate": {
@@ -2054,6 +2149,16 @@
           "rank": {
             "type": "integer",
             "minimum": 1
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Handle"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2413,6 +2518,13 @@
         "required": [],
         "additionalProperties": false,
         "description": "A valid changed subset is accepted only from a joined racer while waiting. Changes clear all votes and cancel the countdown. Empty, unchanged, invalid or unknown-field patches are ignored."
+      },
+      "Handle": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]{3,24}$",
+        "minLength": 3,
+        "maxLength": 24,
+        "description": "Unique public handle stored in lowercase, without the @ prefix."
       }
     }
   },

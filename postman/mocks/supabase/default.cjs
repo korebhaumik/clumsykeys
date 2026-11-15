@@ -3,6 +3,7 @@
 const { createServer } = require('node:http');
 const { randomUUID, createHash } = require('node:crypto');
 const users = new Map(), tokens = new Map(), refresh = new Map();
+const handles = new Map();
 const preferences = new Map(), practices = new Map(), details = new Map(), rounds = new Map();
 let raceResults = [], failWrites = false;
 let writeDelay = 0;
@@ -12,6 +13,10 @@ function userFor(email, displayName = 'Test typist') {
     app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: { display_name: displayName },
     created_at: new Date().toISOString(), email_confirmed_at: new Date().toISOString(), identities: [] });
   return users.get(email);
+}
+function publicName(user) {
+  return ['display_name', 'full_name', 'name', 'user_name', 'preferred_username'].map(key => user?.user_metadata[key])
+    .find(value => typeof value === 'string' && value.trim() && !value.includes('@'))?.trim().slice(0, 50) || '';
 }
 function session(user) {
   const exp = Math.floor(Date.now() / 1000) + 3600;
@@ -56,10 +61,15 @@ const server = createServer(async (req, res) => {
     const found = grant === 'pkce' ? (body.code_verifier && (body.auth_code === 'github-code' ? userFor('github-oauth@test.local', 'GitHub typist') : body.auth_code === 'recovery-code' ? recoveryUser : body.auth_code === 'confirmation-code' ? confirmationUser : null))
       : grant === 'refresh_token' ? refresh.get(body.refresh_token)
       : body.password === 'password123' ? userFor(body.email) : null;
+    if (found && grant === 'pkce' && body.auth_code === 'github-code' && !found.app_metadata.providers.includes('github')) { found.app_metadata = { provider: 'github', providers: ['github'] }; found.user_metadata = { full_name: 'GitHub typist', user_name: 'github-typist' }; }
     return found ? send(200, session(found)) : send(400, { error: 'invalid_grant', error_description: 'Invalid login credentials', msg: 'Invalid login credentials' });
   }
   if (path === '/auth/v1/logout') return send(204);
   if (path === '/auth/v1/recover') { recoveryUser = userFor(body.email); return send(200, {}); }
+  if (path === '/auth/v1/user' && req.method === 'PUT' && user) {
+    if (body.data) user.user_metadata = { ...user.user_metadata, ...body.data };
+    return send(200, user);
+  }
   if (path === '/auth/v1/user') return user ? send(200, user) : send(401, { msg: 'Invalid JWT', code: 'bad_jwt' });
   if (!path.startsWith('/rest/v1/')) return send(501, { error: 'Endpoint not modeled' });
   if (req.headers.apikey !== 'sb_secret_test') return send(401, { message: 'Invalid API key' });
@@ -79,13 +89,18 @@ const server = createServer(async (req, res) => {
     for (const r of eligible) if (!best.has(r.user_id)) best.set(r.user_id, r);
     const ownId = [...best.values()].find(r => r.user_id === body.p_viewer)?.id;
     const ranked = [...best.values()].map((r, index) => {
-      const name = [...users.values()].find(u => u.id === r.user_id)?.user_metadata.display_name;
-      return { id: r.id, userId: createHash('md5').update(r.user_id).digest('hex'), username: name && !name.includes('@') ? name : 'Anonymous typist',
+      const name = publicName([...users.values()].find(u => u.id === r.user_id));
+      return { id: r.id, userId: createHash('md5').update(r.user_id).digest('hex'), username: name && !name.includes('@') ? name : 'Anonymous typist', handle: handles.get(r.user_id) ?? null,
         mode: f.mode, language: f.language, test: f.test, length: f.length, wpm: r.wpm, raw: r.raw, accuracy: r.accuracy,
         deviation: r.deviation, correct: r.correct, incorrect: r.incorrect, extra: r.extra, date: r.created_at, rank: index + 1 };
     });
     const pages = Math.max(1, Math.ceil(ranked.length / 10)), page = Math.min(f.page, pages);
     return send(200, { rows: ranked.slice((page - 1) * 10, page * 10), currentUser: ranked.find(r => r.id === ownId) ?? null, total: ranked.length, pages, page });
+  }
+  if (name === 'rpc/save_account_handle') {
+    const handle = String(body.p_handle).trim().toLowerCase();
+    if ([...handles.entries()].some(([id, value]) => id !== body.p_user_id && value === handle)) return send(409, { code: '23505', message: 'Handle exists' });
+    handles.set(body.p_user_id, handle); return send(200, handle);
   }
   if (name === 'rpc/read_account_dashboard') {
     const owned = [...practices.values()].filter(row => row.user_id === body.p_user_id);
@@ -123,7 +138,7 @@ const server = createServer(async (req, res) => {
     return send(200, r.id);
   }
   let records;
-  if (name === 'profiles') records = [...users.values()].map(u => ({ id: u.id, display_name: u.user_metadata.display_name }));
+  if (name === 'profiles') records = [...users.values()].map(u => ({ id: u.id, display_name: publicName(u), handle: handles.get(u.id) ?? null }));
   else if (name === 'user_preferences') records = [...preferences.values()];
   else if (name === 'practice_results') records = [...practices.values()];
   else if (name === 'practice_result_details') records = [...details.values()];

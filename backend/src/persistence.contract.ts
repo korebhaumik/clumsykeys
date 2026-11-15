@@ -44,7 +44,7 @@ export type RaceArchive = {
 };
 export type PracticeSummary = Database["public"]["Tables"]["practice_results"]["Row"];
 export type RaceResult = Database["public"]["Tables"]["race_results"]["Row"];
-export type AccountData = { displayName: string; preferences: Preferences | null; revision: number };
+export type AccountData = { displayName: string; handle: string | null; preferences: Preferences | null; revision: number };
 export type AccountDashboard = {
 	stats: { tests: number; seconds: number; characters: number; averageWpm: number; averageRaw: number; averageAccuracy: number; bestWpm: number };
 	bests: PracticeSummary[];
@@ -127,4 +127,11 @@ export function parsePractice(value: unknown): PracticeSubmission | undefined {
 			deviation: Math.sqrt(samples.reduce((sum, point) => sum + (point.wpm - mean) ** 2, 0) / (samples.length || 1)),
 			samples, history: (s.history as PracticeSubmission["stats"]["history"]).map(({ word, wpm, errors }) => ({ word, wpm, errors })) },
 	};
+}
+
+/** Handles are public identifiers, distinct from editable display names and room aliases. */
+export function parseHandle(value: unknown): string | null {
+	if (typeof value !== "string") return null;
+	const handle = value.trim().toLowerCase();
+	return /^[a-z0-9_]{3,24}$/.test(handle) ? handle : null;
 }

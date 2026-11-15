@@ -68,8 +68,18 @@ Current page patterns:
 - **Room access:** an introduction and a clearly labeled join form sit side by
   side when space permits and stack on narrow screens. The two-player preview
   is scripted illustration, not a live room or fabricated player statistics.
+  The guest explanation and sign-in link appear only after session restoration
+  confirms the visitor is signed out.
 - **Account:** sign-in controls and a quiet introduction share the page; the
-  signed-in dashboard fills the container. The banner uses accent/caret roles,
+  signed-in dashboard fills the container. The centered display name opens its editor on double-click; keyboard activation
+  with Enter or Space works through its semantic button. Hover adds an accent-wash highlight, accent text and an underline; the tooltip
+  explains double-click editing.
+  A unique handle appears beneath the name in the accent color once assigned.
+  Double-click the handle, or press Enter/Space while focused, to edit it; hover
+  adds an accent-wash highlight and underline. Unassigned accounts retain a Choose
+  action and labeled form. Display names can be shared; handle conflicts retain the
+  draft and explain how to retry. The display-name action opens a labeled inline form with
+  Save and Cancel actions and explicit saving/error feedback. The banner uses accent/caret roles,
   avatars use profile roles, and statistics/bests/recent tests use the shared
   surfaces. Show real loading, empty, failed and retained-snapshot states. The Recent tests
   heading and history link share a row, aligned left and right. Recent-test table
@@ -95,7 +105,9 @@ Current page patterns:
   9–11rem desktop widths and wrapping narrow-screen layout. Filters and readable standings frame a horizontally
   scrollable table. Sparse result pages do not reserve unused table-row space. The personal
   rank panel has a 78px minimum height (110px on narrow screens), expanding
-  naturally when its contents wrap.
+  naturally when its contents wrap. Each player cell shows only the unique
+  `@handle`, falling back to the display name when unassigned; the “you” marker
+  stays inline.
 
 Pages should compose shared layout and feature presentation. Keep generic icons
 and charts free of app/feature stores.
