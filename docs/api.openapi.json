@@ -959,6 +959,136 @@
           }
         }
       }
+    },
+    "/api/practice-personal-best": {
+      "get": {
+        "operationId": "getPracticePersonalBest",
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Read your WPM best for a practice category",
+        "description": "Authenticated, owner-scoped read of the highest saved WPM across all matching results, independent of history pagination. Category = practice mode, language, active test type and length. Prose accepts time/words with a positive integer length up to 86400, or quotes with short/medium/long. Code keywords accepts time/words with a numeric length; code snippets accepts snippets with short/medium/long. Prose uses English/Hinglish catalog IDs; code uses randomPy/randomJs/randomTs/randomJava/randomCpp/randomC. Modifiers, difficulty and auto-indent do not subdivide these categories. Quotes without archived quoteLength count as medium. Snippets without archived snippetLength cannot be attributed and are excluded. Returns null when no matching saved result exists. No writes; no-store. The client snapshots before saving the new result; read failures suppress celebration while keeping its account-bound retry entry.",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "prose",
+                "code-snippets",
+                "code-keywords"
+              ]
+            },
+            "example": "prose"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "english",
+                "english 1k",
+                "english 2k",
+                "english 5k",
+                "hinglish",
+                "randomPy",
+                "randomJs",
+                "randomTs",
+                "randomJava",
+                "randomCpp",
+                "randomC"
+              ]
+            },
+            "example": "english"
+          },
+          {
+            "name": "test",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "time",
+                "words",
+                "quotes",
+                "snippets"
+              ]
+            },
+            "example": "time"
+          },
+          {
+            "name": "length",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 86400
+                },
+                {
+                  "enum": [
+                    "short",
+                    "medium",
+                    "long"
+                  ]
+                }
+              ]
+            },
+            "example": 30
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Highest matching saved WPM, or null for an unestablished category.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "wpm"
+                  ],
+                  "properties": {
+                    "wpm": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 0
+                    }
+                  }
+                },
+                "examples": {
+                  "existing": {
+                    "value": {
+                      "wpm": 72
+                    }
+                  },
+                  "empty": {
+                    "value": {
+                      "wpm": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1391,6 +1521,14 @@
             "properties": {
               "autoTabs": {
                 "type": "boolean"
+              },
+              "snippetLength": {
+                "enum": [
+                  "short",
+                  "medium",
+                  "long"
+                ],
+                "description": "Optional archived length for snippet results. New snippet completions include it; older results may omit it and cannot be assigned to a length-specific PB."
               }
             },
             "required": [
@@ -1398,7 +1536,7 @@
             ]
           }
         ],
-        "description": "Saved code results require autoTabs in addition to code preferences. Snippet length currently remains a session-only UI choice."
+        "description": "Saved code results require autoTabs in addition to code preferences. Snippet results may include snippetLength; its category lookup uses only known archived lengths. This does not change account preferences or public leaderboard grouping."
       },
       "Preferences": {
         "type": "object",

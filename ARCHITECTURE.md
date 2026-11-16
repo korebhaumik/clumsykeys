@@ -174,6 +174,15 @@ all active rooms/timers/recovery sessions; confirmed database rows remain durabl
 The private dashboard reads one service-only aggregate of all saved solo tests,
 per-test arithmetic means, characters/time totals, bests per mode and five recent
 summaries. Guest, unsaved, abandoned and multiplayer activity is excluded.
+
+Authenticated `GET /api/practice-personal-best` reads the highest saved WPM
+for the verified owner and selected mode, language, test type and length.
+The browser-safe `practice-category.contract.ts` validates these categories.
+JSON-field filtering and descending WPM selection cover all matching saved
+rows independently of history pagination. Quote results without a length
+default to medium; snippet results without a known archived length cannot
+be attributed. Code result validation accepts optional `snippetLength`;
+this does not change account preferences or public leaderboard grouping.
 `#/history` paginates private practice and race results. The history feature owns
 loaded-result filtering, metric/date sorting and CSV formatting in a pure helper;
 its presentation retains the listing while inspecting result charts. Detail

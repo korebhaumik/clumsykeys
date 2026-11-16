@@ -259,6 +259,17 @@ WPM result for each practice mode and the five latest summaries in one snapshot.
 Average WPM, raw WPM and accuracy are arithmetic per-test means. Guest, unsaved,
 abandoned and multiplayer activity is excluded. Different test settings can
 produce different bests; each card shows its language and test type.
+
+Authenticated `GET /api/practice-personal-best` returns a category-specific
+WPM best. Categories distinguish mode, language, active test type and
+duration/word count, or quote/snippet length. Modifiers, difficulty and
+auto-indent share a category. The adapter queries all owner-scoped saved
+results and returns only the highest matching WPM (or null), independently
+of history pagination. No database migration or RPC change is needed.
+Snippet submissions may archive optional `snippetLength`; legacy results
+without it cannot be assigned to a length category. Legacy quote results
+use the existing medium default.
+
 The page supports loading, empty, failed and refresh states without replacing a
 failed request with fabricated statistics. Name, join date and optional bio/website
 come from authenticated metadata. The display-name editor saves through Supabase

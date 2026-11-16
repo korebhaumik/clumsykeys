@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 import type { AccountDashboard, AccountData, Json, PracticeSubmission, PracticeSummary, RaceArchive, RaceResult } from "./persistence.contract";
 import { parsePreferences } from "./persistence.contract";
+import type { PracticeCategory } from "./practice-category.contract";
 
 export class PersistenceError extends Error {
 	constructor(public status: number, message: string) { super(message); }
@@ -15,6 +16,7 @@ export type Persistence = {
 	account(userId: string): Promise<AccountData>;
 	saveHandle(userId: string, handle: string): Promise<string>;
 	dashboard(userId: string): Promise<AccountDashboard>;
+	practicePersonalBest(userId: string, category: PracticeCategory): Promise<number | null>;
 	savePreferences(userId: string, data: Json, revision: number): Promise<number>;
 	savePractice(userId: string, result: PracticeSubmission): Promise<void>;
 	practiceHistory(userId: string, offset: number): Promise<PracticeSummary[]>;
@@ -67,6 +69,20 @@ export function createSupabasePersistence(config: { url: string; secret: string 
 		async dashboard(userId) {
 			const { data, error } = await client.rpc("read_account_dashboard", { p_user_id: userId });
 			check(error); return data as unknown as AccountDashboard;
+		},
+		async practicePersonalBest(userId, category) {
+			let query = client.from("practice_results").select("wpm").eq("user_id", userId)
+				.eq("mode", category.mode).eq("language", category.language);
+			if (category.test === "quotes") {
+				query = query.eq("settings->>quotes", "Random Quotes");
+				query = category.length === "medium"
+					? query.or("settings->>quoteLength.eq.medium,settings->>quoteLength.is.null")
+					: query.eq("settings->>quoteLength", String(category.length));
+			} else if (category.test === "snippets") query = query.eq("settings->>snippetLength", String(category.length));
+			else if (category.mode === "code-keywords") query = query.eq("settings->limit->>type", category.test).eq("settings->limit->>value", String(category.length));
+			else query = query.eq(`settings->>${category.test === "time" ? "timer" : "words"}`, String(category.length));
+			const { data, error } = await query.order("wpm", { ascending: false }).limit(1);
+			check(error); return data?.[0]?.wpm ?? null;
 		},
 		async savePreferences(userId, data, revision) {
 			const result = await client.rpc("save_account_preferences", { p_user_id: userId, p_data: data, p_revision: revision });
