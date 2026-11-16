@@ -8,6 +8,37 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Nonvisual SEO and original-interface verification
+
+On **16 November 2026**, narrowed the SEO work to head metadata, factual WebSite
+JSON-LD, robots.txt and a root-only sitemap. Removed the proposed visible copy,
+landing documents, `/app` shell, extra stylesheet and asynchronous route changes
+at the user's request to retain the original interface. No hidden marketing
+copy or bot-specific response is used. The origin is validated from build-time
+`SITE_URL`, and metadata attributes/JSON are escaped.
+
+Compared production builds of baseline `bc4fde9` and this working tree with
+matching public build configuration: all **16 JavaScript/CSS/font assets** and
+the complete HTML body matched byte for byte. All **eight screenshot comparisons**
+also matched exactly across Chrome/WebKit, both themes and 320/1440px. The
+corrected desktop practice screenshot was visually inspected. No application
+styles, routes, loading, auth, transport, scoring or typing logic changed.
+
+Frozen dependency verification from this session, lint/design audit, dead-code,
+frontend/backend types/docs checks, **59 unit/HTTP/socket tests**, both builds
+and SEO artifact checks passed. Build validation confirms that retired landing
+documents are absent. The complete **212-case Chrome/WebKit suite passed**,
+including ten metadata/original-interface cases, reset/replay, keyboard order,
+themes, narrow layouts and browser-error checks. Focus tests wait for the input
+before sending keys and hold the native arrow key through a rendering frame;
+no application behavior was changed for these assertions. Existing Vite
+native-config-loader warnings and Knip configuration hints remain non-failing.
+
+No production deployment, Search Console submission, Google index/ranking,
+field performance, hosted SQL/Auth verification, advisory audit or credential
+scan was performed. Hash views remain one HTTP document and are excluded from
+the sitemap as separate URLs. See the [owner indexing workflow](DEPLOYMENT.md#seo-metadata-and-indexing).
+
 ## Safari keyboard navigation verification
 
 On **16 November 2026**, fixed reset/replay and cross-page keyboard access by

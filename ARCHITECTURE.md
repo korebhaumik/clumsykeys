@@ -220,3 +220,14 @@ scans and dependency auditing; it does not run the Chrome suite or local SQL tes
 [SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md) records actual results and unresolved
 verification limits. Update this architecture when routes, ownership, module
 boundaries, persistence flow or deployment packaging change.
+
+## Nonvisual SEO metadata
+
+`src/lib/seo/metadata.ts` defines escaped homepage metadata, factual WebSite
+JSON-LD, robots and the root-only sitemap. `scripts/seo-plugin.ts` injects only
+head metadata and emits the two crawl files; it never changes the app body or
+serves different content to crawlers. The original eager route composition,
+root practice, hash bookmarks, authentication startup and styles remain intact.
+There are no separate SEO landing pages or `/app` entry point. See the
+[deployment guide](docs/DEPLOYMENT.md#seo-metadata-and-indexing) for canonical
+origin configuration and owner-operated Google verification.

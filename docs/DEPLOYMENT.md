@@ -188,3 +188,30 @@ workflow triggers or deployment controls. Keep the deployment status
 aligned with the workflow condition. Record hosted verification only
 after checking the intended live service; build success alone is not a deployed
 health, WebSocket, CORS or account-persistence check.
+
+## SEO metadata and indexing
+
+SEO is nonvisual: `scripts/seo-plugin.ts` adds the document title, description,
+canonical URL, Open Graph/Twitter tags and factual WebSite JSON-LD to the head.
+It emits `robots.txt` and a sitemap containing only the canonical homepage.
+`npm run build` includes `check:seo`, which verifies these artifacts and checks
+that no landing documents remain. The original application body, routes,
+styles, loading behavior, Auth callbacks and keyboard order are preserved.
+No extra pages, marketing copy, hidden SEO text or bot-specific rendering is used.
+
+Set build-time `SITE_URL` to the permanent HTTPS production origin (default:
+`https://clumsykeys.vercel.app`), without credentials, path, query or fragment.
+Rebuild after a domain change. Keep preview indexing protection enabled and
+submit only the production URL to Google. The hash views share the root HTTP
+resource; fragments such as `/#/game`, private history and room sessions cannot
+be independently represented in this sitemap. Do not add a blanket `noindex`
+to the root or claim robots.txt protects private data.
+
+After deploying, verify the production property in Google Search Console,
+inspect the homepage's rendered application and canonical metadata, submit
+`/sitemap.xml`, and request indexing when appropriate. Track indexing, relevant
+queries, impressions and clicks; measure mobile performance and field Core Web
+Vitals when enough data exists. Metadata improves how the existing app is
+described; it cannot guarantee ranking or create separate indexed mode pages.
+This change does not deploy, create a Google property, submit the sitemap,
+install analytics or claim Google index/field-performance verification.

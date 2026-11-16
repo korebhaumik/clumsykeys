@@ -110,3 +110,11 @@ separate commits; history rewrites and force pushes need explicit authorization.
 Describe the concrete problem, resulting behavior, validation, and remaining
 limitations in the review description. Never commit credentials, `.env` files,
 generated builds, screenshots/traces from test runs, or local editor state.
+
+## Nonvisual SEO
+
+Keep SEO work in `src/lib/seo/metadata.ts` and `scripts/seo-plugin.ts`. Preserve
+all visible UI, app loading, routes and keyboard order. Do not inject marketing
+copy, hidden keyword text or bot-specific bodies. `npm run build` includes
+`npm run check:seo`; browser regressions verify the original practice flow in
+both themes and browsers. See the [indexing workflow](docs/DEPLOYMENT.md#seo-metadata-and-indexing).

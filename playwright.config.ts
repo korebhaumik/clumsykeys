@@ -9,11 +9,12 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:4193', trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [
     { name: 'chrome', use: { browserName: 'chromium', channel: 'chrome' } },
-    { name: 'webkit-keyboard', testMatch: ['practice-reset.spec.ts', 'keyboard-navigation.spec.ts', 'keyboard-focus.spec.ts', 'dropdowns.spec.ts'], use: { browserName: 'webkit' } },
+    { name: 'webkit-keyboard', testMatch: ['practice-reset.spec.ts', 'keyboard-navigation.spec.ts', 'keyboard-focus.spec.ts', 'dropdowns.spec.ts', 'seo.spec.ts'], use: { browserName: 'webkit' } },
   ],
   webServer: [
     { command: 'node postman/mocks/supabase/default.cjs', url: 'http://127.0.0.1:15443/health', env: { PORT: '15443' } },
     { command: 'npm run dev -- --host 127.0.0.1 --port 4193 --strictPort', url: 'http://127.0.0.1:4193', env: {
+      SITE_URL: 'https://clumsykeys.vercel.app',
       VITE_SERVER_URL: 'http://127.0.0.1:15442', VITE_SUPABASE_URL: 'http://127.0.0.1:15443', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
     } },
     { command: 'npm run dev:server', url: 'http://127.0.0.1:15442/rooms', env: { PORT: '15442', FRONTEND_ORIGINS: 'http://127.0.0.1:4193',
