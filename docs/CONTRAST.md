@@ -20,6 +20,17 @@ Both pass the normal-text threshold. Forced-color mode delegates to system
 Highlight/HighlightText. Earlier measurements and known failures below retain
 their recorded scope.
 
+## Sign-in mini keyboard
+
+Recalculated on **16 November 2026** directly from `tokens.css`. Key text
+on `--surface` has muted ratios of **6.16:1** in Dark Forest and **7.00:1**
+in Classic. Home/hover accent text on `--accent-wash` is **6.06:1** and
+**16.96:1**, respectively. Pressed keys use `--accent-ink` on `--accent`:
+**9.51:1** and **21.00:1**. Global focus on the keyboard surface is
+**7.94:1** and **21.00:1**. These text/focus pairs exceed their thresholds;
+the known neutral-border limitations remain. Keys show physical depression
+while pressed, and transitions respect reduced motion.
+
 ## Text and primary actions
 
 | Theme | Current use | Foreground / background | Ratio | Normal text (4.5:1) |

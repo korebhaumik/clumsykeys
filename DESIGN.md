@@ -71,6 +71,10 @@ Current page patterns:
   The guest explanation and sign-in link appear only after session restoration
   confirms the visitor is signed out.
 - **Account:** sign-in controls and a quiet introduction share the page; the
+  introduction's mini keyboard uses native buttons with hover and pressed
+  feedback only. Its keys accept pointer, Enter and Space activation without
+  changing fields, submitting or navigating. The specimen stays hidden on narrow
+  layouts, including its Tab stops. The
   signed-in dashboard fills the container. The centered display name opens its editor on double-click; keyboard activation
   with Enter or Space works through its semantic button. Hover adds an accent-wash highlight, accent text and an underline; the tooltip
   explains double-click editing.
