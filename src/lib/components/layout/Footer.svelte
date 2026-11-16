@@ -30,7 +30,7 @@
 	{/snippet}
 
 	{#if action}
-		<button type="button" class="footer-command" onclick={action}>{@render contents()}</button>
+		<button tabindex="0" type="button" class="footer-command" onclick={action}>{@render contents()}</button>
 	{:else}
 		<span class="footer-command">{@render contents()}</span>
 	{/if}
@@ -61,7 +61,7 @@
 		)}
 	>
 		<div class="flex w-80 max-w-full flex-wrap justify-between font-semibold md:w-[var(--dimension-40rem)]">
-			<a
+			<a tabindex="0"
 				aria-label="Contact"
 				href="mailto:bhaumik.kore31@gmail.com"
 				class="flex items-center transition cursor-pointer hover:text-classic-900"
@@ -69,7 +69,7 @@
 				<MailSvg />
 				<span class="ml-2 text-xs">Contact</span>
 			</a>
-			<a
+			<a tabindex="0"
 				aria-label="Github"
 				href="http://github.com/korebhaumik/Clumsykeys"
 				target="_blank"
@@ -78,15 +78,15 @@
 				<GithubSvg />
 				<span class="ml-2 text-xs">Github</span>
 			</a>
-			<a aria-label="Security" href="#/security" class="flex items-center">
+			<a tabindex="0" aria-label="Security" href="#/security" class="flex items-center">
 				<ShieldSvg />
 				<span class="ml-2 text-xs">Security</span>
 			</a>
-			<a aria-label="Terms" href="#/terms" class="flex items-center">
+			<a tabindex="0" aria-label="Terms" href="#/terms" class="flex items-center">
 				<DocumentSvg />
 				<span class="ml-2 text-xs">Terms</span>
 			</a>
-			<a aria-label="Privacy" href="#/privacy" class="flex items-center">
+			<a tabindex="0" aria-label="Privacy" href="#/privacy" class="flex items-center">
 				<LockSvg />
 				<span class="ml-2 text-xs">Privacy</span>
 			</a>
@@ -96,7 +96,7 @@
 			</div>
 		</div>
 		<p class="text-xs">
-			developed by <a
+			developed by <a tabindex="0"
 				aria-label="Kore Bhaumik"
 				class="text-amber-700 hover:underline"
 				href="http://github.com/korebhaumik"

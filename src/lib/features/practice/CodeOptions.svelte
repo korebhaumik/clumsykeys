@@ -23,24 +23,24 @@
 	<div class="code-options">
 		{#if section === "test"}
 			<div class="option-group" role="group" aria-label="Keyword test type">
-				<button class="type-option" type="button" aria-pressed={keywordLimit.type === "time"} onclick={() => onLimitChange({ type: "time", value: 30 })}><TimerSvg /> Time</button>
-				<button class="type-option" type="button" aria-pressed={keywordLimit.type === "words"} onclick={() => onLimitChange({ type: "words", value: 25 })}><span aria-hidden="true">Aa</span> Words</button>
+				<button tabindex="0" class="type-option" type="button" aria-pressed={keywordLimit.type === "time"} onclick={() => onLimitChange({ type: "time", value: 30 })}><TimerSvg /> Time</button>
+				<button tabindex="0" class="type-option" type="button" aria-pressed={keywordLimit.type === "words"} onclick={() => onLimitChange({ type: "words", value: 25 })}><span aria-hidden="true">Aa</span> Words</button>
 			</div>
 			<div class="option-group presets" role="group" aria-label={keywordLimit.type === "time" ? "Duration in seconds" : "Word count"}>
 				{#each keywordLimit.type === "time" ? practiceDurations : practiceWordCounts as value (value)}
-					<button type="button" aria-pressed={keywordLimit.value === value} onclick={() => onLimitChange({ type: keywordLimit.type, value })}>{value}</button>
+					<button tabindex="0" type="button" aria-pressed={keywordLimit.value === value} onclick={() => onLimitChange({ type: keywordLimit.type, value })}>{value}</button>
 				{/each}
 			</div>
 		{:else}
 			{#if mode === "snippets"}
 				<div class="option-group" role="group" aria-label="Indentation">
-					<button type="button" aria-pressed={autoTabs} onclick={() => (autoTabs = true)}>Auto Tabs</button>
-					<button type="button" aria-pressed={!autoTabs} onclick={() => (autoTabs = false)}>Manual Tabs</button>
+					<button tabindex="0" type="button" aria-pressed={autoTabs} onclick={() => (autoTabs = true)}>Auto Tabs</button>
+					<button tabindex="0" type="button" aria-pressed={!autoTabs} onclick={() => (autoTabs = false)}>Manual Tabs</button>
 				</div>
 			{:else}
 				<div class="option-group" role="group" aria-label="Keyword modifiers">
-					<button class="type-option" type="button" aria-pressed={modifiers.punctuation} onclick={() => onToggleModifier("punctuation")}><AtSvg /> Punctuation</button>
-					<button class="type-option" type="button" aria-pressed={modifiers.numbers} onclick={() => onToggleModifier("numbers")}><HashSvg /> Numbers</button>
+					<button tabindex="0" class="type-option" type="button" aria-pressed={modifiers.punctuation} onclick={() => onToggleModifier("punctuation")}><AtSvg /> Punctuation</button>
+					<button tabindex="0" class="type-option" type="button" aria-pressed={modifiers.numbers} onclick={() => onToggleModifier("numbers")}><HashSvg /> Numbers</button>
 				</div>
 			{/if}
 			<div class="language-picker">

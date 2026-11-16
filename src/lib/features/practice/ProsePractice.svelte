@@ -191,7 +191,7 @@
 	{:else}
 		{#key session}
 			<div class="typing-frame" class:caret-idle={status === "waiting"}>
-				<input
+				<input tabindex="0"
 					class="sr-only"
 					id="boss"
 					type="text"
@@ -232,6 +232,8 @@
 			</div>
 		{/key}
 		<button
+			type="button"
+			tabindex="0"
 			class="practice-reset mx-auto mt-5 mb-1 block rounded-sm text-dark-forest-unhighlighted focus:text-dark-forest-highlighted focus:bg-dark-forest-fade hover:bg-dark-forest-fade"
 			aria-label="reset"
 			onclick={restart}

@@ -47,7 +47,7 @@
 <section class="race-preview" class:paused bind:this={previewElement} aria-label="Two-player race preview">
 	<div class="preview-heading">
 		<span>Head-to-head.</span>
-		{#if !reducedMotion}<button type="button" class="preview-control" aria-label={paused ? "Resume race preview" : "Pause race preview"} onclick={() => paused = !paused}>{paused ? "Play" : "Pause"}</button>{/if}
+		{#if !reducedMotion}<button tabindex="0" type="button" class="preview-control" aria-label={paused ? "Resume race preview" : "Pause race preview"} onclick={() => paused = !paused}>{paused ? "Play" : "Pause"}</button>{/if}
 	</div>
 	<div class="preview-lanes" aria-hidden="true" style:opacity={reducedMotion ? 1 : frame.opacity}>
 		{#each frame.players as player (player.name)}

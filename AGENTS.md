@@ -10,7 +10,7 @@ Svelte 5, TypeScript, Vite 8 and Tailwind 4 frontend; Express 5 and Socket.IO ba
 - `npm run check:all`
 - `npm run check:docs` (API coverage, Socket.IO events, documentation links)
 - `npm test` (includes a real ephemeral HTTP/Socket.IO server)
-- `npm run test:e2e` (Playwright, installed Chrome; frontend 4193, backend 15442, upstream fixture 15443)
+- `npm run test:e2e` (Playwright, installed Chrome plus focused WebKit keyboard coverage; install WebKit with `pnpm exec playwright install webkit`; frontend 4193, backend 15442, upstream fixture 15443)
 - `npm run build` and `npm run build:server`
 
 ## Structure and conventions
@@ -20,6 +20,11 @@ Pages compose features. `src/lib/features/{practice,settings,multiplayer,auth,hi
 Use semantic CSS variables from `src/styles/tokens.css`, or Tailwind token utilities. Never introduce raw colors or arbitrary visual values in components. Existing precise dimension tokens preserve layout; reuse them before adding tokens. Breakpoints and SVG drawing coordinates are structural values. Icons use the shared Icon wrapper with a 24-unit viewBox, currentColor, and no interaction. Label the enclosing button. Logo and data charts retain their own coordinate systems.
 
 ## Adding features
+
+Use explicit `tabindex="0"` on native links, buttons and form controls for Safari
+keyboard navigation. Preserve authored negative and roving indexes, disabled and
+inert states, and keep static content out of sequential focus. Lint checks this
+convention; verify real Tab/Shift+Tab order in Chrome and WebKit.
 
 Add a focused feature module, compose it from a page/router entry, and place domain helpers beside it. Avoid importing stores into generic icons or charts. The backend settings contract is deliberately browser-safe; do not import server runtime modules into the frontend. Register backend transport behavior through server.ts, http.ts and socket.ts.
 

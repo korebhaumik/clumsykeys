@@ -50,8 +50,8 @@
 			<RacePreview />
 		</div>
 		<nav class="practice-links" aria-label="Solo practice">
-			<a href="#/game"><span class="practice-icon" aria-hidden="true">&lt;/&gt;</span><span>Practice code</span><span aria-hidden="true">→</span></a>
-			<a href="#/"><span class="practice-icon" aria-hidden="true">Aa</span><span>Practice prose</span><span aria-hidden="true">→</span></a>
+			<a tabindex="0" href="#/game"><span class="practice-icon" aria-hidden="true">&lt;/&gt;</span><span>Practice code</span><span aria-hidden="true">→</span></a>
+			<a tabindex="0" href="#/"><span class="practice-icon" aria-hidden="true">Aa</span><span>Practice prose</span><span aria-hidden="true">→</span></a>
 		</nav>
 	</section>
 
@@ -63,17 +63,17 @@
 		<form class="stack" onsubmit={(event) => { event.preventDefault(); handleSubmit(); }}>
 			<label class="field">
 				Username
-				<span class="join-input"><UserIcon /><input type="text" placeholder="e.g. Ada" required maxlength="50" autocomplete="nickname" oninput={() => edited = true} bind:value={username} /></span>
+				<span class="join-input"><UserIcon /><input tabindex="0" type="text" placeholder="e.g. Ada" required maxlength="50" autocomplete="nickname" oninput={() => edited = true} bind:value={username} /></span>
 			</label>
 			<label class="field">
 				Room ID
-				<span class="join-input"><HashIcon /><input type="text" placeholder="e.g. weekend-race" required autocomplete="off" bind:value={roomId} /></span>
+				<span class="join-input"><HashIcon /><input tabindex="0" type="text" placeholder="e.g. weekend-race" required autocomplete="off" bind:value={roomId} /></span>
 			</label>
-			<button class="button button-primary" type="submit">
+			<button tabindex="0" class="button button-primary" type="submit">
 				Join room <span aria-hidden="true">→</span>
 			</button>
 			{#if $account.ready && !$account.session}
-				<p class="muted join-note">Guest rooms work without an account. <a href="#/account">Sign in</a> to save your races.</p>
+				<p class="muted join-note">Guest rooms work without an account. <a tabindex="0" href="#/account">Sign in</a> to save your races.</p>
 			{/if}
 		</form>
 	</section>

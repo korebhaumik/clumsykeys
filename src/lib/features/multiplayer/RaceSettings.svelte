@@ -52,11 +52,11 @@
 		<div class="settings-toggles">
 			<label>
 				Punctuation
-				<input type="checkbox" checked={settings.punctuation} onchange={(event) => onChange?.({ punctuation: event.currentTarget.checked })} />
+				<input tabindex="0" type="checkbox" checked={settings.punctuation} onchange={(event) => onChange?.({ punctuation: event.currentTarget.checked })} />
 			</label>
 			<label>
 				Numbers
-				<input type="checkbox" checked={settings.numbers} onchange={(event) => onChange?.({ numbers: event.currentTarget.checked })} />
+				<input tabindex="0" type="checkbox" checked={settings.numbers} onchange={(event) => onChange?.({ numbers: event.currentTarget.checked })} />
 			</label>
 		</div>
 		<p class="muted vote-note">Changing settings clears existing votes.</p>

@@ -60,10 +60,10 @@
 		<AccountHandle accountId={user.id} />
 		{#if Number.isFinite(joined.getTime())}<p class="joined">Joined <time datetime={user.created_at}>{joined.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</time></p>{/if}
 		<p class="profile-bio">{bio}</p>
-		{#if website}<a class="profile-website" href={website.href} target="_blank" rel="noopener noreferrer"><GlobeIcon />{website.hostname}</a>{/if}
+		{#if website}<a tabindex="0" class="profile-website" href={website.href} target="_blank" rel="noopener noreferrer"><GlobeIcon />{website.hostname}</a>{/if}
 	</header>
 
-	<div class="dashboard-toolbar"><p>Saved solo practice · all time</p><button class="button button-secondary" disabled={loading} onclick={() => load(user.id)}>{loading ? "Refreshing…" : "Refresh stats"}</button></div>
+	<div class="dashboard-toolbar"><p>Saved solo practice · all time</p><button tabindex="0" class="button button-secondary" disabled={loading} onclick={() => load(user.id)}>{loading ? "Refreshing…" : "Refresh stats"}</button></div>
 	{#if loading && !dashboard}<p class="sr-only" role="status">Loading your practice statistics…</p>{/if}
 	{#if error}<p class="dashboard-error" role="alert">{error}{#if dashboard} Showing the previous snapshot.{/if}</p>{/if}
 	{#if dashboard || loading}
@@ -80,7 +80,7 @@
 					<article class="best-card"><h3>{mode.label}</h3>
 						{#if initialLoading}<div class="best-placeholders" aria-hidden="true"><span class="skeleton best-number"></span><span class="skeleton"></span><span class="skeleton"></span></div>
 						{:else if best}<p class="best-speed">{number(best.wpm)} <span>wpm</span></p><p class="best-accuracy">{number(best.accuracy)}% accuracy</p><p class="best-context">{testLabel(best)} · {testLanguage(best.language)}</p>
-						{:else}<p class="best-speed empty-best">—</p><p class="best-context">Your first best is ahead of you.</p><a href={mode.value === "prose" ? "#/" : "#/game"}>Start practising <ArrowRightIcon /></a>{/if}
+						{:else}<p class="best-speed empty-best">—</p><p class="best-context">Your first best is ahead of you.</p><a tabindex="0" href={mode.value === "prose" ? "#/" : "#/game"}>Start practising <ArrowRightIcon /></a>{/if}
 					</article>
 				{/each}
 			</div>
@@ -88,7 +88,7 @@
 		<section class="dashboard-section" aria-labelledby={`${id}-recent`} aria-busy={loading}>
 			<div class="recent-heading">
 				<h2 id={`${id}-recent`}>Recent tests</h2>
-				<a class="history-link" href="#/history">View your history <ArrowRightIcon /></a>
+				<a tabindex="0" class="history-link" href="#/history">View your history <ArrowRightIcon /></a>
 			</div>
 			{#if initialLoading || dashboard?.recent.length}
 				<div class="recent-scroll" role="region" aria-label="Recent test results, scroll for more columns" tabindex="-1" use:scrollFocus><table>
@@ -99,12 +99,12 @@
 					{:else}{#each dashboard?.recent ?? [] as row}<tr><td>{number(row.wpm)}</td><td>{number(row.raw)}</td><td>{number(row.accuracy)}%</td><td>{number(row.deviation)}</td><td>{row.correct}/{row.incorrect}/{row.extra}</td><td>{practiceModes.find(mode => mode.value === row.mode)?.label} · {testLabel(row)}</td><td>{testLanguage(row.language)}</td><td><time datetime={row.created_at}>{new Date(row.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}</time></td></tr>{/each}{/if}</tbody>
 				</table></div>
 				<p class="table-note">¹ Characters: correct / incorrect / extra.</p>
-			{:else}<p class="empty-history">No saved results yet. Your next practice is a fresh start. <a href="#/">Start practising <ArrowRightIcon /></a></p>{/if}
+			{:else}<p class="empty-history">No saved results yet. Your next practice is a fresh start. <a tabindex="0" href="#/">Start practising <ArrowRightIcon /></a></p>{/if}
 		</section>
 	{/if}
 	<footer class="account-controls">
 		<div><p class="account-email">{user.email}</p><p role="status">{$preferenceSync.message}</p></div>
-		<div class="account-actions">{#if $preferenceSync.state === "error" || $preferenceSync.state === "conflict"}<button class="button button-secondary" onclick={() => reloadAccountPreferences()}>Retry preference sync</button>{/if}<a class="button button-secondary" href="#/">Practice</a><button class="button button-secondary" disabled={busy} onclick={onsignout}>Sign out</button></div>
+		<div class="account-actions">{#if $preferenceSync.state === "error" || $preferenceSync.state === "conflict"}<button tabindex="0" class="button button-secondary" onclick={() => reloadAccountPreferences()}>Retry preference sync</button>{/if}<a tabindex="0" class="button button-secondary" href="#/">Practice</a><button tabindex="0" class="button button-secondary" disabled={busy} onclick={onsignout}>Sign out</button></div>
 	</footer>
 </div>
 

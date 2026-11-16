@@ -14,7 +14,7 @@
 	})}
 >
 	<div class="flex flex-wrap items-center gap-3 text-sm font-bold">
-		<button
+		<button tabindex="0"
 			class={cn("settings-primary flex gap-0.5 items-center p-2 rounded-sm", {
 				"bg-dark-forest-accent-main": $theme === "dark-forest",
 				"text-dark-forest-primary": $theme === "dark-forest",
@@ -23,7 +23,7 @@
 			<TimerSvg />
 			<span>Timer - 60s</span>
 		</button>
-		<button
+		<button tabindex="0"
 			class={cn("flex gap-0.5 items-center p-2 rounded-sm", {
 				"text-dark-forest-accent-main": $theme === "dark-forest",
 				"bg-dark-forest-primary": $theme === "dark-forest",
@@ -32,7 +32,7 @@
 			<HashSvg />
 			<span>Numbers - None</span>
 		</button>
-		<button
+		<button tabindex="0"
 			class={cn("flex gap-0.5 items-center p-2 rounded-sm", {
 				"text-dark-forest-accent-main": $theme === "dark-forest",
 				"bg-dark-forest-primary": $theme === "dark-forest",
@@ -55,7 +55,7 @@
 	
 	<div class="flex flex-wrap gap-2">
 		<div class="flex flex-wrap gap-2">
-			<input
+			<input tabindex="0"
 				placeholder="Eg: 60"
 				aria-label="WPM limit"
 				type="number"
@@ -64,7 +64,7 @@
 					"bg-white": $theme === "classic",
 				})}
 			/>
-			<button
+			<button tabindex="0"
 				class={cn("settings-primary py-2 w-32 px-2 font-semibold text-sm rounded-sm", {
 					"bg-dark-forest-accent-main": $theme === "dark-forest",
 					"text-dark-forest-primary": $theme === "dark-forest",
@@ -75,7 +75,7 @@
 			</button>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<input
+			<input tabindex="0"
 				placeholder="Eg: 95%"
 				aria-label="Accuracy limit"
 				type="number"
@@ -84,7 +84,7 @@
 					"bg-white": $theme === "classic",
 				})}
 			/>
-			<button
+			<button tabindex="0"
 				class={cn("settings-primary py-2 w-32 px-2 font-semibold text-sm rounded-sm", {
 					"bg-dark-forest-accent-main": $theme === "dark-forest",
 					"text-dark-forest-primary": $theme === "dark-forest",

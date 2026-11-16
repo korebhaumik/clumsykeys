@@ -12,7 +12,7 @@
 
 <div class="settings-list">
 	{#each options as { value, label, detail } (value)}
-		<button class="settings-choice" type="button" aria-label={label} aria-pressed={$testConfig.numbers === value} onclick={() => updateTestConfigNumbers(value)}>
+		<button tabindex="0" class="settings-choice" type="button" aria-label={label} aria-pressed={$testConfig.numbers === value} onclick={() => updateTestConfigNumbers(value)}>
 			<span>{label}</span><small>{detail}</small>
 		</button>
 	{/each}

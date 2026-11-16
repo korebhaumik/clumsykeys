@@ -401,8 +401,8 @@
 
 {#snippet modeToggle()}
 	<div class="mode-toggle" role="group" aria-label="Practice mode">
-		<button type="button" aria-pressed={mode === "snippets"} onclick={() => selectMode("snippets")}><CodeSvg /> Snippets</button>
-		<button type="button" aria-pressed={mode === "keywords"} onclick={() => selectMode("keywords")}><span aria-hidden="true">Aa</span> Keywords</button>
+		<button tabindex="0" type="button" aria-pressed={mode === "snippets"} onclick={() => selectMode("snippets")}><CodeSvg /> Snippets</button>
+		<button tabindex="0" type="button" aria-pressed={mode === "keywords"} onclick={() => selectMode("keywords")}><span aria-hidden="true">Aa</span> Keywords</button>
 	</div>
 {/snippet}
 
@@ -423,7 +423,7 @@
 				{#if game === "waiting" && mode === "snippets"}
 					<div class="snippet-selector" role="group" aria-label="Snippet length">
 						{#each snippetLengths as length (length)}
-							<button type="button" aria-pressed={snippetLength === length} onclick={() => selectSnippetLength(length)}>{length.charAt(0).toUpperCase() + length.slice(1)}</button>
+							<button tabindex="0" type="button" aria-pressed={snippetLength === length} onclick={() => selectSnippetLength(length)}>{length.charAt(0).toUpperCase() + length.slice(1)}</button>
 						{/each}
 					</div>
 				{:else if game === "waiting"}
@@ -438,7 +438,7 @@
 		<section class="code-passage" class:keyword-passage={mode === "keywords"} aria-label={`${languages[langChoice]} ${mode === "keywords" ? "keywords" : "snippet"}`}>
 			<div bind:this={codeScrollEl} class="code-scroll">
 				<div class="typing-frame code-frame" class:caret-idle={game === "waiting"}>
-					<input
+					<input tabindex="0"
 						class="sr-only"
 						id="boss"
 						type="text"
@@ -492,7 +492,7 @@
 			{/if}
 		</section>
 		{/key}
-		<button type="button" class="code-reset" aria-label="Reset code practice" title="Reset code practice" onclick={restart}><ResetSvg /></button>
+		<button type="button" tabindex="0" class="code-reset" aria-label="Reset code practice" title="Reset code practice" onclick={restart}><ResetSvg /></button>
 	</div>
 	{/if}
 

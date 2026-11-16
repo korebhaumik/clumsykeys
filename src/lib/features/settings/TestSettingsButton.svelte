@@ -4,7 +4,7 @@
 	let { onclick, disabled = false }: { onclick: () => void; disabled?: boolean } = $props();
 </script>
 
-<button
+<button tabindex="0"
 	type="button"
 	class="settings-label cursor-pointer disabled:cursor-not-allowed"
 	{disabled}

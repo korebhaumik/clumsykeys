@@ -59,7 +59,7 @@
 	<div class="flex items-end">
 		
 		<div class="flex items-end w-fit brand">
-			<a href={mode === "code" ? "#/game" : "#/"}
+			<a tabindex="0" href={mode === "code" ? "#/game" : "#/"}
 				aria-label={mode === "code" ? "Clumsy Devs home" : "Clumsy Keys home"}
 				class={mode ? "inline-flex h-10 w-[var(--dimension-50px)] shrink-0" : undefined}>
 				<LogoSvg code={mode === "code"} />
@@ -93,7 +93,7 @@
 			inert={active}
 		>
 			{#if !mode}
-			<button
+			<button tabindex="0"
 				aria-label="Code practice"
 				onclick={() => push("/game")}
 				class={cn("transition p-2 text-dark-forest-accent-red ", {
@@ -104,7 +104,7 @@
 				<KeyboardSvg />
 			</button>
 			{/if}
-			<a
+			<a tabindex="0"
 				href="#/leaderboard" aria-current={router.location === "/leaderboard" ? "page" : undefined}
 				aria-label="Leaderboard"
 				title="Leaderboard"
@@ -114,7 +114,7 @@
 			>
 				<LeaderboardsSvg />
 			</a>
-			<a
+			<a tabindex="0"
 				href="#/race"
 				aria-label="Multiplayer"
 				title="Multiplayer"
@@ -124,7 +124,7 @@
 			>
 				<RocketSvg />
 			</a>
-			<button
+			<button tabindex="0"
 				aria-label="About"
 				onclick={() => push("/about")}
 				class={cn("transition p-2 text-dark-forest-accent-yellow", {
@@ -134,7 +134,7 @@
 			>
 				<InfoSvg />
 			</button>
-			<button
+			<button tabindex="0"
 				onclick={() => {
 					push("/themes");
 				}}
@@ -158,7 +158,7 @@
 		})}
 	>
 		{#if mode}
-			<a class="mode-switch" href={mode === "code" ? "#/" : "#/game"}
+			<a tabindex="0" class="mode-switch" href={mode === "code" ? "#/" : "#/game"}
 				aria-label={mode === "code" ? "Switch to prose practice" : "Switch to code practice"}
 				title={mode === "code" ? "Switch to prose practice" : "Switch to code practice"}>
 				{#if mode === "code"}<CodeSvg />{:else}<LangSvg />{/if}
@@ -166,7 +166,7 @@
 			<hr class="nav-divider hidden sm:block h-10 border-none bg-dark-forest-fade w-1 rounded-sm mx-3" />
 		{:else}
 			
-			<button
+			<button tabindex="0"
 				aria-label="Language"
 				class={cn("border rounded-full border-dark-forest-accent-main p-2", {
 					"border-dark-forest-accent-main": $theme === "dark-forest",
@@ -184,7 +184,7 @@
 		{/if}
 		
 		{#if $account.session}
-		<button
+		<button tabindex="0"
 			aria-label="Sign out"
 			onclick={signOut}
 			class={cn("text-dark-forest-accent-error mr-3 rounded-full p-2", mode && "hidden sm:inline-flex", {
@@ -197,11 +197,11 @@
 		>
 		{/if}
 		
-		<a aria-label={$account.session ? "Your account" : "Sign in or create account"} href="#/account" class="p-2 mr-2 rounded-full">
+		<a tabindex="0" aria-label={$account.session ? "Your account" : "Sign in or create account"} href="#/account" class="p-2 mr-2 rounded-full">
 			<UserSvg />
 		</a>
 		
-		<a
+		<a tabindex="0"
 			href="#/history"
 			aria-current={router.location === "/history" ? "page" : undefined}
 			aria-label="Your history"
@@ -211,7 +211,7 @@
 			<HistorySvg />
 		</a>
 		
-		<button
+		<button tabindex="0"
 			bind:this={menuToggle}
 			class="inline-block md:hidden"
 			aria-label="Open navigation"
@@ -226,16 +226,16 @@
 	</div>
 	{#if menuIsVisible && !active}
 		<nav id={navigationId} aria-label="Mobile navigation" class="mobile-navigation absolute right-5 top-24 z-30 grid gap-3 rounded-lg bg-dark-forest-fade p-4 text-dark-forest-highlighted md:hidden">
-			<a href="#/" onclick={() => (menuIsVisible = false)}>Prose practice</a>
-			<a href="#/game" onclick={() => (menuIsVisible = false)}>Code practice</a>
-			<a href="#/leaderboard" aria-current={router.location === "/leaderboard" ? "page" : undefined} onclick={() => (menuIsVisible = false)}>Leaderboard</a>
-			<a href="#/race" onclick={() => (menuIsVisible = false)}>Multiplayer</a>
-			{#if mode}<a href="#/login" onclick={() => (menuIsVisible = false)}>Join a room</a>{/if}
-			<a href="#/themes" onclick={() => (menuIsVisible = false)}>Settings</a>
-			<a href="#/about" onclick={() => (menuIsVisible = false)}>About</a>
-			<a href="#/account" onclick={() => (menuIsVisible = false)}>Account</a>
-			<a href="#/history" onclick={() => (menuIsVisible = false)}>Your history</a>
-			{#if mode}<button class="text-left" onclick={leaveRoom}>Leave room</button>{/if}
+			<a tabindex="0" href="#/" onclick={() => (menuIsVisible = false)}>Prose practice</a>
+			<a tabindex="0" href="#/game" onclick={() => (menuIsVisible = false)}>Code practice</a>
+			<a tabindex="0" href="#/leaderboard" aria-current={router.location === "/leaderboard" ? "page" : undefined} onclick={() => (menuIsVisible = false)}>Leaderboard</a>
+			<a tabindex="0" href="#/race" onclick={() => (menuIsVisible = false)}>Multiplayer</a>
+			{#if mode}<a tabindex="0" href="#/login" onclick={() => (menuIsVisible = false)}>Join a room</a>{/if}
+			<a tabindex="0" href="#/themes" onclick={() => (menuIsVisible = false)}>Settings</a>
+			<a tabindex="0" href="#/about" onclick={() => (menuIsVisible = false)}>About</a>
+			<a tabindex="0" href="#/account" onclick={() => (menuIsVisible = false)}>Account</a>
+			<a tabindex="0" href="#/history" onclick={() => (menuIsVisible = false)}>Your history</a>
+			{#if mode}<button tabindex="0" class="text-left" onclick={leaveRoom}>Leave room</button>{/if}
 		</nav>
 	{/if}
 </header>

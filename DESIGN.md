@@ -181,6 +181,14 @@ indentation and Shift+Tab to leave the editor. Mobile navigation closes with
 Escape and returns focus to its toggle. Preserve existing dialog/dropdown
 keyboard navigation and focus return. Errors use text/underlines as well as color.
 
+Author an explicit `tabindex="0"` on native links, buttons and form controls so
+Safari includes them even when its default keyboard navigation skips implicit
+Tab stops. Preserve existing `tabindex="-1"` exclusions and roving tab indexes
+(such as leaderboard tabs); never add positive tab indexes or make static
+content focusable. Disabled, hidden and inert controls remain excluded. The
+design audit enforces explicit indexes. Reset/replay buttons retain native
+Enter/Space activation and return focus to the fresh typing input.
+
 ## Motion and verification
 
 Keep the shared header mounted across navigation, including Appearance and About;

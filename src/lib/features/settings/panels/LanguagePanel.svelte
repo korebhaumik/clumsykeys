@@ -6,7 +6,7 @@
 
 <div class="settings-list">
 	{#each proseLanguages as { value, label, size } (value)}
-		<button class="settings-choice" type="button" aria-label={label} aria-pressed={$testConfig.language === value} onclick={() => updateTestConfigLanguage(value)}>
+		<button tabindex="0" class="settings-choice" type="button" aria-label={label} aria-pressed={$testConfig.language === value} onclick={() => updateTestConfigLanguage(value)}>
 			<span>{label}</span><small>{size}</small>
 		</button>
 	{/each}

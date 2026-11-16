@@ -451,7 +451,7 @@
 
 <section class="race-passage" aria-label="Race passage">
 	<div class="typing-frame">
-		<input
+		<input tabindex="0"
 			class="sr-only"
 			id="boss"
 			type="text"

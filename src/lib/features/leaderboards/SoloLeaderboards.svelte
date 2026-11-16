@@ -70,23 +70,23 @@
 			<span class="standing-label">{preview ? "Your preview rank" : "Your rank"}</span>
 			{#if loading}<span class="muted">Finding your place…</span>
 			{:else if error}<span class="muted">Available when rankings load.</span>
-			{:else if own}<strong>#{own.rank} <span>{own.wpm} WPM · {own.accuracy.toFixed(1)}%</span></strong><button class="button button-secondary" disabled={ownPage === result?.page} onclick={() => change({ page: ownPage })}>{ownPage === result?.page ? "On this page" : "View your page"}</button>
-			{:else if !viewerId}<span class="muted">Sign in to see your rank.</span><a href="#/account">Sign in →</a>
-			{:else}<span class="muted">No ranked result for this selection.</span><a href={filters.mode === "dev" ? "#/game" : "#/"}>Start a solo test →</a>{/if}
+			{:else if own}<strong>#{own.rank} <span>{own.wpm} WPM · {own.accuracy.toFixed(1)}%</span></strong><button tabindex="0" class="button button-secondary" disabled={ownPage === result?.page} onclick={() => change({ page: ownPage })}>{ownPage === result?.page ? "On this page" : "View your page"}</button>
+			{:else if !viewerId}<span class="muted">Sign in to see your rank.</span><a tabindex="0" href="#/account">Sign in →</a>
+			{:else}<span class="muted">No ranked result for this selection.</span><a tabindex="0" href={filters.mode === "dev" ? "#/game" : "#/"}>Start a solo test →</a>{/if}
 		</div>
 		<p class="scroll-hint">Scroll the table to see every column →</p>
 		<LeaderboardTable rows={result?.rows ?? []} {loading} currentUserId={result?.currentUser?.userId ?? null}>
-			{#if error}<h3>Rankings couldn’t load.</h3><p class="error" role="alert">{error}</p><button class="button button-primary" onclick={() => retry++}>Retry rankings</button>
+			{#if error}<h3>Rankings couldn’t load.</h3><p class="error" role="alert">{error}</p><button tabindex="0" class="button button-primary" onclick={() => retry++}>Retry rankings</button>
 			{:else}
 				<div class="empty-card">
 					<div class="empty-icon" aria-hidden="true"><LeaderboardsIcon /></div>
 					<div class="empty-copy"><h3>A fresh leaderboard.</h3><p>No results match these filters yet.<br class="empty-break" /> Be the first to set the pace.</p></div>
-					<a class="button button-primary empty-action" href={filters.mode === "dev" ? "#/game" : "#/"}>Start a solo test <ArrowRightIcon /></a>
+					<a tabindex="0" class="button button-primary empty-action" href={filters.mode === "dev" ? "#/game" : "#/"}>Start a solo test <ArrowRightIcon /></a>
 				</div>
 			{/if}
 		</LeaderboardTable>
 		{#if loading || error || result?.total}
-		<nav class="pagination" aria-label="Leaderboard pages"><p>{result?.total ? `${(result.page - 1) * pageSize + 1}–${Math.min(result.page * pageSize, result.total)} of ${result.total}` : "0 results"}</p><div><button class="button button-secondary" disabled={loading || !!error || !result || result.page <= 1} onclick={() => change({ page: result!.page - 1 })} aria-label="Previous leaderboard page">← Previous</button><span>Page {result?.page ?? filters.page} of {result?.pages ?? "…"}</span><button class="button button-secondary" disabled={loading || !!error || !result || result.page >= result.pages} onclick={() => change({ page: result!.page + 1 })} aria-label="Next leaderboard page">Next →</button></div></nav>
+		<nav class="pagination" aria-label="Leaderboard pages"><p>{result?.total ? `${(result.page - 1) * pageSize + 1}–${Math.min(result.page * pageSize, result.total)} of ${result.total}` : "0 results"}</p><div><button tabindex="0" class="button button-secondary" disabled={loading || !!error || !result || result.page <= 1} onclick={() => change({ page: result!.page - 1 })} aria-label="Previous leaderboard page">← Previous</button><span>Page {result?.page ?? filters.page} of {result?.pages ?? "…"}</span><button tabindex="0" class="button button-secondary" disabled={loading || !!error || !result || result.page >= result.pages} onclick={() => change({ page: result!.page + 1 })} aria-label="Next leaderboard page">Next →</button></div></nav>
 		<p class="ranking-note">Ranked by WPM, then accuracy. Equal scores favor the earlier result. Each test format and length has its own board. Snippet and quote difficulty can vary.</p>
 		{/if}
 	</div>

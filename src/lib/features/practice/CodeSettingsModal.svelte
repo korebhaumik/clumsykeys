@@ -57,7 +57,7 @@
 		<div class="settings-list">
 			{#each entries as key (key)}
 				{@const item = panels[key]}
-				<button class="settings-choice" type="button" onclick={() => { selected = key; }}>
+				<button tabindex="0" class="settings-choice" type="button" onclick={() => { selected = key; }}>
 					<item.icon /><span>{item.title}</span><ArrowRightIcon />
 				</button>
 			{/each}
@@ -65,28 +65,28 @@
 	{:else if selected === "language"}
 		<div class="settings-list" role="group" aria-label="Code language">
 			{#each languageChoices as value (value)}
-				<button class="settings-choice" type="button" aria-pressed={language === value} onclick={() => onLanguageChange(value)}>{languages[value]}</button>
+				<button tabindex="0" class="settings-choice" type="button" aria-pressed={language === value} onclick={() => onLanguageChange(value)}>{languages[value]}</button>
 			{/each}
 		</div>
 	{:else if selected === "mode"}
 		<div class="settings-list" role="group" aria-label="Practice mode">
-			<button class="settings-choice" type="button" aria-pressed={mode === "snippets"} onclick={() => onModeChange("snippets")}><CodeIcon /><span>Snippets</span></button>
-			<button class="settings-choice" type="button" aria-pressed={mode === "keywords"} onclick={() => onModeChange("keywords")}><span aria-hidden="true">Aa</span><span>Keywords</span></button>
+			<button tabindex="0" class="settings-choice" type="button" aria-pressed={mode === "snippets"} onclick={() => onModeChange("snippets")}><CodeIcon /><span>Snippets</span></button>
+			<button tabindex="0" class="settings-choice" type="button" aria-pressed={mode === "keywords"} onclick={() => onModeChange("keywords")}><span aria-hidden="true">Aa</span><span>Keywords</span></button>
 		</div>
 	{:else if selected === "indentation"}
 		<div class="settings-list" role="group" aria-label="Indentation">
-			<button class="settings-choice" type="button" aria-pressed={autoTabs} onclick={() => { autoTabs = true; }}>Auto Tabs</button>
-			<button class="settings-choice" type="button" aria-pressed={!autoTabs} onclick={() => { autoTabs = false; }}>Manual Tabs</button>
+			<button tabindex="0" class="settings-choice" type="button" aria-pressed={autoTabs} onclick={() => { autoTabs = true; }}>Auto Tabs</button>
+			<button tabindex="0" class="settings-choice" type="button" aria-pressed={!autoTabs} onclick={() => { autoTabs = false; }}>Manual Tabs</button>
 		</div>
 	{:else if selected === "testType"}
 		<div class="settings-fields">
 			<div class="settings-mode-options" role="group" aria-label="Keyword test type">
-				<button class="button button-secondary" type="button" aria-pressed={limit.type === "time"} onclick={() => { if (limit.type !== "time") onLimitChange({ type: "time", value: 30 }); }}><TimerIcon /> Timer</button>
-				<button class="button button-secondary" type="button" aria-pressed={limit.type === "words"} onclick={() => { if (limit.type !== "words") onLimitChange({ type: "words", value: 25 }); }}><span aria-hidden="true">Aa</span> Words</button>
+				<button tabindex="0" class="button button-secondary" type="button" aria-pressed={limit.type === "time"} onclick={() => { if (limit.type !== "time") onLimitChange({ type: "time", value: 30 }); }}><TimerIcon /> Timer</button>
+				<button tabindex="0" class="button button-secondary" type="button" aria-pressed={limit.type === "words"} onclick={() => { if (limit.type !== "words") onLimitChange({ type: "words", value: 25 }); }}><span aria-hidden="true">Aa</span> Words</button>
 			</div>
 			<div class="settings-list" role="group" aria-label={limit.type === "time" ? "Duration in seconds" : "Word count"}>
 				{#each limit.type === "time" ? raceDurations : raceWordCounts as value (value)}
-					<button class="settings-choice" type="button" aria-pressed={limit.value === value} onclick={() => onLimitChange({ type: limit.type, value })}>{value} {limit.type === "time" ? "seconds" : "words"}</button>
+					<button tabindex="0" class="settings-choice" type="button" aria-pressed={limit.value === value} onclick={() => onLimitChange({ type: limit.type, value })}>{value} {limit.type === "time" ? "seconds" : "words"}</button>
 				{/each}
 			</div>
 		</div>
@@ -94,7 +94,7 @@
 		{@const modifier = selected}
 		<div class="settings-list">
 			{#each [false, true] as enabled (enabled)}
-				<button class="settings-choice" type="button" aria-pressed={modifiers[modifier] === enabled} onclick={() => { if (modifiers[modifier] !== enabled) onToggleModifier(modifier); }}>
+				<button tabindex="0" class="settings-choice" type="button" aria-pressed={modifiers[modifier] === enabled} onclick={() => { if (modifiers[modifier] !== enabled) onToggleModifier(modifier); }}>
 					{enabled ? "On" : "None"}
 				</button>
 			{/each}

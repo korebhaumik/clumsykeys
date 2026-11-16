@@ -23,7 +23,7 @@
 			<h2 id="about-practice">Find your practice mode</h2>
 			<nav class="about-modes" aria-label="Practice modes">
 				{#each modes as mode}
-					<a class="mode-link" href={mode.href} aria-labelledby={`${mode.id}-title`} aria-describedby={`${mode.id}-description`}>
+					<a tabindex="0" class="mode-link" href={mode.href} aria-labelledby={`${mode.id}-title`} aria-describedby={`${mode.id}-description`}>
 						<span class="mode-icon"><mode.icon /></span>
 						<div class="mode-copy">
 							<h3 id={`${mode.id}-title`}>{mode.title}</h3>

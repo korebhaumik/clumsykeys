@@ -83,7 +83,7 @@
 <div class="dropdown" class:compact bind:this={root} onfocusout={(event) => {
 	if (!root.contains(event.relatedTarget as HTMLElement)) open = false;
 }}>
-	<button bind:this={trigger} type="button" role="combobox" aria-label={label}
+	<button tabindex="0" bind:this={trigger} type="button" role="combobox" aria-label={label}
 		aria-describedby={describedBy} aria-expanded={open} aria-haspopup="listbox"
 		aria-controls={`${id}-list`} aria-activedescendant={open ? `${id}-option-${active}` : undefined}
 		{disabled} class="dropdown-trigger" onclick={() => open ? open = false : show()} onkeydown={keydown}>

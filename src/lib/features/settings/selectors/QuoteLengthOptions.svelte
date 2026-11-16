@@ -8,7 +8,7 @@
 
 <div class:quote-length-cards={panel} class="quote-length-options" role="group" aria-label="Quote length">
 	{#each quoteLengths as length (length)}
-		<button type="button" class={panel ? "length-card" : "toolbar-option"}
+		<button tabindex="0" type="button" class={panel ? "length-card" : "toolbar-option"}
 			aria-label={length.charAt(0).toUpperCase() + length.slice(1)}
 			aria-describedby={panel ? `${id}-${length}-range` : undefined}
 			aria-pressed={($testConfig.quoteLength ?? "medium") === length}

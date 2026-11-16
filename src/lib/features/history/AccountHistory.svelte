@@ -108,14 +108,14 @@
 <section class="history-page" aria-labelledby="history-title">
 	<h1 id="history-title" class="sr-only">History</h1>
 	{#if !$account.session}
-		<div class="panel stack"><h2 class="panel-title">Your progress, in one place.</h2><p>Sign in to see your saved results. Guest tests aren’t saved to your account.</p><a class="button button-primary" href="#/account">Sign in</a></div>
+		<div class="panel stack"><h2 class="panel-title">Your progress, in one place.</h2><p>Sign in to see your saved results. Guest tests aren’t saved to your account.</p><a tabindex="0" class="button button-primary" href="#/account">Sign in</a></div>
 	{:else}
 		<div class="history-navigation">
 			<div class="history-tabs" role="group" aria-label="History type">
-				<button aria-label="Practice history" aria-pressed={kind === "practice"} onclick={() => kind = "practice"}>Practice</button>
-				<button aria-label="Race history" aria-pressed={kind === "race"} onclick={() => kind = "race"}>Multiplayer</button>
+				<button tabindex="0" aria-label="Practice history" aria-pressed={kind === "practice"} onclick={() => kind = "practice"}>Practice</button>
+				<button tabindex="0" aria-label="Race history" aria-pressed={kind === "race"} onclick={() => kind = "race"}>Multiplayer</button>
 			</div>
-			{#if detail}<button class="back-button" onclick={close}>← Back to history</button>{/if}
+			{#if detail}<button tabindex="0" class="back-button" onclick={close}>← Back to history</button>{/if}
 		</div>
 		<div hidden={!!detail} class="history-listing">
 			<div class="history-filters" aria-label="Filter loaded results">
@@ -124,13 +124,13 @@
 					<div class="filter"><span>Language</span><Dropdown label="History language" disabled={initialLoading} value={language} options={[{ value: "", label: "All languages" }, ...languages]} onchange={value => language = value} /></div>
 				{/if}
 				<div class="filter"><span>Period</span><Dropdown label="History period" disabled={initialLoading} value={days} options={[{ value: 0, label: "All time" }, { value: 7, label: "Last 7 days" }, { value: 30, label: "Last 30 days" }, { value: 90, label: "Last 90 days" }]} onchange={value => days = value} /></div>
-				<div class="filter-actions">{#if filtered}<button onclick={clearFilters}>Clear filters</button>{/if}<button disabled={!visible.length || loading} onclick={download}>Export CSV ↓</button></div>
+				<div class="filter-actions">{#if filtered}<button tabindex="0" onclick={clearFilters}>Clear filters</button>{/if}<button tabindex="0" disabled={!visible.length || loading} onclick={download}>Export CSV ↓</button></div>
 			</div>
 			<div class="history-summary" aria-label="Summary of matching loaded results" aria-busy={loading}>
 				<p role="status">{loading ? "Loading results…" : `${visible.length} ${filtered ? "matching" : "saved"} ${visible.length === 1 ? "test" : "tests"}`}{#if nextOffset !== null}<span> · more available</span>{/if}</p>
 				<dl><div><dt>best</dt><dd>{#if initialLoading}<span class="skeleton summary-placeholder" aria-hidden="true"></span>{:else}{bestWpm ?? "—"}<small> wpm</small>{/if}</dd></div><div><dt>average</dt><dd>{#if initialLoading}<span class="skeleton summary-placeholder" aria-hidden="true"></span>{:else}{averageWpm ?? "—"}<small> wpm</small>{/if}</dd></div><div><dt>accuracy</dt><dd>{#if initialLoading}<span class="skeleton summary-placeholder" aria-hidden="true"></span>{:else}{averageAccuracy ?? "—"}<small>%</small>{/if}</dd></div></dl>
 			</div>
-			{#if error}<div class="error-message" role="alert">{error}{#if rows.length} Showing previously loaded results.{/if} <button disabled={loading} onclick={() => load(failedOffset)}>Retry history</button></div>{/if}
+			{#if error}<div class="error-message" role="alert">{error}{#if rows.length} Showing previously loaded results.{/if} <button tabindex="0" disabled={loading} onclick={() => load(failedOffset)}>Retry history</button></div>{/if}
 			{#if rows.length || loading}
 				<p class="scroll-hint">Scroll to see all columns →</p>
 				<div class="history-table-scroll" role="region" aria-label="Saved results, scroll for more columns" tabindex="-1" use:scrollFocus aria-busy={loading}>
@@ -138,11 +138,11 @@
 						<caption class="sr-only">Saved {kind === "practice" ? "practice tests" : "multiplayer races"}. Sort using column headings, or open a result for details.</caption>
 						<thead><tr>
 							{#each metricColumns.filter(column => kind === "practice" || column.key === "wpm" || column.key === "accuracy") as column}
-								<th scope="col" aria-sort={sort === column.key ? ascending ? "ascending" : "descending" : "none"}><button disabled={initialLoading} onclick={() => order(column.key)} title={column.title}>{column.label}<span aria-hidden="true" class:active-sort={sort === column.key}>{sort === column.key ? ascending ? "↑" : "↓" : "↕"}</span></button></th>
+								<th scope="col" aria-sort={sort === column.key ? ascending ? "ascending" : "descending" : "none"}><button tabindex="0" disabled={initialLoading} onclick={() => order(column.key)} title={column.title}>{column.label}<span aria-hidden="true" class:active-sort={sort === column.key}>{sort === column.key ? ascending ? "↑" : "↓" : "↕"}</span></button></th>
 							{/each}
 							<th scope="col"><abbr title={kind === "practice" ? "Correct / incorrect / extra characters" : "Total characters typed"}>chars</abbr></th><th scope="col">{kind === "practice" ? "mode" : "result"}</th>
 							{#if kind === "practice"}<th scope="col">language</th>{/if}
-							<th scope="col" aria-sort={sort === "created_at" ? ascending ? "ascending" : "descending" : "none"}><button disabled={initialLoading} onclick={() => order("created_at")}>date <span aria-hidden="true" class:active-sort={sort === "created_at"}>{sort === "created_at" ? ascending ? "↑" : "↓" : "↕"}</span></button></th><th scope="col"><span class="sr-only">Details</span></th>
+							<th scope="col" aria-sort={sort === "created_at" ? ascending ? "ascending" : "descending" : "none"}><button tabindex="0" disabled={initialLoading} onclick={() => order("created_at")}>date <span aria-hidden="true" class:active-sort={sort === "created_at"}>{sort === "created_at" ? ascending ? "↑" : "↓" : "↕"}</span></button></th><th scope="col"><span class="sr-only">Details</span></th>
 						</tr></thead>
 						<tbody>
 							{#each visible as row (resultKey(row))}
@@ -151,7 +151,7 @@
 									{#if "id" in row}<td>{Number(row.deviation.toFixed(2))}</td><td aria-label={`${row.correct} correct, ${row.incorrect} incorrect, ${row.extra} extra`}>{row.correct}<span class="separator">/</span>{row.incorrect}<span class="separator">/</span>{row.extra}</td><td class="mode-cell">{modeLabel(row)}</td><td>{testLanguage(row.language)}</td>
 									{:else}<td>{row.typed_chars}</td><td>{row.reason === "completed" ? "Completed" : row.reason === "time-limit" ? "Time limit" : "Disconnected"}</td>{/if}
 									<td><time datetime={row.created_at}>{date(row.created_at)}</time></td>
-									<td><button class="history-row" aria-label={`View ${modeLabel(row)} result from ${date(row.created_at)}`} title="View result details" disabled={opening || loading} onclick={event => open(row, event.currentTarget)}><ArrowRightIcon /></button></td>
+									<td><button tabindex="0" class="history-row" aria-label={`View ${modeLabel(row)} result from ${date(row.created_at)}`} title="View result details" disabled={opening || loading} onclick={event => open(row, event.currentTarget)}><ArrowRightIcon /></button></td>
 								</tr>
 							{/each}
 							{#if initialLoading || loadingMore}
@@ -164,9 +164,9 @@
 				</div>
 			{/if}
 			{#if !visible.length && !loading && !error}
-				<div class="empty-history"><h2>{filtered ? "No matching tests." : "No saved results yet."}</h2><p>{filtered ? "Try another filter, or load more results below." : kind === "practice" ? "Finish a practice test to start building your history." : "Your saved multiplayer races will appear here."}</p>{#if filtered}<button class="button button-secondary" onclick={clearFilters}>Clear filters</button>{:else}<a class="button button-primary" href={kind === "practice" ? "#/" : "#/login"}>{kind === "practice" ? "Start practising" : "Join a race"} <ArrowRightIcon /></a>{/if}</div>
+				<div class="empty-history"><h2>{filtered ? "No matching tests." : "No saved results yet."}</h2><p>{filtered ? "Try another filter, or load more results below." : kind === "practice" ? "Finish a practice test to start building your history." : "Your saved multiplayer races will appear here."}</p>{#if filtered}<button tabindex="0" class="button button-secondary" onclick={clearFilters}>Clear filters</button>{:else}<a tabindex="0" class="button button-primary" href={kind === "practice" ? "#/" : "#/login"}>{kind === "practice" ? "Start practising" : "Join a race"} <ArrowRightIcon /></a>{/if}</div>
 			{/if}
-			<footer class="history-footer"><p>Filters, summaries and export use loaded results.{#if kind === "practice"}<br />chars = correct / incorrect / extra · wpm std = speed variation{/if}</p>{#if nextOffset !== null}<button class="button button-secondary" disabled={loading || opening} onclick={() => load(nextOffset!)}>Load more results</button>{/if}</footer>
+			<footer class="history-footer"><p>Filters, summaries and export use loaded results.{#if kind === "practice"}<br />chars = correct / incorrect / extra · wpm std = speed variation{/if}</p>{#if nextOffset !== null}<button tabindex="0" class="button button-secondary" disabled={loading || opening} onclick={() => load(nextOffset!)}>Load more results</button>{/if}</footer>
 		</div>
 		{#if detail}
 			<section class="detail-view" aria-label="Result details" aria-busy={opening}><div class="detail-heading"><h2 bind:this={detailHeading} tabindex="-1">{detail.title}</h2><time datetime={detail.date}>{date(detail.date)}</time></div>
@@ -174,7 +174,7 @@
 					<p class="loading-detail" role="status">Loading result…</p>
 					<ResultDetailSkeleton {kind} />
 				{:else if detailError}
-					<div class="detail-error"><p class="error-message" role="alert">{detailError}</p><button class="button button-secondary" onclick={retryDetail}>Retry result</button></div>
+					<div class="detail-error"><p class="error-message" role="alert">{detailError}</p><button tabindex="0" class="button button-secondary" onclick={retryDetail}>Retry result</button></div>
 				{:else}
 				{#if detail.series}
 					<section class="saved-race-settings" aria-label="Race settings">

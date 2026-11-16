@@ -26,13 +26,13 @@
 </script>
 
 <div class="name-row">
-	<h2 aria-label={name}>{#if editing}{name}{:else}<button class="edit-name" type="button" aria-label={`Edit display name: ${name}`} title="Double-click to edit display name" bind:this={editButton} onclick={event => { if (event.detail === 0 || event.detail === 2) void edit(); }}>{name}</button>{/if}</h2>
+	<h2 aria-label={name}>{#if editing}{name}{:else}<button tabindex="0" class="edit-name" type="button" aria-label={`Edit display name: ${name}`} title="Double-click to edit display name" bind:this={editButton} onclick={event => { if (event.detail === 0 || event.detail === 2) void edit(); }}>{name}</button>{/if}</h2>
 </div>
 {#if editing}
 	<form class="name-editor" onsubmit={event => { event.preventDefault(); void save(); }}>
-		<label>Display name<input required maxlength="50" autocomplete="nickname" bind:this={input} bind:value={draft} disabled={saving} /></label>
+		<label>Display name<input tabindex="0" required maxlength="50" autocomplete="nickname" bind:this={input} bind:value={draft} disabled={saving} /></label>
 		<p>Your public name on leaderboards. You can choose a separate alias when joining a room.</p>
-		<div><button class="button button-primary" disabled={saving}>{saving ? "Saving…" : "Save display name"}</button><button class="button button-secondary" type="button" disabled={saving} onclick={close}>Cancel</button></div>
+		<div><button tabindex="0" class="button button-primary" disabled={saving}>{saving ? "Saving…" : "Save display name"}</button><button tabindex="0" class="button button-secondary" type="button" disabled={saving} onclick={close}>Cancel</button></div>
 	</form>
 {/if}
 {#if error}<p role="alert">{error}</p>{/if}
