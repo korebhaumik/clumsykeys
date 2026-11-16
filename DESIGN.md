@@ -61,6 +61,19 @@ Current page patterns:
   Settings and mode controls lead into the typing area. Active
   tests replace configuration controls with live stats and suppress distracting
   chrome; results bring back explicit replay actions and detailed feedback.
+  A strict WPM improvement in the same practice mode, language, test type and
+  duration/word count (or quote/snippet length) shows an achievement card from
+  the top: an unlocked badge, a trophy
+  medallion with small sparkles, a prominent WPM score and an improvement pill.
+  It announces the previous best and improvement without taking focus, dismisses after eight seconds
+  (remaining available while its dismiss button is focused), and clears on replay
+  or navigation. Auto-dismissal and explicit dismissal fade and slide the card
+  fully upward before removing it; it stays inert during this exit. Replay and
+  navigation still clear it immediately. Dismissal returns focus to the results
+  heading. The entrance/exit slide, medal pop and sparkle reveal are disabled
+  for reduced motion; the first result
+  establishes that category's baseline. The footer names the category, for
+  example “English · 30s” or “English 2k · 25 words”.
 - **About:** a compact About label sits above the brand title, using the same
   700 weight as other page titles. One short muted line sits beneath the title;
   there are no decorative cards or hero actions.

@@ -24,3 +24,19 @@ export function parsePracticeCategory(value: unknown): PracticeCategory | undefi
 	} else if (!Number.isSafeInteger(length) || (length as number) <= 0 || (length as number) > 86_400) return;
 	return { mode, language, test, length } as PracticeCategory;
 }
+
+export function practiceCategory(result: Pick<PracticeSubmission, "mode" | "language" | "settings">): PracticeCategory | undefined {
+	const settings = result.settings;
+	if (!isRecord(settings)) return;
+	const test = result.mode === "code-snippets" ? "snippets" : result.mode === "code-keywords"
+		? (isRecord(settings.limit) ? settings.limit.type : undefined)
+		: settings.quotes ? "quotes" : typeof settings.timer === "number" ? "time" : "words";
+	const length = test === "snippets" ? settings.snippetLength : test === "quotes" ? settings.quoteLength ?? "medium"
+		: result.mode === "code-keywords" && isRecord(settings.limit) ? settings.limit.value
+		: test === "time" ? settings.timer : settings.words;
+	return parsePracticeCategory({ mode: result.mode, language: result.language, test, length });
+}
+
+export function practiceCategoryKey(category: PracticeCategory) {
+	return JSON.stringify([category.mode, category.language, category.test, category.length]);
+}

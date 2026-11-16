@@ -259,16 +259,27 @@ WPM result for each practice mode and the five latest summaries in one snapshot.
 Average WPM, raw WPM and accuracy are arithmetic per-test means. Guest, unsaved,
 abandoned and multiplayer activity is excluded. Different test settings can
 produce different bests; each card shows its language and test type.
+Solo practice uses `GET /api/practice-personal-best` for an authenticated
+category-specific WPM best. Categories distinguish mode, language, active test
+type and duration/word count, or quote/snippet length. Modifiers, difficulty and
+auto-indent share a category. The adapter queries all owner-scoped saved results
+and returns only the highest matching WPM (or null), without history pagination.
+No database migration or RPC change is needed. New snippet submissions archive
+optional `snippetLength`; legacy snippet results without it cannot be assigned
+to a length category. Legacy quote results use the existing medium default.
 
-Authenticated `GET /api/practice-personal-best` returns a category-specific
-WPM best. Categories distinguish mode, language, active test type and
-duration/word count, or quote/snippet length. Modifiers, difficulty and
-auto-indent share a category. The adapter queries all owner-scoped saved
-results and returns only the highest matching WPM (or null), independently
-of history pagination. No database migration or RPC change is needed.
-Snippet submissions may archive optional `snippetLength`; legacy results
-without it cannot be assigned to a length category. Legacy quote results
-use the existing medium default.
+Practice reads this snapshot when typing starts and writes the new result to the browser
+retry queue immediately on completion. Only its network save waits for that read
+to settle, so the snapshot cannot include the new result and a reload retains
+the pending save. A strict improvement over
+an existing best earns a notification; first results and ties do not. This tab
+also retains completed unsaved category bests per account in memory. If the
+category read fails, no achievement is claimed and the result still enters the existing
+save/retry flow. These notifications are feedback, not proof of competitive
+eligibility or successful persistence. Guest bests are device-local and separate
+from account data. Version 2 guest snapshots keep category keys under the existing
+storage key; earlier per-mode aggregate scores have no recoverable category and
+are replaced as new category baselines are established.
 
 The page supports loading, empty, failed and refresh states without replacing a
 failed request with fabricated statistics. Name, join date and optional bio/website

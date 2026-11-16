@@ -109,7 +109,8 @@ Quotes are never truncated to a word preset. Solo quote length is an optional
 preference/result setting with a medium fallback; multiplayer uses its unfiltered
 quote pool. Snippet restart avoids the previous ID when the category has an
 alternative. Snippet length and auto-indent are cached as device-local UI choices; snippet
-length is not part of account preferences or result settings. Neither quote nor snippet
+length is not part of account preferences; new snippet results archive it for
+category-specific personal bests. Neither quote nor snippet
 length currently subdivides the public solo board.
 
 `session.ts` owns pure solo metrics, retaining the historical four-character WPM
@@ -118,6 +119,31 @@ and use keyed sessions to reset them. Keep calculations, input/DOM work and
 transport side effects separate; reactive per-character rewrites require their
 own regression work. Completion captures one immutable, account-bound result;
 network writes do not enter the keyboard loop.
+
+`practice-completion.ts` snapshots the selected category through authenticated
+`GET /api/practice-personal-best` when typing starts, compares WPM using `personal-best.ts`
+helper, and submits through the existing retry queue. Queue storage is immediate;
+the network write waits for that snapshot (bounded by the account HTTP timeout)
+to avoid comparing a fast result against itself. Reloads retain the queued result.
+Failed reads suppress celebrations while preserving saves.
+Bests are separate for practice mode, language, test type and duration/word count,
+or quote/snippet length. Modifiers, difficulty and auto-indent share a category.
+The browser-safe `practice-category.contract.ts` normalizes both clients and
+server queries. The backend reads the highest owner-scoped matching WPM across
+all saved rows, independent of history pagination; the dashboard retains its
+overall per-mode summary. Account-bound memory also includes this tab's completed
+unsaved tests. Legacy quotes default to medium; snippets without an archived
+length cannot be attributed to a length category.
+Guest bests use `clumsy-keys:guest-personal-bests` in localStorage with an
+in-memory fallback. Version 2 stores category keys; old aggregate-only guest
+values cannot be assigned to a category and establish fresh baselines. Guest
+values are never imported into account bests. The result view
+owns the notification, its timer and cleanup. Saved-history views never create
+achievements; multiplayer scores are outside this solo comparison.
+Its local Svelte outro measures the card and top inset to move the whole card
+above the viewport on timed/manual dismissal, retaining inert outgoing markup
+until the fade/slide ends. Reduced motion removes it immediately; replay and
+route teardown do not hold the old results view for an outro.
 
 ## Live multiplayer
 
@@ -174,15 +200,6 @@ all active rooms/timers/recovery sessions; confirmed database rows remain durabl
 The private dashboard reads one service-only aggregate of all saved solo tests,
 per-test arithmetic means, characters/time totals, bests per mode and five recent
 summaries. Guest, unsaved, abandoned and multiplayer activity is excluded.
-
-Authenticated `GET /api/practice-personal-best` reads the highest saved WPM
-for the verified owner and selected mode, language, test type and length.
-The browser-safe `practice-category.contract.ts` validates these categories.
-JSON-field filtering and descending WPM selection cover all matching saved
-rows independently of history pagination. Quote results without a length
-default to medium; snippet results without a known archived length cannot
-be attributed. Code result validation accepts optional `snippetLength`;
-this does not change account preferences or public leaderboard grouping.
 `#/history` paginates private practice and race results. The history feature owns
 loaded-result filtering, metric/date sorting and CSV formatting in a pure helper;
 its presentation retains the listing while inspecting result charts. Detail

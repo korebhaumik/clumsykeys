@@ -19,7 +19,8 @@
 	import { codePreferencesKey, codePreferences } from "./code-preferences";
 	import { account } from "../../state/account.store";
 	import { practiceBusy } from "../../state/preferences.store";
-	import { submitPracticeResult } from "./result-persistence";
+	import { startPracticeCompletion } from "./practice-completion";
+	import type { PersonalBest } from "./personal-best";
 	import {
 		alignPracticeCaret,
 		markPracticeCharacter,
@@ -50,6 +51,8 @@
 	let session = $state.raw(createPracticeSession());
 	let resultId = $state(window.crypto.randomUUID());
 	let sessionAccountId = $state(get(account).session?.user.id ?? null);
+	let completePractice: ReturnType<typeof startPracticeCompletion>;
+	let personalBest = $state<Promise<PersonalBest | undefined>>();
 	let typedLetter = "";
 	let isBlur = $state(false);
 	let autoTabs = $state(uiPreferences.autoTabs);
@@ -153,6 +156,7 @@
 		resetPositions();
 		typedLetter = "";
 		results = undefined;
+		personalBest = undefined;
 		game = "waiting";
 		await tick();
 		inputEl.focus();
@@ -182,14 +186,16 @@
 	function finish() {
 		if (game !== "playing") return;
 		results = session.finish();
-		submitPracticeResult(sessionAccountId, { id: resultId, mode: mode === "keywords" ? "code-keywords" : "code-snippets",
-			language: langChoice, settings: { mode, language: langChoice, limit: keywordLimit, modifiers: { ...modifiers }, autoTabs }, stats: results });
+		personalBest = completePractice({ id: resultId, mode: mode === "keywords" ? "code-keywords" : "code-snippets",
+			language: langChoice, settings: { mode, language: langChoice, limit: keywordLimit, modifiers: { ...modifiers }, autoTabs, ...(mode === "snippets" ? { snippetLength } : {}) }, stats: results });
 		game = "finished";
 	}
 
 	function startSession() {
 		if (game !== "waiting") return;
 		sessionAccountId = get(account).session?.user.id ?? null;
+		completePractice = startPracticeCompletion(sessionAccountId, { mode: mode === "keywords" ? "code-keywords" : "code-snippets", language: langChoice,
+			settings: { mode, limit: keywordLimit, ...(mode === "snippets" ? { snippetLength } : {}) } });
 		game = "playing";
 	}
 
@@ -413,7 +419,7 @@
 <PracticeLayout mode="code" active={game === "playing"} finished={!!results} onRestart={restart} onSettings={openSettings}>
 
 	{#if results}
-		<PracticeResults testType={`${languages[langChoice]} ${mode === "keywords" ? "keywords" : "practice"}`} stats={results} onRestart={restart} {resultId} signedIn={!!sessionAccountId} />
+		<PracticeResults testType={`${languages[langChoice]} ${mode === "keywords" ? "keywords" : "practice"}`} stats={results} onRestart={restart} {resultId} {personalBest} accountId={sessionAccountId} signedIn={!!sessionAccountId} />
 	{:else}
 	<div class="code-layout" class:playing={game === "playing"}>
 		<div class="code-toolbar">

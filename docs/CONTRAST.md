@@ -20,16 +20,21 @@ Both pass the normal-text threshold. Forced-color mode delegates to system
 Highlight/HighlightText. Earlier measurements and known failures below retain
 their recorded scope.
 
-## Sign-in mini keyboard
+## Personal-best notification and mini keyboard
 
-Recalculated on **16 November 2026** directly from `tokens.css`. Key text
-on `--surface` has muted ratios of **6.16:1** in Dark Forest and **7.00:1**
-in Classic. Home/hover accent text on `--accent-wash` is **6.06:1** and
-**16.96:1**, respectively. Pressed keys use `--accent-ink` on `--accent`:
-**9.51:1** and **21.00:1**. Global focus on the keyboard surface is
-**7.94:1** and **21.00:1**. These text/focus pairs exceed their thresholds;
-the known neutral-border limitations remain. Keys show physical depression
-while pressed, and transitions respect reduced motion.
+Recalculated on **16 November 2026** directly from `tokens.css`. The notification
+and keyboard reuse existing semantic tokens. Notification text on `--surface`
+has ink/muted/accent ratios of **10.40/6.16/7.94:1** in Dark Forest and
+**21.00/7.00/21.00:1** in Classic. The achievement-unlocked badge and
+hovered/home-key accent text on `--accent-wash` are **6.06:1** and **16.96:1**,
+respectively. The trophy medallion, improvement pill and pressed keys use
+`--accent-ink` on `--accent`: **9.51:1** and **21.00:1**. Global focus on the
+keyboard/notification surface is **7.94:1** and **21.00:1**. All these text/focus
+pairs exceed their thresholds; the known neutral-border limitations remain.
+Keys also show physical depression while pressed. The medal ring and sparkles
+are decorative; the footer separator retains the shared neutral-border role.
+Notification entry/exit, medal pop, sparkle reveal and key transitions respect reduced
+motion, and the notification does not take focus.
 
 ## Text and primary actions
 

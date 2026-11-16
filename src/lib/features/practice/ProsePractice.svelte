@@ -9,7 +9,8 @@
 	import { createPracticeSession, type PracticeResults as Results } from "./session";
 	import { account } from "../../state/account.store";
 	import { practiceBusy } from "../../state/preferences.store";
-	import { submitPracticeResult } from "./result-persistence";
+	import { startPracticeCompletion } from "./practice-completion";
+	import type { PersonalBest } from "./personal-best";
 	import {
 		alignPracticeCaret,
 		markPracticeCharacter,
@@ -25,6 +26,8 @@
 	let session = $state.raw(createPracticeSession());
 	let resultId = $state(window.crypto.randomUUID());
 	let sessionAccountId = $state(get(account).session?.user.id ?? null);
+	let completePractice: ReturnType<typeof startPracticeCompletion>;
+	let personalBest = $state<Promise<PersonalBest | undefined>>();
 	let typedLetter = "";
 	let isBlur = $state(false);
 	let caretEl = $state<HTMLDivElement>()!;
@@ -86,6 +89,7 @@
 		letterIndex = 0;
 		typedLetter = "";
 		results = undefined;
+		personalBest = undefined;
 		status = "waiting";
 		if (focus) {
 			await tick();
@@ -96,7 +100,7 @@
 	function finish() {
 		if (status !== "playing") return;
 		results = session.finish();
-		submitPracticeResult(sessionAccountId, { id: resultId, mode: "prose", language: passageConfig.language, settings: passageConfig, stats: results });
+		personalBest = completePractice({ id: resultId, mode: "prose", language: passageConfig.language, settings: passageConfig, stats: results });
 		status = "finished";
 	}
 
@@ -177,7 +181,10 @@
 				advanceWord();
 				continue;
 			}
-			if (status === "waiting") sessionAccountId = get(account).session?.user.id ?? null;
+			if (status === "waiting") {
+				sessionAccountId = get(account).session?.user.id ?? null;
+				completePractice = startPracticeCompletion(sessionAccountId, { mode: "prose", language: passageConfig.language, settings: passageConfig });
+			}
 			status = "playing";
 			typedLetter = letter;
 			handleInput();
@@ -187,7 +194,7 @@
 
 <section class="practice my-5">
 	{#if results}
-		<PracticeResults testType="Prose practice" stats={results} onRestart={restart} {resultId} signedIn={!!sessionAccountId} />
+		<PracticeResults testType="Prose practice" stats={results} onRestart={restart} {resultId} {personalBest} accountId={sessionAccountId} signedIn={!!sessionAccountId} />
 	{:else}
 		{#key session}
 			<div class="typing-frame" class:caret-idle={status === "waiting"}>
