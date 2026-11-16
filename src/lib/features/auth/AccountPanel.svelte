@@ -84,10 +84,10 @@
 			<p class="eyebrow">Your typing journey</p>
 			<h1 id="account-title">Find your<br /><span>rhythm.</span></h1>
 			<p class="intro-copy">A little practice. A new personal best.</p>
-			<div class="typing-specimen" aria-hidden="true">
-				<p class="specimen-label">one keystroke at a time</p>
-				<p class="specimen-text"><span>keep</span> making<br />progress<span class="specimen-caret"></span></p>
-				<div class="specimen-keys">{#each ["a", "s", "d", "f", "j", "k", "l", ";"] as key}<span class:home-key={key === "f" || key === "j"}>{key}</span>{/each}</div>
+			<div class="typing-specimen">
+				<p class="specimen-label" aria-hidden="true">one keystroke at a time</p>
+				<p class="specimen-text" aria-hidden="true"><span>keep</span> making<br />progress<span class="specimen-caret"></span></p>
+				<div class="specimen-keys" role="group" aria-label="Mini keyboard">{#each ["a", "s", "d", "f", "j", "k", "l", ";"] as key}<button type="button" tabindex="0" aria-label={`${key === ";" ? "Semicolon" : key} key`} class:home-key={key === "f" || key === "j"}>{key}</button>{/each}</div>
 			</div>
 			<p class="intro-benefits">Your progress and preferences, on every device.</p>
 		</div>
@@ -142,8 +142,11 @@
 	.specimen-text > span:first-child { color: var(--ink); }
 	.specimen-caret { display: inline-block; height: var(--dimension-1em); width: var(--dimension-2px); background: var(--caret); vertical-align: text-bottom; margin-left: var(--dimension-0_15rem); }
 	.specimen-keys { display: flex; gap: var(--dimension-0_35rem); }
-	.specimen-keys > span { display: grid; place-items: center; width: var(--dimension-2_25rem); height: var(--dimension-2_25rem); border: var(--dimension-1px) solid var(--line); border-bottom-width: var(--dimension-3px); border-radius: var(--radius-0_45rem); color: var(--muted); font: var(--text-0_82rem) var(--mono); background: var(--surface); }
+	.specimen-keys > button { display: grid; place-items: center; width: var(--dimension-2_25rem); height: var(--dimension-2_25rem); border: var(--dimension-1px) solid var(--line); border-bottom-width: var(--dimension-3px); border-radius: var(--radius-0_45rem); color: var(--muted); font: var(--text-0_82rem) var(--mono); background: var(--surface); cursor: pointer; }
 	.specimen-keys > .home-key { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+	.specimen-keys > button:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+	.specimen-keys > button:active { transform: translateY(var(--dimension-2px)); border-bottom-width: var(--dimension-1px); color: var(--accent-ink); background: var(--accent); }
+	@media (prefers-reduced-motion: no-preference) { .specimen-keys > button { transition: transform var(--motion-110ms), background var(--motion-110ms), color var(--motion-110ms); } }
 	.intro-benefits { margin-top: var(--dimension-1rem); font-size: var(--text-0_82rem); color: var(--muted); }
 	.account-entry { min-width: 0; }
 	.auth-card { display: grid; gap: var(--dimension-0_85rem); padding: clamp(var(--dimension-1_25rem), var(--dimension-3_5vw), var(--dimension-1_5rem)); background: var(--surface); border: var(--dimension-1px) solid var(--line); border-radius: var(--radius-1rem); }

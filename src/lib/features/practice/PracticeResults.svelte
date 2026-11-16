@@ -4,8 +4,10 @@
 	import type { PracticeResults } from "./session";
 	import ResultsChart from "../../components/charts/ResultsChart.svelte";
 	import { resultSaveStates, retryPracticeResults } from "./result-persistence";
+	import PersonalBestCelebration from "./PersonalBestCelebration.svelte";
+	import type { PersonalBest } from "./personal-best";
 
-	let { stats, testType, onRestart, resultId, signedIn = false, showRestart = true }: { stats: PracticeResults; testType: string; onRestart: () => void; resultId?: string; signedIn?: boolean; showRestart?: boolean } = $props();
+	let { stats, testType, onRestart, resultId, signedIn = false, showRestart = true, personalBest, accountId = null }: { stats: PracticeResults; testType: string; onRestart: () => void; resultId?: string; signedIn?: boolean; showRestart?: boolean; personalBest?: Promise<PersonalBest | undefined>; accountId?: string | null } = $props();
 	let saveState = $derived(resultId ? $resultSaveStates[resultId] : undefined);
 	const speedBands = [
 		{ label: "0–30", upper: 30 },
@@ -31,6 +33,8 @@
 
 	onMount(() => heading.focus());
 </script>
+
+{#if personalBest}<PersonalBestCelebration achievement={personalBest} {accountId} onDismiss={() => heading.focus()} />{/if}
 
 <section class="test-results practice-results" aria-labelledby="practice-results">
 	<h2 class="sr-only" id="practice-results" bind:this={heading} tabindex="-1">Practice results</h2>

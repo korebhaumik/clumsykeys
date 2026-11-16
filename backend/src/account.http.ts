@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { isRecord, isUuid, parseHandle, parsePractice, parsePreferences } from "./persistence.contract";
 import { PersistenceError, type Persistence } from "./persistence";
 import { createRateLimit } from "./security";
+import { parsePracticeCategory } from "./practice-category.contract";
 
 export function registerAccountRoutes(app: Express, persistence?: Persistence) {
 	const writes = createRateLimit(30, 60_000);
@@ -32,6 +33,11 @@ export function registerAccountRoutes(app: Express, persistence?: Persistence) {
 		res.json({ handle: await db.saveHandle(id, handle) });
 	}));
 	app.get("/api/account/dashboard", route(async (_req, res, id, db) => res.json(await db.dashboard(id))));
+	app.get("/api/practice-personal-best", route(async (req, res, id, db) => {
+		const category = parsePracticeCategory(req.query);
+		if (!category) throw new PersistenceError(400, "Choose a valid practice mode, language, test and length.");
+		res.json({ wpm: await db.practicePersonalBest(id, category) });
+	}));
 	app.put("/api/account/preferences", route(async (req, res, id, db) => {
 		const preferences = parsePreferences(req.body?.preferences);
 		const revision = req.body?.revision;

@@ -8,6 +8,63 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Interactive feedback verification
+
+On **16–17 November 2026**, added compact per-category solo achievement cards with a
+trophy medallion, unlocked badge, improvement pill and reduced-motion-aware
+slide/pop/sparkle feedback, plus interactive keys on the account sign-in page. Guest WPM bests
+use a new device-local storage key, separate from account bests. Signed-in bests
+come from authenticated `GET /api/practice-personal-best` plus this tab's completed
+tests. Categories distinguish practice mode, language, active test type and length;
+modifiers, difficulty and auto-indent share a category. The read selects the
+highest matching owner-scoped WPM across saved rows, independent of history
+pagination. New snippet results archive optional `snippetLength`; older
+unattributed snippets are excluded, while legacy quotes default to medium.
+Version 2 guest snapshots retain category keys under the same storage key;
+legacy mode-only aggregates cannot establish category baselines.
+An unavailable snapshot suppresses achievement claims without preventing
+result saves. Retry entries are stored immediately; only network writes wait
+for the snapshot. Existing owner verification is preserved. The additive HTTP
+read and optional snippet result field are documented in OpenAPI; no database
+migration, RPC or dependency changes are required. Achievements do not establish
+score integrity or persistence.
+
+Checks ran on **16–17 November 2026**. Lint/design audit, dead-code checks,
+frontend/backend type/docs checks, **65 unit/HTTP/socket tests**, both production
+builds and SEO artifact checks passed. The complete browser suite passed **226
+cases: 184 Chrome and 42 WebKit**. Its 14 interaction cases cover both themes at 320/1440px,
+all three solo modes, first-result baselines, guest persistence/account isolation,
+storage-write failures, delayed/failed snapshots, immediate retry-queue storage, history suppression,
+replay/dismissal cleanup, auto-dismissal, reduced motion, real Tab/Shift+Tab and
+pointer/Enter/Space feedback. The exact English 30s, English 60s and English 2k
+25-word case passes in both browsers. HTTP tests verify authentication, invalid
+categories, owner isolation and an older matching best behind 23 newer results
+in another category. OpenAPI syntax/example validation passed with Redocly 2.78.0.
+Settled category-footer screenshots were inspected. The real local Supabase stack passed **86 pgTAP assertions
+across six SQL files** and the Auth/Data API integration check, including
+disposable-user cleanup and actual JSON-field/category filtering for prose,
+legacy quotes, snippets and keywords. Browser account flows use the separate modeled fixture;
+these are distinct from the real local database checks.
+
+The **17 November 2026** exit-motion follow-up reran lint/design, types/docs,
+dead-code checks, all **65 unit/HTTP/socket tests**, both builds and the complete
+**226-case Chrome/WebKit suite**, all passing. Manual and timed dismissals now
+retain an inert card through a local Svelte outro, fading and sliding it fully
+above the viewport before removal. Browser assertions pause actual outgoing
+animations, verify upward movement and partial opacity mid-flight, and verify
+the final card bottom is above the viewport before removal. Keyboard dismissal
+returns focus to results; reduced motion removes immediately. Replay/navigation
+clear the old view without waiting for this local outro. The SQL/Auth evidence
+above belongs to the category-lookup pass; it was not repeated for this motion-only
+change, which adds no persistence or transport behavior.
+
+`pnpm install --frozen-lockfile` could not run because the local pnpm 12.18.0
+launcher reports `ENOEXEC`; checks used the installed dependencies. The existing
+Vite native-config-loader warning and Knip configuration hints remain. No new
+dependency/advisory or credential scan, hosted provider check or deployment is
+claimed for this issue. Source-token contrast was recalculated
+in [CONTRAST.md](CONTRAST.md); its known failures remain open.
+
 ## Nonvisual SEO and original-interface verification
 
 On **16 November 2026**, narrowed the SEO work to head metadata, factual WebSite
@@ -485,7 +542,7 @@ exposure, grants, buckets, migration history, SMTP, OAuth consent and production
 redirect settings were not freshly checked; earlier hosted observations are not
 presented as current verification.
 
-## Latest verification
+## Earlier security and history verification
 
 Environment: Node **24.11.1**, pnpm **12.18.0**, Vite **8.3.6**, Supabase JS
 **2.119.0**, Socket.IO **4.8.4**. Lint, dead-code, type/docs, unit/browser and

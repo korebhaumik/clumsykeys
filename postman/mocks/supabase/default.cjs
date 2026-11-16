@@ -145,8 +145,15 @@ const server = createServer(async (req, res) => {
   else if (name === 'race_rounds') records = [...rounds.values()];
   else if (name === 'race_results') records = raceResults;
   else return send(501, { error: 'Table not modeled' });
-  for (const [key, value] of url.searchParams) if (value.startsWith('eq.')) records = records.filter(row => String(row[key]) === value.slice(3));
-  if (url.searchParams.has('order')) records = records.toSorted((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  const field = (row, key) => key.split(/->>?/).reduce((value, part) => value?.[part], row);
+  for (const [key, value] of url.searchParams) if (value.startsWith('eq.')) records = records.filter(row => String(field(row, key)) === value.slice(3));
+  const or = url.searchParams.get('or');
+  if (or) records = records.filter(row => or.slice(1, -1).split(',').some(condition => {
+    const [, key, operator, value] = condition.match(/^(.*?)\.(eq|is)\.(.*)$/) ?? [];
+    return operator === 'is' ? value === 'null' && field(row, key) == null : operator === 'eq' && String(field(row, key)) === value;
+  }));
+  if (url.searchParams.get('order')?.startsWith('wpm.desc')) records = records.toSorted((a, b) => b.wpm - a.wpm);
+  else if (url.searchParams.has('order')) records = records.toSorted((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   const from = Number(url.searchParams.get('offset') ?? 0), limit = Number(url.searchParams.get('limit') ?? 1000);
   records = records.slice(from, from + limit);
   const select = url.searchParams.get('select');

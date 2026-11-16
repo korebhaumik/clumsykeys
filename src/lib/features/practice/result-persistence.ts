@@ -18,6 +18,7 @@ try {
 let running = false;
 let syncing = false;
 let retryTimer: ReturnType<typeof setTimeout> | undefined;
+const beforeSaves = new Map<string, Promise<unknown>>();
 
 function store() {
 	try { localStorage.setItem(queueKey, JSON.stringify(pending)); } catch { /* The visible failed/pending state remains accurate. */ }
@@ -25,13 +26,14 @@ function store() {
 function state(id: string, value: "pending" | "saved" | "failed") {
 	resultSaveStates.update(states => ({ ...states, [id]: value }));
 }
-export function submitPracticeResult(accountId: string | null, result: PracticeSubmission) {
+export function submitPracticeResult(accountId: string | null, result: PracticeSubmission, beforeSave?: Promise<unknown>) {
 	if (!accountId) return;
 	if (!pending.some(entry => entry.result.id === result.id)) {
 		if (pending.length >= 20 || JSON.stringify(pending).length + JSON.stringify(result).length > 2_000_000) {
 			state(result.id, "failed"); return;
 		}
 		pending.push({ accountId, result: JSON.parse(JSON.stringify(result)) }); store();
+		if (beforeSave) beforeSaves.set(result.id, beforeSave);
 	}
 	state(result.id, "pending"); void retryPracticeResults();
 }
@@ -41,10 +43,14 @@ export async function retryPracticeResults() {
 	const id = get(account).session?.user.id;
 	try {
 		if (!id) return;
-		for (const entry of [...pending]) {
-			if (entry.accountId !== id) continue;
+		while (true) {
+			const entry = pending.find(item => item.accountId === id);
+			if (!entry) break;
 			state(entry.result.id, "pending");
 			try {
+				// Queue storage is immediate; only the network write waits for a PB snapshot.
+				await beforeSaves.get(entry.result.id);
+				beforeSaves.delete(entry.result.id);
 				await accountApi("/api/practice-results", { method: "POST", body: entry.result, accountId: id });
 				pending = pending.filter(item => item.result.id !== entry.result.id); store(); state(entry.result.id, "saved");
 			} catch (error) {

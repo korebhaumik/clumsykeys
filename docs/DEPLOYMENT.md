@@ -121,6 +121,12 @@ The multi-stage Node 24 image compiles TypeScript with frozen pnpm dependencies,
 The [general API spec](api.openapi.json) lists HTTP endpoints and Socket.IO event
 payloads. Update it when adding or changing a transport contract.
 
+Category-specific personal-best celebrations require the backend's authenticated
+`GET /api/practice-personal-best` alongside the frontend. The read uses existing
+result JSON settings; no database migration is required. New code-snippet saves
+include optional `snippetLength`, while older unattributed snippet results are
+excluded from length-specific bests. See [SUPABASE.md](SUPABASE.md).
+
 For contract changes, run the local coverage/link check and an independent
 OpenAPI syntax/example validator:
 

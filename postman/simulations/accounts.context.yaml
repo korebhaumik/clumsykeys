@@ -2,6 +2,13 @@ purpose:
   stands_in_for: Supabase Auth and the application-specific PostgREST RPC/read paths; not the PostgreSQL engine.
   unblocks: Deterministic HTTP and browser account flows, upstream write outages, and retry verification without hosted data.
 assumptions:
+  - id: category-personal-best-read
+    status: supported
+    claim: The tested local adapter selects the highest owner-scoped WPM for the requested mode, language, test type and length, independent of history pagination.
+    reason: The real SDK exercised JSON-field filtering and WPM ordering against the loopback fixture, and the same adapter separately reached real local PostgREST/PostgreSQL with category and owner isolation assertions.
+    verification: On 2026-11-17, 65 unit/HTTP/socket tests passed, including an old matching result followed by 23 newer results in another category, authentication, invalid input and account isolation. Real local SQL tests passed 86 assertions; the Auth/Data API integration separately checked duration and language separation, missing quoteLength as medium, snippet lengths and keyword limits. The complete 226-case browser suite passed, including 14 interaction cases and the exact English 30s, English 60s and English 2k 25-word flow in Chrome/WebKit. Playwright and HTTP tests reused the local fixture directly; the Postman simulation CLI was not run. No hosted category-read verification is claimed.
+    source: backend/src/practice-category.contract.ts; backend/src/persistence.ts; tests/unit/persistence.test.ts; tests/integration/local-supabase.ts; tests/e2e/interactive-elements.spec.ts; postman/mocks/supabase/default.cjs
+    updated_at: "2026-11-17"
   - id: existing-handle-seed
     status: supported
     claim: The one-time database seed fills existing unclaimed handles while preserving claims and producing valid unique public values.
@@ -109,6 +116,10 @@ assumptions:
     updated_at: "2026-11-14"
 
 fingerprints:
+  - id: category-pb-working-tree
+    date: "2026-11-17"
+    commit: 4b4095a985df89ac06a0ade66b216d80929ed1be (dirty working tree with preserved interactive-UI work and category-specific PB changes)
+    cli: Postman 1.76.0; Node 24.11.1; Supabase CLI 3.1.0; real local database and existing direct HTTP fixture; postman status is unavailable in this CLI
   - id: integration-working-tree
     date: "2026-11-13"
     commit: 0678ce23644a94c050d163a3a37a503d11977cd5 (dirty working tree, including independently authored dropdown changes that were preserved)

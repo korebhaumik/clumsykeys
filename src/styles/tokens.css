@@ -109,6 +109,7 @@
   --dimension-1rem: 1rem;
   --dimension-22px: 22px;
   --dimension-28px: 28px;
+  --dimension-28rem: 28rem;
   --dimension-2_25rem: 2.25rem;
   --dimension-2_5rem: 2.5rem;
   --dimension-2px: 2px;
@@ -124,6 +125,7 @@
   --dimension-3px: 3px;
   --dimension-3rem: 3rem;
   --dimension-40rem: 40rem;
+  --dimension-4rem: 4rem;
   --dimension-4vh: 4vh;
   --dimension-4vw: 4vw;
   --dimension-50px: 50px;
@@ -151,6 +153,8 @@
   --motion-110ms: 110ms;
   --motion-160ms: 160ms;
   --motion-180ms: 180ms;
+  --motion-420ms: 420ms;
+  --motion-600ms: 600ms;
   --motion-1_2s: 1.2s;
   --radius-0_25rem: .25rem;
   --radius-0_3rem: .3rem;
@@ -185,6 +189,7 @@
   --text-1rem: 1rem;
   --text-2_4vw: 2.4vw;
   --text-2_5vw: 2.5vw;
+  --text-2_5rem: 2.5rem;
   --text-2_75rem: 2.75rem;
   --text-2_8rem: 2.8rem;
   --text-2rem: 2rem;

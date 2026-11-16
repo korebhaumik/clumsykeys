@@ -1,4 +1,5 @@
 import { quoteLengths, type QuoteLength } from "../../shared/content/quote-length";
+import { snippetLengths } from "../../shared/content/code-catalog";
 // Browser-safe persistence contract. No transport, environment, or SDK imports.
 import type { Database, Json } from "./database.types";
 export type { Json } from "./database.types";
@@ -99,6 +100,9 @@ export function parsePractice(value: unknown): PracticeSubmission | undefined {
 			difficulty: { wpmLimit: null, timeLimit: null } },
 		code: { mode: "snippets", language: "randomPy", limit: { type: "words", value: 25 }, modifiers: { numbers: false, punctuation: false } } };
 	const config = parsePreferences({ ...defaults, [value.mode === "prose" ? "prose" : "code"]: value.settings });
+	const requestedSnippetLength = value.settings.snippetLength;
+	const snippetLength = snippetLengths.find(length => length === requestedSnippetLength);
+	if (value.mode === "code-snippets" && requestedSnippetLength !== undefined && !snippetLength) return;
 	if (!config || (value.mode === "prose" ? value.language !== config.prose.language
 		: value.language !== config.code.language || value.settings.mode !== (value.mode === "code-snippets" ? "snippets" : "keywords") || typeof value.settings.autoTabs !== "boolean")) return;
 	if (!isRecord(s) || ![s.correct, s.incorrect, s.extra].every(count) || !finite(s.elapsedSeconds, 86_400) || s.elapsedSeconds <= 0 ||
@@ -119,7 +123,8 @@ export function parsePractice(value: unknown): PracticeSubmission | undefined {
 	const mean = samples.reduce((sum, point) => sum + point.wpm, 0) / (samples.length || 1);
 	return {
 		id: value.id, mode: value.mode as PracticeSubmission["mode"], language: value.language,
-		settings: value.mode === "prose" ? config.prose : { ...config.code, autoTabs: value.settings.autoTabs as boolean },
+		settings: value.mode === "prose" ? config.prose : { ...config.code, autoTabs: value.settings.autoTabs as boolean,
+			...(value.mode === "code-snippets" && snippetLength ? { snippetLength } : {}) },
 		stats: { correct: s.correct as number, incorrect: s.incorrect as number, extra: s.extra as number,
 			elapsedSeconds: s.elapsedSeconds,
 			wpm: Math.floor((s.correct as number) * 15 / s.elapsedSeconds), raw: Math.floor(attempts * 15 / s.elapsedSeconds),

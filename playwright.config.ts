@@ -9,7 +9,7 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:4193', trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [
     { name: 'chrome', use: { browserName: 'chromium', channel: 'chrome' } },
-    { name: 'webkit-keyboard', testMatch: ['practice-reset.spec.ts', 'keyboard-navigation.spec.ts', 'keyboard-focus.spec.ts', 'dropdowns.spec.ts', 'seo.spec.ts'], use: { browserName: 'webkit' } },
+    { name: 'webkit-keyboard', testMatch: ['practice-reset.spec.ts', 'keyboard-navigation.spec.ts', 'keyboard-focus.spec.ts', 'dropdowns.spec.ts', 'seo.spec.ts', 'interactive-elements.spec.ts'], use: { browserName: 'webkit' } },
   ],
   webServer: [
     { command: 'node postman/mocks/supabase/default.cjs', url: 'http://127.0.0.1:15443/health', env: { PORT: '15443' } },

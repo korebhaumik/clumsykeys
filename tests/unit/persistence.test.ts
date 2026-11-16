@@ -7,6 +7,7 @@ import { createSupabasePersistence, PersistenceError } from '../../backend/src/p
 import { parsePractice, parsePreferences, type Preferences, type PracticeSubmission } from '../../backend/src/persistence.contract';
 import { readSupabaseConfig } from '../../backend/src/config';
 import { io } from 'socket.io-client';
+import { randomUUID } from 'node:crypto';
 
 let fixture: ChildProcess, upstream: string, server: ReturnType<typeof createApplication>, base: string;
 let tokenA: string, tokenB: string;
@@ -86,6 +87,31 @@ test('dashboard authenticates the owner and returns private lifetime totals, bes
   assert.equal(dashboard.bests[0].id, result.id); assert.equal(dashboard.recent[0].id, result.id);
   const other = await (await request('/api/account/dashboard?user_id=attacker', tokenB)).json();
   assert.equal(other.stats.tests, 0); assert.equal(other.stats.characters, 0); assert.deepEqual(other.bests, []); assert.deepEqual(other.recent, []);
+});
+test('category PB reads authenticate owners and find matching bests across all saved rows', async () => {
+  const db = createSupabasePersistence({ url: upstream, secret: 'sb_secret_test' });
+  const owner = (await db.verify(tokenA)).id;
+  const category = { mode: 'prose', language: 'english', test: 'time', length: 30 } as const;
+  const path = '/api/practice-personal-best?mode=prose&language=english&test=time&length=30';
+  assert.equal((await fetch(base + path)).status, 401);
+  assert.equal((await request(path, 'invalid')).status, 401);
+  for (const query of ['mode=prose&language=randomPy&test=time&length=30', 'mode=prose&language=english&test=time&length=-1', 'mode=prose&language=english&test=snippets&length=short']) {
+    assert.equal((await request('/api/practice-personal-best?' + query)).status, 400);
+  }
+  assert.deepEqual(await (await request(path)).json(), { wpm: null });
+  for (let index = 0; index < 24; index++) await db.savePractice(owner, {
+    ...result, id: randomUUID(), language: 'english', settings: { ...settings, language: 'english', timer: index === 0 ? 30 : 60, words: null },
+    stats: { ...result.stats, wpm: index === 0 ? 75 : 120 },
+  });
+  const response = await request(path);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(await response.json(), { wpm: 75 });
+  assert.equal(await db.practicePersonalBest(owner, category), 75);
+  assert.deepEqual(await (await request(path + '&user_id=' + owner, tokenB)).json(), { wpm: null });
+  assert.deepEqual(await (await request(path.replace('length=30', 'length=60'))).json(), { wpm: 120 });
+  await db.savePractice(owner, { ...result, id: randomUUID(), language: 'english', settings: { ...settings, language: 'english', timer: null, words: null, quotes: 'Random Quotes' }, stats: { ...result.stats, wpm: 31 } });
+  assert.equal(await db.practicePersonalBest(owner, { ...category, test: 'quotes', length: 'medium' }), 31);
+  assert.equal(await db.practicePersonalBest(owner, { ...category, test: 'quotes', length: 'short' }), null);
 });
 test('database outage returns retryable errors without breaking health or guest room access', async () => {
   await fetch(upstream + '/__control', { method: 'POST', body: JSON.stringify({ failWrites: true }) });
