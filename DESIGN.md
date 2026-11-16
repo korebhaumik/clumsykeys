@@ -207,3 +207,10 @@ motion after visual changes. Keep known low-contrast cases visible in the
 and some shared borders or legacy muted text. A passing browser flow does not
 establish WCAG compliance. Update this document when a shared UI pattern changes
 and recalculate the report when relevant source colors/backgrounds change.
+
+## SEO and visual preservation
+
+SEO metadata must not introduce landing screens, explanatory sections, new
+controls or hidden marketing content into the application. Preserve the
+existing practice-first interface, footer placement, styles and focus order.
+Head metadata and crawl files do not change the design system.

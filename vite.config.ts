@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
 import { isPublicSupabaseKey, publicSupabaseError } from './src/lib/services/public-config'
+import { seoPlugin } from './scripts/seo-plugin'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -14,5 +15,6 @@ export default defineConfig(({ mode }) => {
   }
   const error = publicSupabaseError(env.VITE_SUPABASE_URL?.trim(), env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim());
   if (error) throw new Error(error);
-  return { plugins: [tailwindcss(), svelte()], build: { sourcemap: false } };
+  const site = loadEnv(mode, process.cwd(), 'SITE_');
+  return { plugins: [seoPlugin(site.SITE_URL), tailwindcss(), svelte()], build: { sourcemap: false } };
 })

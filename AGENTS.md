@@ -58,3 +58,12 @@ Audit dates and test counts must describe checks actually run against the curren
 Run the full command suite above. Cover changed behavior with meaningful unit/integration tests and browser flows. Verify both themes, keyboard interaction, narrow screens, and no browser errors. Preserve storage keys, Socket.IO events, routes, WPM formulas, and typing semantics unless explicitly fixing a documented bug. Check dynamic references before deletion. Flag uncertain dead code instead of deleting it. Do not commit generated build/test output or credentials. Record known limitations honestly; passing tests do not prove every possible interaction.
 
 Run only one default browser suite at a time against its configured ports/output directory. Do not stop unrelated servers to free those ports. Normal tests use local fixtures and ephemeral servers; SQL/Auth verification uses the real local Supabase stack. Treat hosted tests and migration commands as external mutations rather than routine local verification; follow the task's authorization and describe their effects. Keep local, modeled and hosted verification claims distinct, and carry unresolved failures forward until a relevant rerun actually resolves them.
+
+## Nonvisual SEO
+
+Keep SEO changes limited to document metadata and crawl files unless the user
+explicitly requests visible product changes. Preserve the existing UI, styles,
+routes, loading and keyboard order. Do not inject hidden marketing copy or serve
+bot-specific bodies. The sitemap lists only real canonical HTTP documents, not
+hash/private/session routes. `npm run build` includes `npm run check:seo`.
+Report Search Console and hosted verification separately from local checks.

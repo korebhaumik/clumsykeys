@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+const html = readFileSync('dist/index.html', 'utf8');
+assert.equal((html.match(/<title>/g) ?? []).length, 1);
+assert.equal((html.match(/rel="canonical"/g) ?? []).length, 1);
+assert.equal((html.match(/name="description"/g) ?? []).length, 1);
+assert.match(html, /content="index, follow"/);
+assert.match(html, /<div id="app"><\/div>/);
+assert.match(html, /<script[^>]*type="module"/);
+assert.doesNotMatch(html, /public-content|discovery:start|\/src\//);
+const json = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1];
+assert.equal(JSON.parse(json)['@type'], 'WebSite');
+assert.equal((readFileSync('dist/sitemap.xml', 'utf8').match(/<loc>/g) ?? []).length, 1);
+assert.match(readFileSync('dist/robots.txt', 'utf8'), /Sitemap:/);
+for (const path of ['app.html','code-typing-test.html','python-typing-test.html','multiplayer-typing-test.html','hinglish-typing-test.html','guides/typing-accuracy.html','guides/wpm-and-accuracy.html']) assert.equal(existsSync('dist/' + path), false, `Retired landing document: ${path}`);
+console.log('SEO checks passed: metadata, structured data, root-only sitemap and original app shell; no landing documents.');

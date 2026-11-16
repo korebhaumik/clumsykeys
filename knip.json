@@ -8,13 +8,15 @@
         "eslint.config.js",
         "playwright.config.ts",
         "tests/**/*.ts",
-        "scripts/*.mjs"
+        "scripts/*.mjs",
+        "scripts/*.ts"
       ],
       "project": [
         "src/**/*.{ts,svelte}",
         "shared/**/*.ts",
         "tests/**/*.ts",
-        "scripts/*.mjs"
+        "scripts/*.mjs",
+        "scripts/*.ts"
       ],
       "ignoreDependencies": [
         "tailwindcss"

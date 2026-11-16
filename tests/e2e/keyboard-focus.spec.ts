@@ -54,7 +54,8 @@ for (const theme of ['dark-forest', 'classic']) {
     await signIn.focus();
     await page.keyboard.press('Tab');
     await expectHighlight(table, theme);
-    await page.keyboard.press('ArrowRight');
+    // Exercise native keyboard scrolling across a rendering frame in WebKit.
+    await page.keyboard.press('ArrowRight', { delay: 100 });
     await expect.poll(() => table.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
     await page.keyboard.press('Tab');
     await expect(next).toBeFocused();
@@ -93,6 +94,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     for (const route of ['/', '/game', '/themes', '/about', '/login', '/leaderboard']) {
       await page.goto('/#' + route);
       await expect(page.locator('main')).toBeVisible();
+      await expect(page.locator('.route-content')).toContainText(/\S/);
       await page.keyboard.press('Shift+Tab');
       const controls = page.locator(':is(a[href], button, input, select, textarea, [tabindex="0"]):not([tabindex="-1"])');
       for (const control of await controls.all()) {
@@ -174,6 +176,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     }
 
     await page.goto('/#/game');
+    await expect(page.getByRole('textbox', { name: 'Type the practice snippet' })).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await expectHighlight(page.locator(':focus'), theme);
     await page.getByRole('button', { name: 'Keywords', exact: true }).click();
