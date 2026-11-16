@@ -51,7 +51,7 @@
 		{#key title}
 			<h2 id={`${id}-title`} tabindex="-1" bind:this={heading}><Icon /> {title}</h2>
 		{/key}
-		<button class="settings-dialog-close button button-secondary" type="button" aria-label="Close settings" onclick={onClose}><CrossIcon /></button>
+		<button tabindex="0" class="settings-dialog-close button button-secondary" type="button" aria-label="Close settings" onclick={onClose}><CrossIcon /></button>
 	</header>
 	<div class="settings-dialog-body">{@render children()}</div>
 	<SettingsShortcuts {onClose} {onBack} />

@@ -15,11 +15,11 @@
 
 <div class="flex items-center justify-between gap-4 min-w-32">
 	{#each practiceDurations as value (value)}
-		<button aria-pressed={timer === value} onclick={() => updateTestConfigType("timer", value)}>
+		<button tabindex="0" aria-pressed={timer === value} onclick={() => updateTestConfigType("timer", value)}>
 			<span class={cn("tracking-wide", { "text-dark-forest-accent-main underline": $theme === "dark-forest" && timer === value })}>{value}</span>
 		</button>
 	{/each}
-	<button
+	<button tabindex="0"
 		aria-label="Customize test type"
 		onclick={() => {
 			updateModalContent("testType");

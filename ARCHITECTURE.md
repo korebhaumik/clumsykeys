@@ -50,7 +50,7 @@ into browser code. Shared presentation must not import feature stores.
 | `shared/content/` | Browser-safe catalogs, selection, length classification and token modifiers used by browser and server. |
 | `backend/src/` | Process/configuration, HTTP/Socket.IO boundaries, live room lifecycle and persistence adapter. |
 | `supabase/` | Versioned migrations, local configuration and SQL access/aggregation tests. |
-| `tests/` | Unit/HTTP/socket tests, Chrome flows, local/hosted database checks and controlled upstream-failure checks. |
+| `tests/` | Unit/HTTP/socket tests, Chrome flows, focused WebKit keyboard/reset flows, local/hosted database checks and controlled upstream-failure checks. |
 | `postman/` | Local Supabase HTTP fixture and simulation context; not the application backend or a PostgreSQL implementation. |
 
 Use explicit direct imports, focused feature modules and PascalCase Svelte

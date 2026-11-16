@@ -212,11 +212,11 @@
 				<code class="room-code">{roomId ?? "—"}</code>
 			</div>
 			<div class="room-actions">
-				<button type="button" class="button button-secondary" disabled={!roomId} onclick={copyInvite}>
+				<button tabindex="0" type="button" class="button button-secondary" disabled={!roomId} onclick={copyInvite}>
 					<span aria-hidden="true"><ClipboardSvg variant="size-4" /></span>
 					Copy invite link
 				</button>
-				<button type="button" class="leave-room" aria-label="Leave room" title="Leave room" onclick={leaveRoom}><SignOutIcon /></button>
+				<button tabindex="0" type="button" class="leave-room" aria-label="Leave room" title="Leave room" onclick={leaveRoom}><SignOutIcon /></button>
 			</div>
 		</section>
 	</div>
@@ -254,7 +254,7 @@
 						<p class="muted">The race starts when everyone votes.</p>
 					{/if}
 				</div>
-				<button
+				<button tabindex="0"
 					type="button"
 					class="button {thisUser?.vote ? 'button-secondary' : 'button-primary'}"
 					disabled={!canVote}
@@ -277,7 +277,7 @@
 			<p class="eyebrow">Room details</p>
 			<h2 id="room-details-title" class="room-code">{roomId}</h2>
 		</div>
-		<form method="dialog"><button class="button button-secondary">Close</button></form>
+		<form method="dialog"><button tabindex="0" class="button button-secondary">Close</button></form>
 	</div>
 	<table>
 		<thead><tr><th scope="col">Racer</th><th scope="col">WPM</th><th scope="col">Accuracy</th></tr></thead>

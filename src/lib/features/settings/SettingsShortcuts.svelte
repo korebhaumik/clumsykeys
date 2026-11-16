@@ -3,7 +3,7 @@
 </script>
 
 <footer class="settings-dialog-footer" role="group" aria-label="Settings shortcuts">
-	<button class="settings-shortcut" type="button" aria-keyshortcuts="Escape" onclick={onBack ?? onClose}>
+	<button tabindex="0" class="settings-shortcut" type="button" aria-keyshortcuts="Escape" onclick={onBack ?? onClose}>
 		<kbd aria-hidden="true">Esc</kbd>
 		<span>{onBack ? "Back" : "Close"}</span>
 	</button>

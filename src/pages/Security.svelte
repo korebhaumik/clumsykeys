@@ -61,8 +61,8 @@
 				<h2>6. Vulnerability Disclosure &amp; Contact</h2>
 				<p>We appreciate responsible disclosure from security researchers. If you believe you have discovered a vulnerability, security flaw, or bug in Clumsy Keys, please notify us privately so we can address it promptly:</p>
 				<ul>
-					<li>Direct email to maintainer: <a href="mailto:bhaumik.kore31@gmail.com">bhaumik.kore31@gmail.com</a></li>
-					<li>Security advisories &amp; code issues: <a href="https://github.com/korebhaumik/clumsykeys" target="_blank" rel="noreferrer">GitHub Repository</a></li>
+					<li>Direct email to maintainer: <a tabindex="0" href="mailto:bhaumik.kore31@gmail.com">bhaumik.kore31@gmail.com</a></li>
+					<li>Security advisories &amp; code issues: <a tabindex="0" href="https://github.com/korebhaumik/clumsykeys" target="_blank" rel="noreferrer">GitHub Repository</a></li>
 				</ul>
 			</section>
 		</div>

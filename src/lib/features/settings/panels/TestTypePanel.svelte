@@ -24,9 +24,9 @@
 
 <div class="settings-fields test-type-fields">
 	<div class="settings-mode-options test-type-options" role="group" aria-label="Test type">
-		<button class="button button-secondary" type="button" aria-pressed={selectedType === "timer"} onclick={() => { if (selectedType !== "timer") updateTestConfigType("timer", 30); }}><TimerSvg /> Timer</button>
-		<button class="button button-secondary" type="button" aria-pressed={selectedType === "words"} onclick={() => { if (selectedType !== "words") updateTestConfigType("words", 50); }}><span aria-hidden="true">Aa</span> Words</button>
-		<button class="button button-secondary" type="button" aria-pressed={selectedType === "quotes"} onclick={() => { if (selectedType !== "quotes") updateTestConfigType("quotes", "Random Quotes"); }}><QuotesSvg /> Quotes</button>
+		<button tabindex="0" class="button button-secondary" type="button" aria-pressed={selectedType === "timer"} onclick={() => { if (selectedType !== "timer") updateTestConfigType("timer", 30); }}><TimerSvg /> Timer</button>
+		<button tabindex="0" class="button button-secondary" type="button" aria-pressed={selectedType === "words"} onclick={() => { if (selectedType !== "words") updateTestConfigType("words", 50); }}><span aria-hidden="true">Aa</span> Words</button>
+		<button tabindex="0" class="button button-secondary" type="button" aria-pressed={selectedType === "quotes"} onclick={() => { if (selectedType !== "quotes") updateTestConfigType("quotes", "Random Quotes"); }}><QuotesSvg /> Quotes</button>
 	</div>
 
 	{#if selectedType === "quotes"}
@@ -41,9 +41,9 @@
 		<form class="settings-limit-form" onsubmit={setLimit}>
 			<label class="field">
 				{selectedType === "timer" ? "Seconds" : "Word count"}
-				<input type="number" min={minimum} max={1000} required bind:value={customLimit} aria-describedby="limit-hint" />
+				<input tabindex="0" type="number" min={minimum} max={1000} required bind:value={customLimit} aria-describedby="limit-hint" />
 			</label>
-			<button class="button button-primary" type="submit">Set {selectedType}</button>
+			<button tabindex="0" class="button button-primary" type="submit">Set {selectedType}</button>
 			<p class="muted limit-hint" id="limit-hint">{minimum}–1,000 {selectedType === "timer" ? "seconds" : "words"}</p>
 		</form>
 	{/if}

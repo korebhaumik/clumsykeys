@@ -8,6 +8,38 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Safari keyboard navigation verification
+
+On **16 November 2026**, fixed reset/replay and cross-page keyboard access by
+giving native links, buttons and form controls explicit Tab stops. WebKit's
+default navigation skipped implicit buttons; the prose reset reproduced that
+failure before the fix. Authored negative/roving indexes, disabled/inert states,
+native dialog/dropdown behavior and snippet indentation remain intact. The
+design audit now checks the explicit-index convention.
+
+Frozen installation with pnpm 12.18.0, lint/design audit, dead-code checks,
+frontend/backend type/docs checks, **56 unit/HTTP/socket tests**, and both builds
+passed. The **20 focused WebKit browser cases** passed in both themes at
+320/1440px, including real forward/backward traversal of public pages, accounts,
+saved history, settings dialogs and a local multiplayer lobby, reset/replay,
+native Enter/Space activation and snippet indentation/reset shortcuts. Tests
+check browser errors. Source-token focus contrast was recalculated; known
+contrast failures remain recorded in [CONTRAST.md](CONTRAST.md).
+
+The complete browser run passed **201 of 202 cases**: all **172 Chrome cases**
+and **29 of 30 WebKit cases**. All new reset/navigation cases passed. One
+existing Classic WebKit table case focused the overflow region but did not
+observe horizontal movement after ArrowRight. Both themes' table cases passed
+the isolated **two-case rerun** without source changes. Its intermittent cause
+is unconfirmed; the complete suite was not repeated after that rerun. Other
+WebKit checks include dropdown navigation, static/overflow tab stops, focus
+outlines and focus return across routes.
+
+Browser account/history traffic uses the local modeled Supabase fixture; no
+hosted deployment, SQL/Auth-stack verification, advisory audit or credential
+scan was repeated. WebKit coverage is engine-level verification, not a claim
+about every Safari/macOS accessibility preference combination.
+
 ## Northflank CD re-enablement
 
 On **15 November 2026**, restored the existing deploy-job condition allowing

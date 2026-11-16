@@ -37,16 +37,16 @@
 	{#if loading}<p role="status">Loading handle…</p>
 	{:else if editing}
 		<form onsubmit={event => { event.preventDefault(); void save(); }}>
-			<label>Unique handle<input bind:this={input} bind:value={draft} required minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" disabled={saving} aria-describedby="handle-help" /></label>
+			<label>Unique handle<input tabindex="0" bind:this={input} bind:value={draft} required minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" disabled={saving} aria-describedby="handle-help" /></label>
 			<p id="handle-help">3–24 letters, numbers or underscores. Handles ignore capitalization. Your display name and room alias can be different.</p>
-			<div class="actions"><button class="button button-primary" disabled={saving}>{saving ? "Saving…" : "Save handle"}</button><button type="button" class="button button-secondary" disabled={saving} onclick={close}>Cancel handle edit</button></div>
+			<div class="actions"><button tabindex="0" class="button button-primary" disabled={saving}>{saving ? "Saving…" : "Save handle"}</button><button tabindex="0" type="button" class="button button-secondary" disabled={saving} onclick={close}>Cancel handle edit</button></div>
 		</form>
 	{:else if !error}
 		{#if handle}
-			<button class="handle-name" type="button" bind:this={button} aria-label={`Edit handle: @${handle}`} title="Double-click to edit handle" onclick={event => { if (event.detail === 0 || event.detail === 2) void edit(); }}>@{handle}</button>
-		{:else}<button class="handle-action" bind:this={button} onclick={edit}>Choose a unique handle</button>{/if}
+			<button tabindex="0" class="handle-name" type="button" bind:this={button} aria-label={`Edit handle: @${handle}`} title="Double-click to edit handle" onclick={event => { if (event.detail === 0 || event.detail === 2) void edit(); }}>@{handle}</button>
+		{:else}<button tabindex="0" class="handle-action" bind:this={button} onclick={edit}>Choose a unique handle</button>{/if}
 	{/if}
-	{#if error}<p class="error" role="alert">{error}</p>{#if !editing}<button onclick={() => retry++}>Retry handle</button>{/if}{/if}
+	{#if error}<p class="error" role="alert">{error}</p>{#if !editing}<button tabindex="0" onclick={() => retry++}>Retry handle</button>{/if}{/if}
 	{#if message}<p role="status">{message}</p>{/if}
 </div>
 

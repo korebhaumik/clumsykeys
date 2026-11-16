@@ -52,7 +52,7 @@
 		<div class="settings-list">
 			{#each entries as key (key)}
 				{@const item = panels[key]}
-				<button class="settings-choice" type="button" onclick={() => updateModalContent(key)}>
+				<button tabindex="0" class="settings-choice" type="button" onclick={() => updateModalContent(key)}>
 					<item.icon />
 					<span>{item.title}</span>
 					<ArrowRight />

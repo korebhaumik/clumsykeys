@@ -6,7 +6,7 @@
 
 <div class="flex items-center justify-between gap-4 min-w-32">
 	<QuoteLengthOptions />
-	<button
+	<button tabindex="0"
 		aria-label="Customize test type"
 		onclick={() => {
 			updateModalContent("testType");

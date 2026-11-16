@@ -94,38 +94,38 @@
 		<div class="account-entry">
 			<div class="auth-card">
 				{#if !supabase}
-					<h2>Keep practising.</h2><p class="form-copy">Accounts are unavailable on this deployment. Your next practice is still a keystroke away.</p><a class="button button-primary" href="#/">Continue as guest</a>
+					<h2>Keep practising.</h2><p class="form-copy">Accounts are unavailable on this deployment. Your next practice is still a keystroke away.</p><a tabindex="0" class="button button-primary" href="#/">Continue as guest</a>
 				{:else if !$account.ready}
 					<p role="status">Restoring your session…</p>
 				{:else}
 					{#if !$account.recovering && mode !== "reset"}
 						<div class="auth-switch" role="group" aria-label="Account access">
-							<button disabled={busy} aria-pressed={mode === "signin"} onclick={() => changeMode("signin")}>Sign in</button>
-							<button disabled={busy} aria-pressed={mode === "signup"} onclick={() => changeMode("signup")}>Create account</button>
+							<button tabindex="0" disabled={busy} aria-pressed={mode === "signin"} onclick={() => changeMode("signin")}>Sign in</button>
+							<button tabindex="0" disabled={busy} aria-pressed={mode === "signup"} onclick={() => changeMode("signup")}>Create account</button>
 						</div>
 					{/if}
 					<div class="form-heading"><h2>{$account.recovering ? "Choose a new password." : mode === "reset" ? "Forgot your password?" : mode === "signup" ? "Make it your own." : "Welcome back."}</h2>{#if $account.recovering || mode === "reset"}<p class="form-copy">{$account.recovering ? "Choose a strong password for a fresh start." : "We'll send you a link to reset it."}</p>{/if}</div>
 					{@render notices()}
 					{#if !$account.recovering && mode !== "reset"}
-						<button class="github-button" type="button" disabled={busy} onclick={signInWithGithub}><GithubIcon /><span>{githubPending ? "Connecting to GitHub…" : "Continue with GitHub"}</span></button>
+						<button tabindex="0" class="github-button" type="button" disabled={busy} onclick={signInWithGithub}><GithubIcon /><span>{githubPending ? "Connecting to GitHub…" : "Continue with GitHub"}</span></button>
 						<div class="auth-divider"><span>or continue with email</span></div>
 					{/if}
 					<form class="auth-form" onsubmit={event => { event.preventDefault(); void submit(); }}>
 						{#if mode === "signup" && !$account.recovering}
-							<label class="field">Display name<input disabled={busy} required maxlength="50" autocomplete="nickname" placeholder="What should we call you?" bind:value={displayName} /></label>
+							<label class="field">Display name<input tabindex="0" disabled={busy} required maxlength="50" autocomplete="nickname" placeholder="What should we call you?" bind:value={displayName} /></label>
 						{/if}
 						{#if !$account.recovering}
-							<div class="field"><label for={`${fieldId}-email`}>Email</label><div class="input-shell focus-field"><MailIcon /><input id={`${fieldId}-email`} disabled={busy} required type="email" autocomplete="email" placeholder="you@example.com" bind:value={email} /></div></div>
+							<div class="field"><label for={`${fieldId}-email`}>Email</label><div class="input-shell focus-field"><MailIcon /><input tabindex="0" id={`${fieldId}-email`} disabled={busy} required type="email" autocomplete="email" placeholder="you@example.com" bind:value={email} /></div></div>
 						{/if}
 						{#if mode !== "reset" || $account.recovering}
-							<div class="field"><div class="field-label"><label for={`${fieldId}-password`}>{$account.recovering ? "New password" : "Password"}</label>{#if mode === "signin" && !$account.recovering}<button class="text-action forgot-password" type="button" disabled={busy} onclick={() => changeMode("reset")}>Forgot password?</button>{/if}</div><div class="input-shell focus-field"><LockIcon /><input id={`${fieldId}-password`} disabled={busy} required type={passwordVisible ? "text" : "password"} minlength={mode === "signup" || $account.recovering ? 8 : 1} autocomplete={mode === "signup" || $account.recovering ? "new-password" : "current-password"} placeholder={mode === "signup" || $account.recovering ? "At least 8 characters" : "Enter your password"} bind:value={password} /><button class="password-toggle" type="button" disabled={busy} aria-label={passwordVisible ? "Hide password" : "Show password"} aria-pressed={passwordVisible} onclick={() => { passwordVisible = !passwordVisible; }}>{passwordVisible ? "Hide" : "Show"}</button></div></div>
+							<div class="field"><div class="field-label"><label for={`${fieldId}-password`}>{$account.recovering ? "New password" : "Password"}</label>{#if mode === "signin" && !$account.recovering}<button tabindex="0" class="text-action forgot-password" type="button" disabled={busy} onclick={() => changeMode("reset")}>Forgot password?</button>{/if}</div><div class="input-shell focus-field"><LockIcon /><input tabindex="0" id={`${fieldId}-password`} disabled={busy} required type={passwordVisible ? "text" : "password"} minlength={mode === "signup" || $account.recovering ? 8 : 1} autocomplete={mode === "signup" || $account.recovering ? "new-password" : "current-password"} placeholder={mode === "signup" || $account.recovering ? "At least 8 characters" : "Enter your password"} bind:value={password} /><button tabindex="0" class="password-toggle" type="button" disabled={busy} aria-label={passwordVisible ? "Hide password" : "Show password"} aria-pressed={passwordVisible} onclick={() => { passwordVisible = !passwordVisible; }}>{passwordVisible ? "Hide" : "Show"}</button></div></div>
 						{/if}
-						<button class="button button-primary submit-button" type="submit" disabled={busy}><span>{busy ? "Please wait…" : $account.recovering ? "Update password" : mode === "signup" ? "Register" : mode === "reset" ? "Send reset link" : "Sign in to account"}</span><ArrowRightIcon /></button>
+						<button tabindex="0" class="button button-primary submit-button" type="submit" disabled={busy}><span>{busy ? "Please wait…" : $account.recovering ? "Update password" : mode === "signup" ? "Register" : mode === "reset" ? "Send reset link" : "Sign in to account"}</span><ArrowRightIcon /></button>
 					</form>
-					{#if !$account.recovering && mode !== "signin"}<button class="text-action back-to-signin" disabled={busy} onclick={() => changeMode("signin")}>Back to sign in</button>{/if}
+					{#if !$account.recovering && mode !== "signin"}<button tabindex="0" class="text-action back-to-signin" disabled={busy} onclick={() => changeMode("signin")}>Back to sign in</button>{/if}
 				{/if}
 			</div>
-			<p class="guest-link">Just here to type? <a href="#/">Continue as guest <ArrowRightIcon /></a></p>
+			<p class="guest-link">Just here to type? <a tabindex="0" href="#/">Continue as guest <ArrowRightIcon /></a></p>
 		</div>
 	{/if}
 </section>

@@ -47,7 +47,7 @@
 				)}
 			>
 				<div class={cn("flex items-center justify-between", race ? "gap-3" : "min-w-64")}>
-					<button
+					<button tabindex="0"
 						aria-pressed={!!$testConfig.timer}
 						onclick={() => {
 							updateTestConfigType("timer", 30);
@@ -60,7 +60,7 @@
 						<TimerSvg />
 						<span class="ml-1 tracking-wide">time</span>
 					</button>
-					<button
+					<button tabindex="0"
 						aria-pressed={!!$testConfig.words}
 						onclick={() => {
 							updateTestConfigType("words", 25);
@@ -73,7 +73,7 @@
 						<span class="font-bold">Aa</span>
 						<span class="ml-1 tracking-wide">words</span>
 					</button>
-					<button
+					<button tabindex="0"
 						aria-pressed={!!$testConfig.quotes}
 						onclick={() => {
 							updateTestConfigType("quotes", "Random Quotes");
@@ -116,7 +116,7 @@
 				})}
 			>
 				<div class={cn("flex items-center justify-between", race ? "gap-3" : "min-w-64")}>
-					<button
+					<button tabindex="0"
 						onclick={() => {
 							updateModalContent("punctuations");
 							updateModalVisibility();
@@ -129,7 +129,7 @@
 						<AtSvg />
 						<span class="ml-1 tracking-wide">punctuations</span>
 					</button>
-					<button
+					<button tabindex="0"
 						onclick={() => {
 							updateModalContent("numbers");
 							updateModalVisibility();
@@ -156,7 +156,7 @@
 					class={cn("flex items-center underline justify-between gap-4",
 						$theme === "dark-forest" ? "text-dark-forest-accent-main" : "text-white")}
 				>
-					<button
+					<button tabindex="0"
 						class="flex items-center"
 						onclick={() => {
 							updateModalVisibility();

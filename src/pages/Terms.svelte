@@ -48,7 +48,7 @@
 
 			<section class="legal-section">
 				<h2>5. Source Code &amp; Content Rights</h2>
-				<p>The application source is available on <a href="https://github.com/korebhaumik/clumsykeys" target="_blank" rel="noreferrer">GitHub</a>. Availability of source code does not itself grant a license; consult the applicable license notices before reuse.</p>
+				<p>The application source is available on <a tabindex="0" href="https://github.com/korebhaumik/clumsykeys" target="_blank" rel="noreferrer">GitHub</a>. Availability of source code does not itself grant a license; consult the applicable license notices before reuse.</p>
 				<p>Prose passages, literary quotes, and code snippets curated for typing practice remain the intellectual property or public domain works of their respective authors and licenses.</p>
 			</section>
 

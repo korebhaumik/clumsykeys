@@ -50,13 +50,13 @@
 		<div><dt>session</dt><dd>{stats.elapsedSeconds < 0.01 ? "<0.01" : Number(stats.elapsedSeconds.toFixed(2))} s</dd></div>
 	</dl>
 
-	{#if showRestart}<button class="result-replay" aria-label="Practice again" title="Practice again" onclick={onRestart}><ResetSvg /></button>{/if}
+	{#if showRestart}<button type="button" tabindex="0" class="result-replay" aria-label="Practice again" title="Practice again" onclick={onRestart}><ResetSvg /></button>{/if}
 	{#if resultId}
 		<p class="save-status" role="status">
-			{#if saveState === "saved"}Saved to your account. <a href="#/history">View history</a>
+			{#if saveState === "saved"}Saved to your account. <a tabindex="0" href="#/history">View history</a>
 			{:else if saveState === "pending"}Saving result…
-			{:else if saveState === "failed"}Result not saved. <button onclick={() => retryPracticeResults()}>Retry saving</button>
-			{:else if !signedIn}<a href="#/account">Sign in</a> to save future results across devices.{/if}
+			{:else if saveState === "failed"}Result not saved. <button tabindex="0" onclick={() => retryPracticeResults()}>Retry saving</button>
+			{:else if !signedIn}<a tabindex="0" href="#/account">Sign in</a> to save future results across devices.{/if}
 		</p>
 	{/if}
 
@@ -72,7 +72,7 @@
 		</div>
 		<div class="history">
 			{#each stats.history as word}
-				<button
+				<button tabindex="0"
 					type="button" class="history-word"
 					data-band={word.wpm === null ? undefined : speedBands.findIndex((band) => word.wpm! < band.upper)}
 					data-wpm={word.wpm ?? undefined}

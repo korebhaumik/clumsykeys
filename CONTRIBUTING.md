@@ -59,10 +59,15 @@ npm run build:server
 
 `check:all` includes frontend/backend types and `check:docs`. The unit suite
 starts real ephemeral HTTP/Socket.IO servers; account integration uses a local
-Supabase HTTP fixture without hosted credentials. Playwright uses installed
-Google Chrome and starts the frontend on **4193**, backend on **15442**, and
+Supabase HTTP fixture without hosted credentials. Playwright runs the full suite
+in installed Google Chrome and focused keyboard/reset coverage in WebKit.
+Install WebKit once with `pnpm exec playwright install webkit`.
+It starts the frontend on **4193**, backend on **15442**, and
 upstream fixture on **15443**. Run one suite at a time against those ports and
 the same output directory. Do not stop an unrelated running server to free a port.
+Use `npm run test:e2e -- --project=chrome` or `--project=webkit-keyboard` for a
+targeted browser run. WebKit exercises Safari's engine and default Tab behavior;
+it does not establish every Safari/macOS accessibility preference combination.
 
 For SQL/RLS or persistence changes, use the real local Supabase stack as well:
 

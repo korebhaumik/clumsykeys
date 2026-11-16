@@ -66,15 +66,15 @@
 			{/if}
 		</div>
 		{#if leaderboard}
-			<a class="replay" href="#/race">Multiplayer <span aria-hidden="true">↗</span></a>
+			<a tabindex="0" class="replay" href="#/race">Multiplayer <span aria-hidden="true">↗</span></a>
 		{:else}
-			<button class="replay" onclick={replay}>
+			<button tabindex="0" class="replay" onclick={replay}>
 				{racers.length ? "Race again" : "Back to room"} <span aria-hidden="true">↗</span>
 			</button>
 		{/if}
 	</header>
 	{#if $account.session}
-		<p class="persistence-note" role="status">{historyError || ($racePersistence?.state === "pending" ? "Saving race…" : $racePersistence?.state === "failed" ? "Race could not be saved. Live results remain available here." : $racePersistence?.state === "saved" ? "Race saved to your account." : "")} <a href="#/history">Your history</a></p>
+		<p class="persistence-note" role="status">{historyError || ($racePersistence?.state === "pending" ? "Saving race…" : $racePersistence?.state === "failed" ? "Race could not be saved. Live results remain available here." : $racePersistence?.state === "saved" ? "Race saved to your account." : "")} <a tabindex="0" href="#/history">Your history</a></p>
 	{/if}
 
 	{#if racers.length}

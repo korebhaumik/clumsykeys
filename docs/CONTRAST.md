@@ -48,6 +48,12 @@ their recorded scope.
 
 ## Focus, caret, icons and boundaries
 
+On **15 November 2026**, native links/buttons/form controls received explicit
+Tab stops for Safari. Focus colors and geometry are unchanged. Fresh source-token
+calculation gives Dark Forest page/panel outlines **9.51/7.94:1**, Classic
+page/panel **19.08/21.00:1**, and inverted toolbar outlines **21.00:1**.
+The known caret/icon/border failures below remain open.
+
 On **15 November 2026**, static panels were removed from sequential keyboard
 navigation, and scroll-region stops were limited to horizontal overflow. The
 global outline colors, width and offset are unchanged. Recalculation from

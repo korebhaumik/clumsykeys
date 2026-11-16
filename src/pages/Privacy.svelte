@@ -62,13 +62,13 @@
 				<p>You retain full ownership of your data at all times:</p>
 				<ul>
 					<li><strong>Export:</strong> The History page exports the currently loaded results matching your filters as CSV. Load additional pages to include more records.</li>
-					<li><strong>Account Deletion:</strong> Contact the maintainer to request account deletion. Private account records are removed when the Auth account is deleted; retained shared race entries are anonymized. Contact <a href="mailto:bhaumik.kore31@gmail.com">bhaumik.kore31@gmail.com</a>.</li>
+					<li><strong>Account Deletion:</strong> Contact the maintainer to request account deletion. Private account records are removed when the Auth account is deleted; retained shared race entries are anonymized. Contact <a tabindex="0" href="mailto:bhaumik.kore31@gmail.com">bhaumik.kore31@gmail.com</a>.</li>
 				</ul>
 			</section>
 
 			<section class="legal-section">
 				<h2>7. Contact Us</h2>
-				<p>If you have any questions or feedback regarding this Privacy Policy or your personal information, reach out to the developer directly at <a href="mailto:bhaumik.kore31@gmail.com">bhaumik.kore31@gmail.com</a>.</p>
+				<p>If you have any questions or feedback regarding this Privacy Policy or your personal information, reach out to the developer directly at <a tabindex="0" href="mailto:bhaumik.kore31@gmail.com">bhaumik.kore31@gmail.com</a>.</p>
 			</section>
 		</div>
 	</div>
