@@ -78,8 +78,10 @@ Current page patterns:
   and visual-viewport changes scroll the passage above the on-screen keyboard
   without fixing the page or preventing ordinary scrolling. Manual snippets
   provide an on-screen Tab action that preserves input focus.
-  On touch pointers the caret follows input immediately, without the desktop
-  movement transition. Keyboard positioning runs on focus, viewport resize and
+  On touch pointers the caret target updates immediately with a short 50ms
+  transform animation for same-line smoothing. Rapid input retargets one active
+  animation from its visible position; row changes, scrolling and reduced motion
+  snap into place. Desktop movement keeps its existing transition. Keyboard positioning runs on focus, viewport resize and
   passage resize; native viewport panning is not counter-scrolled.
   Wider layouts retain their existing sizing, controls and centering.
   Settings and mode controls lead into the typing area. Active

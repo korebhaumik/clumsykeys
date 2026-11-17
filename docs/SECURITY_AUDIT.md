@@ -86,6 +86,28 @@ were not changed. Physical-phone profiling, hosted/database checks, dependency
 advisory scans and credential scans were not performed. The pnpm launcher still
 fails with `ENOEXEC`; checks used installed dependencies.
 
+### Touch caret smoothing follow-up
+
+On **17 November 2026**, same-line touch caret movement gained a bounded 50ms
+transform animation while layout coordinates still update immediately. Rapid
+input cancels and retargets one movement using cached positions and eased
+animation progress; there are no extra geometry reads in the retargeting step.
+Row changes, scrolling and reduced motion snap to the target. Desktop retains
+its original left/top transition. Native viewport panning remains uncorrected.
+
+The full **260-case browser suite passed (200 Chrome, 60 WebKit)**. It included
+mid-animation continuity, a single active movement, transform-only keyframes,
+50ms duration and reduced-motion checks across prose, snippets and keywords in
+both themes. The full run logged two development module-load warnings during
+forced test reloads. The test setup now waits for the route to mount before
+reloading, and all **12 performance cases passed again with explicit page-error
+assertions**, without those module-load warnings. Lint/design, dead-code,
+type/docs checks, all **65 unit/HTTP/socket tests**, both builds and SEO checks
+passed. Color roles and scoring contracts are unchanged. Physical-phone motion
+and hosted/database/provider checks remain unverified; the existing pnpm
+launcher `ENOEXEC` still blocks a frozen install, so installed dependencies were
+used. Existing Vite config-loader warnings and Knip configuration hints remain.
+
 ## Interactive feedback verification
 
 On **16–17 November 2026**, added compact per-category solo achievement cards with a

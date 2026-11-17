@@ -276,7 +276,7 @@
 	.page-shell input:not([type="checkbox"]):not([type="radio"]), .page-shell select, .page-shell textarea { font-size: var(--text-1rem); }
 }
 
-/* A touch caret must follow input immediately, without a 110ms position transition. */
+/* Touch caret smoothing uses a short transform animation, never left/top transitions. */
 @media (pointer: coarse) {
 	.typing-caret { transition: none; }
 }
