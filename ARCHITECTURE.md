@@ -121,6 +121,9 @@ own regression work. `mobile-typing.ts` adapts touch input deletion/Return and
 keeps the typing frame within the visual viewport as the on-screen keyboard
 opens. Its input sentinel is transient DOM state, excluded from scored text;
 listeners, its resize observer and animation frame are cleaned up on teardown.
+The same module adapts the practice focus overlay: narrow screens require a
+double tap while desktop clicks and keyboard/assistive activation remain single
+actions. The gesture listener is removed with its overlay.
 Completion captures one immutable, account-bound result;
 network writes do not enter the keyboard loop.
 

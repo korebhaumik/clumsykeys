@@ -267,9 +267,9 @@
 	.practice-reset { min-width: var(--dimension-3rem); min-height: var(--dimension-3rem); margin-top: var(--dimension-0_5rem); }
 	.practice-reset svg { margin-inline: auto; }
 	.typing-frame > input { font-size: var(--text-1rem); }
-	.typing-cover { position: relative; inset: auto; min-height: var(--dimension-3rem); backdrop-filter: none; font-size: var(--text-0_875rem); text-align: center; padding: var(--dimension-0_5rem); }
+	.typing-cover { position: absolute; inset: 0; min-height: var(--dimension-3rem); backdrop-filter: blur(var(--dimension-3px)); touch-action: manipulation; font-size: var(--text-0_875rem); text-align: center; padding: var(--dimension-0_5rem); }
 	.desktop-focus-hint { display: none; }
-	.mobile-focus-hint { display: inline; }
+	.mobile-focus-hint { display: inline; max-width: 100%; padding: var(--dimension-0_5rem) var(--dimension-0_75rem); border-radius: var(--radius-0_5rem); background: var(--inset); }
 	.settings-dialog-footer > span, .settings-dialog-footer kbd { display: none; }
 	.settings-dialog-footer button { min-height: var(--dimension-3rem); }
 	/* Native text controls stay readable without triggering iOS focus zoom. */

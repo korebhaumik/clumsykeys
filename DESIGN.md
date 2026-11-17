@@ -69,9 +69,12 @@ Current page patterns:
   remain available in the settings dialog.
   Controls use touch-sized targets. Desktop shortcut rows are hidden at this
   width, while settings dialogs retain explicit Back/Close buttons without keycaps.
-  Touch devices offer a tap-to-type prompt instead of autofocus; the prompt
-  sits below the readable passage and disappears on focus. The typing input uses
-  a 1rem font to avoid iOS focus zoom,
+  Touch devices offer a centered “Double tap here to start playing” overlay
+  on the blurred passage instead of autofocus. A double tap focuses the input
+  and removes the overlay; a single tap leaves the idle layout in place.
+  Keyboard and assistive activation still work with a single activation.
+  The label uses the inset background for contrast over blurred letters. The
+  typing input uses a 1rem font to avoid iOS focus zoom,
   and visual-viewport changes scroll the passage above the on-screen keyboard
   without fixing the page or preventing ordinary scrolling. Manual snippets
   provide an on-screen Tab action that preserves input focus.

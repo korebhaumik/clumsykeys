@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mobileTyping } from "./mobile-typing";
+	import { mobileTyping, practiceFocusPrompt } from "./mobile-typing";
 	import { onMount, tick, untrack } from "svelte";
 	import { get } from "svelte/store";
 	import ResetSvg from "../../components/icons/ResetIcon.svelte";
@@ -236,8 +236,8 @@
 				</div>
 				<div bind:this={caretEl} class="typing-caret bg-blue-300" aria-hidden="true"></div>
 				{#if isBlur}
-					<button class="typing-cover font-bold" tabindex="-1" onclick={() => inputEl.focus()}>
-						<span class="desktop-focus-hint">Click here or Shift+Tab back to type</span><span class="mobile-focus-hint">Tap to start typing</span>
+					<button type="button" class="typing-cover font-bold" tabindex="-1" use:practiceFocusPrompt={() => inputEl.focus()}>
+						<span class="desktop-focus-hint">Click here or Shift+Tab back to type</span><span class="mobile-focus-hint">Double tap here to start playing</span>
 					</button>
 				{/if}
 			</div>

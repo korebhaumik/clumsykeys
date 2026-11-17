@@ -36,6 +36,17 @@ are decorative; the footer separator retains the shared neutral-border role.
 Notification entry/exit, medal pop, sparkle reveal and key transitions respect reduced
 motion, and the notification does not take focus.
 
+## Mobile double-tap focus overlay
+
+On **17 November 2026**, the narrow-screen focus label moved over the blurred
+passage. Its opaque `--inset` backing prevents blurred letters from becoming
+its immediate background. Recalculation from `tokens.css` gives `--ink` on
+`--inset` at **12.45:1** in Dark Forest (`#dadada` on `#151b1d`) and **19.08:1**
+in Classic (`#000000` on `#f3f4f6`). Both pass normal-text contrast. The overlay
+uses the existing 3px blur token and changes no palette or focus colors. These
+label-source measurements do not certify all pixels in the blurred passage;
+all previously recorded failures below remain open.
+
 ## Text and primary actions
 
 | Theme | Current use | Foreground / background | Ratio | Normal text (4.5:1) |

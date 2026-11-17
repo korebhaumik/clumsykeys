@@ -78,3 +78,38 @@ export function mobileTyping(input: HTMLInputElement, controls: { backspace: () 
 		window.removeEventListener("resize", schedule);
 	} };
 }
+
+/** Require a double tap on narrow screens; retain keyboard/assistive activation. */
+export function practiceFocusPrompt(button: HTMLButtonElement, focusInput: () => void) {
+	const mobile = window.matchMedia("(max-width: 40rem)");
+	let lastTapAt = -Infinity;
+	let lastX = 0;
+	let lastY = 0;
+
+	function reset() { lastTapAt = -Infinity; }
+	function activate(event: MouseEvent) {
+		if (!mobile.matches || event.detail === 0) {
+			reset();
+			focusInput();
+			return;
+		}
+		const now = performance.now();
+		// Allow a deliberate second tap without treating unrelated taps as a pair.
+		if (now - lastTapAt <= 500 && Math.hypot(event.clientX - lastX, event.clientY - lastY) <= 24) {
+			reset();
+			focusInput();
+		} else {
+			lastTapAt = now;
+			lastX = event.clientX;
+			lastY = event.clientY;
+		}
+	}
+	button.addEventListener("click", activate);
+	button.addEventListener("blur", reset);
+	button.addEventListener("pointercancel", reset);
+	return { destroy() {
+		button.removeEventListener("click", activate);
+		button.removeEventListener("blur", reset);
+		button.removeEventListener("pointercancel", reset);
+	} };
+}
