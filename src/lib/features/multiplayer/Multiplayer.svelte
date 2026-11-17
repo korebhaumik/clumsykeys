@@ -7,6 +7,7 @@
 	import Footer from "../../components/layout/Footer.svelte";
 	import ClipboardSvg from "../../components/icons/ClipboardIcon.svelte";
 	import SignOutIcon from "../../components/icons/SignOutIcon.svelte";
+	import StopIcon from "../../components/icons/StopIcon.svelte";
 	import ProgressBar from "./ProgressBar.svelte";
 	import { Toaster, toast } from "svelte-sonner";
 	import Game from "./RaceEngine.svelte";
@@ -32,9 +33,16 @@
 	const checkpointKey = `clumsy-keys:race:${roomId}`;
 	let ready = $state(false);
 	let roomDialog = $state<HTMLDialogElement>()!;
+	let endDialog = $state<HTMLDialogElement>()!;
+	let endingRoundId = $state<string | null>(null);
 
 	function leaveRoom() {
 		ready = false;
+		if (socket.connected) socket.timeout(3000).emit("leaveRoom", completeLeave);
+		else completeLeave();
+	}
+
+	function completeLeave() {
 		socket.disconnect();
 		localStorage.removeItem("roomId");
 		localStorage.removeItem(sessionKey);
@@ -44,6 +52,18 @@
 		raceRoundId.set(null);
 		racePersistence.set(null);
 		void push("/login");
+	}
+
+	function confirmEndRace() {
+		endingRoundId = $roomInfo.roundId;
+		if (!endDialog.open) endDialog.showModal();
+	}
+
+	function endRace() {
+		if (ready && socket.connected && isHost && $roomInfo.progress === "playing" && endingRoundId === $roomInfo.roundId) {
+			socket.emit("endRace", { roundId: endingRoundId });
+		}
+		endDialog.close();
 	}
 
 	function openRoom() {
@@ -77,10 +97,15 @@
 	let settings = $derived($roomInfo.settings ?? defaultRaceSettings);
 	let roomVotes = $derived($roomInfo.users.filter((user) => user.vote).length);
 	let thisUser = $derived($roomInfo.users.find((user) => user.userId === userId));
+	let isHost = $derived($roomInfo.hostUserId === userId);
 	let racerCount = $derived($roomInfo.users.length);
 	let canVote = $derived(ready && !!thisUser && racerCount >= 2 && $game === "waiting");
 	let countdown = $state(0);
 	let startsAt = $derived($roomInfo.startsAt);
+
+	$effect(() => {
+		if (endDialog?.open && (!ready || !isHost || $roomInfo.progress !== "playing" || endingRoundId !== $roomInfo.roundId)) endDialog.close();
+	});
 
 	$effect(() => {
 		const deadline = startsAt;
@@ -112,6 +137,7 @@
 			push("/login");
 			return;
 		}
+		let lobbyFocusFrame: number | undefined;
 
 		const joinRoom = () => socket.emit("joinRoom", {
 			username, userId, roomId, resumeToken: localStorage.getItem(sessionKey) ?? undefined,
@@ -125,6 +151,7 @@
 		};
 		const onConnectError = () => { ready = false; toast("Could not connect. Check your account session and rejoin the room."); };
 		const onRoomData = (room: Room) => {
+			const returnedToLobby = $roomInfo.progress === "playing" && room.progress === "waiting";
 			if (room.roundId && room.roundId !== $raceRoundId) { raceRoundId.set(room.roundId); racePersistence.set(null); }
 			const user = room.users.find((member) => member.userId === userId);
 			if (room.roundId !== $roomInfo.roundId) resetTest();
@@ -138,6 +165,14 @@
 				localStorage.removeItem(checkpointKey);
 			}
 			if (room.progress === "finished") void endGame();
+			if (returnedToLobby) {
+				roomDialog.close();
+				lobbyFocusFrame = window.requestAnimationFrame(() => {
+					const vote = document.querySelector<HTMLButtonElement>("#race-ready");
+					if (vote && !vote.disabled) vote.focus();
+					else document.getElementById("lobby-leave")?.focus();
+				});
+			}
 		};
 		const onNotification = ({ msg }: { msg: string }) => toast(msg);
 
@@ -152,6 +187,7 @@
 		else socket.connect();
 
 		return () => {
+			window.cancelAnimationFrame(lobbyFocusFrame ?? 0);
 			socket.off("roomData", onRoomData);
 			socket.off("roomSession", onSession);
 			socket.off("disconnect", onDisconnect);
@@ -167,8 +203,22 @@
 
 {#if thisUser?.isPlaying && $roomInfo.progress === "playing"}
 	<h1 class="sr-only">Live race</h1>
-	<RaceSettings {settings} />
-
+	<RaceSettings {settings}>
+		{#snippet actions()}
+			<div class="room-actions live-race-actions">
+				<button tabindex="0" type="button" class="button button-secondary" aria-label="Leave race" title="Leave race" onclick={leaveRoom}>
+					<span class="race-action-icon"><SignOutIcon /></span>
+					<span class="race-action-label">Leave race</span>
+				</button>
+				{#if isHost}
+					<button tabindex="0" type="button" class="button button-secondary" aria-label="End race" title="End race" disabled={!ready} onclick={confirmEndRace}>
+						<span class="race-action-icon"><StopIcon /></span>
+						<span class="race-action-label">End race</span>
+					</button>
+				{/if}
+			</div>
+		{/snippet}
+	</RaceSettings>
 	<section class="race-standings" aria-label="Live standings">
 		{#each $roomInfo.users as user (user.userId)}
 			{@const local = user.userId === userId}
@@ -187,9 +237,13 @@
 		{/key}
 	{/if}
 
-	<div class="page-footer race-shortcuts">
+	<div class="page-footer race-shortcuts" class:race-finished={thisUser.finished}>
 		<Footer onViewRoom={openRoom} showCredits={false}>
 			{#snippet trailing()}
+				<p class="live-race-host">
+					<span>Host</span>
+					<strong>{$roomInfo.users.find(user => user.userId === $roomInfo.hostUserId)?.username ?? "—"}</strong>
+				</p>
 				{#if thisUser.finished}
 					<p class="finish-status" role="status">
 						<span><strong>{thisUser.wpm} WPM</strong> | <strong>{$timeDataArr.at(-1)?.finishSeconds?.toFixed(2) ?? "—"} s</strong> | Finished · Waiting for racers</span>
@@ -216,7 +270,7 @@
 					<span aria-hidden="true"><ClipboardSvg variant="size-4" /></span>
 					Copy invite link
 				</button>
-				<button tabindex="0" type="button" class="leave-room" aria-label="Leave room" title="Leave room" onclick={leaveRoom}><SignOutIcon /></button>
+				<button tabindex="0" id="lobby-leave" type="button" class="leave-room" aria-label="Leave room" title="Leave room" onclick={leaveRoom}><SignOutIcon /></button>
 			</div>
 		</section>
 	</div>
@@ -234,7 +288,7 @@
 				{#each $roomInfo.users as user (user.userId)}
 					<li class="roster-row">
 						<span class="initial" class:local={user.userId === userId} aria-hidden="true">{user.username.trim().slice(0, 1).toUpperCase() || "?"}</span>
-						<span class="racer-name">{user.username}{#if user.userId === userId}<small>You</small>{/if}</span>
+						<span class="racer-name">{user.username}{#if user.userId === userId}<small>You</small>{/if}{#if user.userId === $roomInfo.hostUserId}<small>Host</small>{/if}</span>
 						<span class:badge-accent={user.vote} class="badge">{user.vote ? "Ready" : "Waiting"}</span>
 					</li>
 				{/each}
@@ -255,6 +309,7 @@
 					{/if}
 				</div>
 				<button tabindex="0"
+					id="race-ready"
 					type="button"
 					class="button {thisUser?.vote ? 'button-secondary' : 'button-primary'}"
 					disabled={!canVote}
@@ -294,6 +349,15 @@
 	</table>
 </dialog>
 
+<dialog bind:this={endDialog} class="room-dialog panel" aria-labelledby="end-race-title" aria-describedby="end-race-description">
+	<h2 id="end-race-title" class="panel-title">End this race?</h2>
+	<p id="end-race-description" class="end-race-description">This stops the race for everyone and returns the room to the lobby. The round will be marked as aborted.</p>
+	<div class="room-actions end-race-actions">
+		<form method="dialog"><button tabindex="0" class="button button-secondary">Keep racing</button></form>
+		<button tabindex="0" type="button" class="button button-primary" disabled={!ready || !isHost} onclick={endRace}>End race for everyone</button>
+	</div>
+</dialog>
+
 <Toaster
 	position="bottom-right"
 	theme={$theme === "classic" ? "light" : "dark"}
@@ -303,6 +367,27 @@
 
 <style>
 	.race-shortcuts { padding-bottom: 0; }
+	.live-race-host {
+		display: flex;
+		align-items: baseline;
+		gap: var(--dimension-0_5rem);
+		min-width: 0;
+		padding: var(--dimension-0_25rem) var(--dimension-0_65rem);
+		border: var(--dimension-1px) solid var(--line);
+		border-radius: var(--radius-0_55rem);
+		color: var(--muted);
+		overflow-wrap: anywhere;
+	}
+	.live-race-host strong { color: var(--ink); font-weight: var(--weight-600); }
+	.live-race-actions .button { min-height: var(--dimension-3rem); white-space: nowrap; }
+	.race-action-icon { display: none; }
+	@media (max-width: 40rem) {
+		.live-race-actions .button { min-width: var(--dimension-3rem); padding: 0; }
+		.race-action-icon { display: flex; }
+		.race-action-label, .live-race-host, .race-shortcuts:not(.race-finished) { display: none; }
+	}
+	.end-race-description { margin-block: var(--dimension-1rem); }
+	.end-race-actions { flex-wrap: wrap; }
 	.room-code { font: 600 var(--text-1rem) var(--mono); overflow-wrap: anywhere; }
 	.panel-heading, .lobby-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--dimension-1rem); flex-wrap: wrap; }
 	.panel-heading .eyebrow { margin-bottom: var(--dimension-0_25rem); }

@@ -359,11 +359,9 @@ test('two browsers join, configure, vote, race, reconnect, see results and repla
     await expect(a.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled({ timeout: 10000 });
     const settingsPreview = a.getByRole('region', { name: 'Race settings preview' });
     await expect(settingsPreview).toHaveAttribute('tabindex', '-1');
-    await a.setViewportSize({ width: 320, height: 900 });
-    await expect(settingsPreview).toHaveAttribute('tabindex', '0');
-    await settingsPreview.focus();
-    await a.keyboard.press('ArrowRight');
-    await expect.poll(() => settingsPreview.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+    await a.setViewportSize({ width: 390, height: 900 });
+    await expect(settingsPreview).toHaveCount(0);
+    await expect(a.getByRole('heading', { name: 'Race Settings', exact: true })).toBeVisible();
     await a.setViewportSize({ width: 1440, height: 900 });
     await expect(settingsPreview).toHaveAttribute('tabindex', '-1');
     await a.getByRole('textbox', { name: 'Type the race passage' }).focus();

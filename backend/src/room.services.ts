@@ -151,6 +151,7 @@ export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, 
 		isPlaying: false,
 	};
 	const joinedRoom: Room = room ?? {
+		hostUserId: userId,
 		text: "",
 		roundId: null,
 		settings: { ...defaultRaceSettings },
@@ -189,6 +190,17 @@ export const leaveRoom = (socket: Socket, io: Server) => {
 	removeRacer(room, roomId, racer, io);
 };
 
+export function leaveRoomPermanently(socket: Socket, io: Server) {
+	const { roomId, userId } = socket.data;
+	const room = rooms.get(roomId);
+	const racer = socketOwnsRacer(room, userId, socket);
+	if (!room || !racer) return;
+	void socket.leave(roomId);
+	delete socket.data.roomId;
+	delete socket.data.userId;
+	removeRacer(room, roomId, racer, io);
+}
+
 function removeRacer(room: Room, roomId: string, racer: Racer, io: Server) {
 	const index = room.users.indexOf(racer);
 	if (index === -1) return;
@@ -203,6 +215,7 @@ function removeRacer(room: Room, roomId: string, racer: Racer, io: Server) {
 		rooms.delete(roomId);
 		return;
 	}
+	if (room.hostUserId === racer.userId) room.hostUserId = room.users[0].userId;
 
 	sendNotif({ msg: `${racer.username} left room ${roomId}`, roomId, io });
 	if (room.progress === "waiting") {
@@ -292,6 +305,12 @@ export const finishGame = async ({ roomId, userId, socket, io }: FinishGameReq) 
 export const resetRoom = async ({ roomId, socket, io }: ResetRoomReq) => {
 	const room = rooms.get(roomId);
 	if (!room || room.progress !== "finished" || !socketOwnsRacer(room, socket.data.userId, socket)) return;
+	removeDisconnectedRacers(room);
+	resetData(roomId);
+	return io.to(roomId).emit("roomData", room);
+};
+
+function removeDisconnectedRacers(room: Room) {
 	room.users = room.users.filter((racer) => {
 		const session = sessions.get(racer);
 		if (session?.socketId) return true;
@@ -299,9 +318,27 @@ export const resetRoom = async ({ roomId, socket, io }: ResetRoomReq) => {
 		sessions.delete(racer);
 		return false;
 	});
+	if (!room.users.some(racer => racer.userId === room.hostUserId)) room.hostUserId = room.users[0].userId;
+}
+
+export function endRace(roundId: unknown, socket: Socket, io: Server) {
+	const { roomId, userId } = socket.data;
+	const room = rooms.get(roomId);
+	if (!room || !socketOwnsRacer(room, userId, socket) || room.hostUserId !== userId) {
+		socket.emit("error", { msg: "Only the room host can end the race." });
+		return;
+	}
+	if (room.progress !== "playing" || typeof roundId !== "string" || room.roundId !== roundId) {
+		socket.emit("error", { msg: "This race is no longer active." });
+		return;
+	}
+	room.users.forEach(racer => captureRacer(room, racer, "disconnected"));
+	finalizeArchive(room, "aborted");
+	removeDisconnectedRacers(room);
 	resetData(roomId);
-	return io.to(roomId).emit("roomData", room);
-};
+	sendNotif({ msg: "The host ended the race. Everyone is back in the lobby.", roomId, io });
+	io.to(roomId).emit("roomData", room);
+}
 
 export const streamData = async ({ roomId, userId, wpm, typedChars, accuracy, socket, io }: StreamData) => {
 	const room = rooms.get(roomId);
@@ -373,6 +410,7 @@ function startGame(roomId: string, io: Server) {
 
 function resetData(roomId: string) {
 	const room = rooms.get(roomId) as Room;
+	cancelCountdown(room);
 	archives.delete(room);
 	clearTimeout(roundTimers.get(room));
 	roundTimers.delete(room);

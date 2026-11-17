@@ -155,6 +155,7 @@ async function racingPair(roomId: string, timed = false) {
   let state: any;
   a.on('roomData', value => { state = value; });
   a.emit('joinRoom', { userId: roomId + '-a', username: 'Ada', roomId });
+  await waitFor(() => state?.users.length === 1);
   b.emit('joinRoom', { userId: roomId + '-b', username: 'Guest', roomId });
   await waitFor(() => state?.users.length === 2);
   if (timed) { a.emit('updateRaceSettings', { mode: 'time', duration: 15 }); await waitFor(() => state.settings.mode === 'time'); }
@@ -210,6 +211,49 @@ test('abandoned races retain disconnected participants after recovery expires', 
   const saved = await (await request('/api/race-results/' + roundId)).json();
   assert.equal(saved.round.outcome, 'aborted'); assert.equal(saved.results.length, 2);
   assert.ok(saved.results.every((r: any) => r.reason === 'disconnected'));
+});
+
+test('host termination freezes an aborted original roster with finished and partial scores before replay', { timeout: 15000 }, async () => {
+  const roomId = 'archive-host-ended', { a, b, snapshot } = await racingPair(roomId);
+  try {
+    const roundId = snapshot().roundId, archivedSettings = { ...snapshot().settings };
+    a.emit('timeData', { roomId, userId: roomId + '-a', wpm: 75, accuracy: 95, typedChars: snapshot().text.length });
+    a.emit('finishGame', { roomId, userId: roomId + '-a' });
+    b.emit('timeData', { roomId, userId: roomId + '-b', wpm: 40, accuracy: 90, typedChars: 10 });
+    await waitFor(() => snapshot().users[0].finished && snapshot().users[1].typedChars === 10);
+    a.emit('endRace', { roundId });
+    await waitFor(() => snapshot().progress === 'waiting');
+    a.emit('updateRaceSettings', { mode: 'words', wordCount: 100 });
+    await waitFor(async () => (await request('/api/race-results/' + roundId)).status === 200);
+    const saved = await (await request('/api/race-results/' + roundId)).json();
+    assert.equal(saved.round.outcome, 'aborted');
+    assert.deepEqual(saved.round.settings, archivedSettings);
+    assert.equal(saved.results.length, 2);
+    const finished = saved.results.find((r: any) => r.racer_id === roomId + '-a');
+    const partial = saved.results.find((r: any) => r.racer_id === roomId + '-b');
+    assert.equal(finished.reason, 'completed'); assert.equal(finished.wpm, 75); assert.ok(finished.finish_seconds > 0);
+    assert.equal(partial.reason, 'disconnected'); assert.equal(partial.wpm, 40); assert.equal(partial.finish_seconds, null);
+    assert.ok(partial.speed_history.length > 0);
+  } finally { a.disconnect(); b.disconnect(); }
+});
+
+test('ending a timed race cancels its deadline before a subsequent round', { timeout: 26000 }, async () => {
+  const roomId = 'archive-cancel-timer', { a, b, snapshot } = await racingPair(roomId, true);
+  try {
+    const roundId = snapshot().roundId;
+    a.emit('endRace', { roundId });
+    await waitFor(() => snapshot().progress === 'waiting');
+    a.emit('updateRaceSettings', { mode: 'words', wordCount: 100 });
+    await waitFor(() => snapshot().settings.mode === 'words');
+    a.emit('startVote', { roomId, userId: roomId + '-a' }); b.emit('startVote', { roomId, userId: roomId + '-b' });
+    await waitFor(() => snapshot().progress === 'playing');
+    const nextRound = snapshot().roundId;
+    await new Promise(resolve => setTimeout(resolve, 10500));
+    assert.equal(snapshot().progress, 'playing'); assert.equal(snapshot().roundId, nextRound);
+    assert.ok(snapshot().users.every((r: any) => !r.finished));
+    a.emit('endRace', { roundId: nextRound });
+    await waitFor(() => snapshot().progress === 'waiting');
+  } finally { a.disconnect(); b.disconnect(); }
 });
 
  test('public solo rankings expose summary fields and derive current rank from the verified token', async () => {

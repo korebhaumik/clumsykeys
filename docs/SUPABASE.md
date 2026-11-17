@@ -126,7 +126,12 @@ See [Supabase's GitHub setup guide](https://supabase.com/docs/guides/auth/social
   only the active time or word limit is shown. Missing values are marked
   unavailable without substituting current lobby defaults. The
   server captures results before replay or disconnect cleanup can erase them.
-  Restricted RPC functions write parent/child rows atomically.
+  Restricted RPC functions write parent/child rows atomically. Host-ended races
+  reuse `outcome: aborted` with the original roster and latest server-held
+  metrics captured before returning to the lobby. Completed racers retain their
+  completion reason; unfinished racers use the existing `disconnected` reason
+  (the legacy schema does not distinguish host cancellation per participant).
+  No database migration is required.
 - Every application table has RLS and explicit grants. Browser users can read
   only their own records; write RPC functions are callable only by the server
   role. The backend verifies access tokens and checks ownership independently.

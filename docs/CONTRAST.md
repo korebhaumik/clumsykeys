@@ -173,6 +173,24 @@ selected leaderboard row) is **9.51/6.06:1** in Dark Forest and
 **19.08/16.96:1** in Classic. These pairs pass normal-text contrast. No new palette or
 background was added; existing control-boundary limitations remain applicable.
 
+## Multiplayer termination controls
+
+Recalculated from `tokens.css` on **18 November 2026**. Live Leave race/End race
+actions reuse secondary buttons; the confirmation dialog reuses the shared
+panel, primary button and global focus indicator. No palette values changed.
+
+| Theme | Dialog text / panel | Secondary text / inset | Primary text / accent | Focus / panel | Focus / page | Host label / page |
+| --- | --- | --- | --- | --- | --- | --- |
+| Dark Forest | 10.40:1 | 12.45:1 | 9.51:1 | 7.94:1 | 9.51:1 | 7.38:1 |
+| Classic | 21.00:1 | 19.08:1 | 21.00:1 | 21.00:1 | 19.08:1 | 6.36:1 |
+
+These source pairs pass their text/focus thresholds. Existing neutral-border,
+disabled/hover-state and broader accessibility limitations above still apply.
+In the live race shortcut row, the Host label uses page-muted text (7.38:1 in
+Dark Forest and 6.36:1 in Classic). The host name uses page ink (12.45:1 and
+19.08:1, respectively). The badge border is decorative. Mobile leave and stop
+icons use the secondary button's existing ink and inset pair.
+
 ## Maintenance
 
 Recalculate this report whenever palette tokens, theme aliases, opacity, component backgrounds, focus indicators or chart colors change. Record the actual source pair and transparency, keep failing cases visible, and update the reviewed date only after recalculation. `DESIGN.md` describes the semantic roles; this file records measurements and remaining contrast work.

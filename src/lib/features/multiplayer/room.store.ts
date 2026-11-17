@@ -15,6 +15,7 @@ type User = {
     isPlaying: boolean;
 };
 export type Room = {
+	hostUserId: string;
 	text: string;
 	roundId: string | null;
 	startsAt?: number;
@@ -23,7 +24,7 @@ export type Room = {
 	progress: "waiting" | "playing" | "finished";
 };
 
-export const emptyRoom: Room = { text: "", roundId: null, users: [], progress: "waiting", settings: defaultRaceSettings };
+export const emptyRoom: Room = { hostUserId: "", text: "", roundId: null, users: [], progress: "waiting", settings: defaultRaceSettings };
 export const roomInfo = writable<Room>(emptyRoom);
 
 export const resetRoom = () => {

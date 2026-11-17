@@ -1,5 +1,5 @@
 import type { Server } from "socket.io";
-import { finishGame, joinRoom, leaveRoom, resetRoom, startVote, stopVote, streamData, updateRaceSettings } from "./room.services";
+import { endRace, finishGame, joinRoom, leaveRoom, leaveRoomPermanently, resetRoom, startVote, stopVote, streamData, updateRaceSettings } from "./room.services";
 import type { Persistence } from "./persistence";
 import { createRaceWriter } from "./race.persistence";
 import { createRateLimit } from "./security";
@@ -61,6 +61,12 @@ io.on("connection", (socket) => {
 	socket.on("resetGame", (payload) => {
 		const { roomId } = payload ?? {};
 		resetRoom({ roomId, socket, io });
+	});
+
+	socket.on("endRace", (payload) => endRace(payload?.roundId, socket, io));
+	socket.on("leaveRoom", (acknowledge) => {
+		leaveRoomPermanently(socket, io);
+		if (typeof acknowledge === "function") acknowledge();
 	});
 
 	socket.on("timeData", (payload) => {

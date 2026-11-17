@@ -109,6 +109,16 @@ Current page patterns:
   is scripted illustration, not a live room or fabricated player statistics.
   The guest explanation and sign-in link appear only after session restoration
   confirms the visitor is signed out.
+- **Multiplayer:** the lobby labels its host. Live races expose Leave race for
+  every racer and End race for the host on the Race Settings row. The summary
+  moves below the toolbar at intermediate widths and is hidden on phones.
+  The host name sits beside View room on larger screens. Phones hide both
+  footer items and use labeled leave and stop icons in the toolbar below the
+  header. Ending opens
+  a native confirmation dialog with Keep
+  racing first; Escape cancels and focus
+  returns to the trigger. Confirming returns everyone to the lobby and focuses
+  the ready action (or Leave room when readiness is disabled). Leaving transfers host to the earliest remaining racer.
 - **Account:** sign-in controls and a quiet introduction share the page; the
   introduction's mini keyboard uses native buttons with hover and pressed
   feedback only. Its keys accept pointer, Enter and Space activation without

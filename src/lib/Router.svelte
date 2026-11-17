@@ -61,7 +61,7 @@
 		<Navbar mode={headerMode} active={practiceLayout && practiceHeader.active} />
 	{/if}
 	{#key router.location}
-		<div class="route-content" class:engine-page={!practiceLayout} class:page-content={pageLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"}>
+		<div class="route-content" class:engine-page={!practiceLayout} class:page-content={pageLayout} class:compact-content={router.location === "/ranking"} class:race-content={router.location === "/race"} class:live-race={router.location === "/race" && $roomInfo.progress === "playing"}>
 			{#if !$preferencesReady && (router.location === "/" || router.location === "/game")}
 				<section class="page-content preference-loading" aria-label="Practice settings" aria-busy="true">
 					<p role="status">Loading your practice settings…</p>
@@ -78,4 +78,7 @@
 	.route-shell { display: flex; flex: 1; flex-direction: column; min-width: 0; }
 	.route-shell:not(.page-shell) > .route-content, .route-shell.practice-shell > .route-content { display: flex; flex: 1; flex-direction: column; min-width: 0; }
 	.route-shell > .race-content { display: flex; flex: 1; flex-direction: column; justify-content: center; }
+	@media (max-width: 40rem) {
+		.route-shell > .race-content.live-race { justify-content: flex-start; }
+	}
 </style>

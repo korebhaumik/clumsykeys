@@ -127,6 +127,12 @@ result JSON settings; no database migration is required. New code-snippet saves
 include optional `snippetLength`, while older unattributed snippet results are
 excluded from length-specific bests. See [SUPABASE.md](SUPABASE.md).
 
+Multiplayer race termination requires the matching frontend and backend release:
+the backend supplies `hostUserId`, authorizes `endRace` against the active round,
+and acknowledges explicit `leaveRoom` requests. No database migration is needed;
+terminated rounds reuse the existing aborted archive contract. See
+[the live multiplayer design](../ARCHITECTURE.md#live-multiplayer).
+
 For contract changes, run the local coverage/link check and an independent
 OpenAPI syntax/example validator:
 

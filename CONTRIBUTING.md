@@ -61,7 +61,9 @@ npm run build:server
 starts real ephemeral HTTP/Socket.IO servers; account integration uses a local
 Supabase HTTP fixture without hosted credentials. Playwright runs the full suite
 in installed Google Chrome and focused keyboard/reset coverage in WebKit.
-The focused WebKit suite also covers touch input without physical key events,
+The focused WebKit suite covers host-only race termination, confirmation-dialog
+Tab/Shift+Tab/Escape behavior, replay and live host transfer in both themes.
+It also covers touch input without physical key events,
 shortened keyboard viewports, double-tap focus, touch caret smoothing,
 viewport-pan stability, manual snippet indentation,
 personal-best notifications and the sign-in mini keyboard's pointer/Enter/Space feedback.
