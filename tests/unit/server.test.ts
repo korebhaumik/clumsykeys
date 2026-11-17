@@ -82,3 +82,70 @@ test('real HTTP and Socket.IO enforce validation, ownership, countdown, recovery
     await new Promise<void>(resolve => server.io.close(() => resolve()));
   }
 });
+
+test('only the current host socket can end the matching round; recovery, replay and explicit host transfer stay safe', { timeout: 22000 }, async () => {
+  const server = createApplication();
+  server.httpServer.listen(0, '127.0.0.1');
+  await once(server.httpServer, 'listening');
+  const address = server.httpServer.address();
+  assert.ok(address && typeof address === 'object');
+  const url = `http://127.0.0.1:${address.port}`;
+  const clients = [io(url), io(url), io(url)];
+  const [host, peer, stranger] = clients;
+  const roomId = `end-race-${Date.now()}`;
+  let state: any, token = '';
+  try {
+    await Promise.all(clients.map(socket => once(socket, 'connect')));
+    peer.on('roomData', value => { state = value; });
+    host.on('roomSession', value => { token = value.resumeToken; });
+    const joined = once(host, 'roomData');
+    host.emit('joinRoom', { roomId, userId: 'host', username: 'Host' });
+    assert.equal((await joined)[0].hostUserId, 'host');
+    peer.emit('joinRoom', { roomId, userId: 'peer', username: 'Peer' });
+    await waitFor(() => state?.users.length === 2);
+    host.emit('startVote', { roomId, userId: 'host' });
+    peer.emit('startVote', { roomId, userId: 'peer' });
+    await waitFor(() => state.progress === 'playing');
+    const roundId = state.roundId, settings = { ...state.settings };
+    for (const socket of [peer, stranger]) {
+      const error = once(socket, 'error');
+      socket.emit('endRace', { roomId, userId: 'host', roundId });
+      assert.match((await error)[0].msg, /Only the room host/);
+      assert.equal(state.progress, 'playing');
+    }
+    host.disconnect();
+    const resumed = io(url); clients.push(resumed);
+    await once(resumed, 'connect');
+    const recovered = once(resumed, 'roomData');
+    resumed.emit('joinRoom', { roomId, userId: 'host', username: 'Host', resumeToken: token });
+    assert.equal((await recovered)[0].hostUserId, 'host');
+    for (const payload of [null, {}, { roundId: 'stale' }]) {
+      const error = once(resumed, 'error'); resumed.emit('endRace', payload);
+      assert.match((await error)[0].msg, /no longer active/);
+    }
+    resumed.emit('timeData', { roomId, userId: 'host', wpm: 42, accuracy: 90, typedChars: 5 });
+    await waitFor(() => state.users[0].wpm === 42);
+    resumed.emit('endRace', { roundId });
+    await waitFor(() => state.progress === 'waiting');
+    assert.equal(state.roundId, null); assert.equal(state.startsAt, undefined);
+    assert.deepEqual(state.settings, settings);
+    assert.ok(state.users.every((r: any) => !r.vote && !r.finished && !r.isPlaying && r.typedChars === 0 && r.wpm === 0 && r.accuracy === 100));
+    resumed.emit('startVote', { roomId, userId: 'host' });
+    peer.emit('startVote', { roomId, userId: 'peer' });
+    await waitFor(() => state.progress === 'playing');
+    assert.notEqual(state.roundId, roundId);
+    const stale = once(resumed, 'error'); resumed.emit('endRace', { roundId });
+    assert.match((await stale)[0].msg, /no longer active/);
+    assert.equal(state.progress, 'playing');
+    await resumed.emitWithAck('leaveRoom');
+    await waitFor(() => state.hostUserId === 'peer' && state.users.length === 1);
+    assert.equal(state.progress, 'playing');
+    peer.emit('endRace', { roundId: state.roundId });
+    await waitFor(() => state.progress === 'waiting');
+    await peer.emitWithAck('leaveRoom');
+    assert.equal((await fetch(url + '/rooms?roomId=' + roomId)).status, 404);
+  } finally {
+    clients.forEach(socket => socket.disconnect());
+    await new Promise<void>(resolve => server.io.close(() => resolve()));
+  }
+});

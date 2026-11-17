@@ -1,6 +1,7 @@
 import type { RaceSettings } from "./race.settings";
 
 export type Room = {
+	hostUserId: string;
 	text: string;
 	roundId: string | null;
 	startsAt?: number;

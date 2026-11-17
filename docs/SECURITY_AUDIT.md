@@ -8,6 +8,72 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Multiplayer termination verification
+
+On **18 November 2026**, the first joined racer became the server-owned room
+host. Only the socket owning that host may end the matching active round ID;
+client-supplied room/user IDs do not grant permission. Stale round requests are
+rejected. Unexpected disconnects preserve host ownership during the existing
+30-second recovery window; explicit leave invalidates recovery immediately and
+transfers host to the earliest remaining racer. Settings editing and unanimous
+start voting retain their existing permissions.
+
+Host termination captures an immutable aborted archive before resetting live
+metrics/votes and cancelling countdown/deadline timers. It retains settings and
+returns connected racers to the lobby. Finished participants retain completion
+reasons; unfinished entries use the legacy `disconnected` reason, with the round
+marked `aborted`. No database migration was added. Server-held metrics remain
+client-reported and do not establish honest typing.
+
+The pnpm 12.18.0 native launcher failed with `ENOEXEC`. The same installation's
+JavaScript entry point completed the frozen-lockfile install from the local
+package store after the sandboxed attempt encountered registry resolution
+errors. Dependencies and the lockfile were not upgraded. Lint/design audit,
+dead-code checks, frontend/backend types, documentation coverage, independent
+Redocly validation, both production builds and SEO checks passed. All **68
+unit/HTTP/socket tests** passed, including host recovery/transfer, forged and
+stale requests, partial/finished archives and cancellation of a deadline before
+a subsequent round. Persistence tests use the modeled local Supabase HTTP
+fixture; they do not establish real SQL/RLS or hosted behavior. Existing Vite
+config-loader warnings and Knip configuration hints remain.
+
+The focused eight-case browser pass covered both themes at 320/1440px in Chrome
+and WebKit: dialog Tab/Shift+Tab/Escape, cancel/confirm, checkpoint clearing,
+return-to-lobby focus, replay and individual departure. Dialog screenshots were
+visually inspected. The full **270-case suite (205 Chrome, 65 WebKit)**
+initially passed 260 cases. Eight new cases used an incorrect accessible-name
+assertion for the existing room-details dialog (the dialog is named by room ID);
+the assertion was corrected. One existing history case received HTTP 429 on a
+pagination retry, and one existing WebKit caret case observed an animation after
+switching to reduced motion. All **13 targeted rerun cases passed**, covering
+all ten new race cases and both existing failures (the caret check in both
+browsers). The motion timing cause was not established; no practice/history
+implementation was changed. New race cases also verify closing open room details
+on termination and live host transfer, with no captured page errors. No hosted
+deployment, provider, real database, dependency-advisory or credential scan is
+claimed for this feature. Source contrast recalculation is recorded in
+[CONTRAST.md](CONTRAST.md#multiplayer-termination-controls); existing limitations
+remain.
+
+The race toolbar follow-up on **18 November 2026** placed both actions on the
+settings row and moved the host badge next to View room. Chrome and WebKit
+passed all ten race cases, including layout and keyboard checks in both themes
+at 320/1440px, opening room details from the mobile button, and host transfer.
+The full browser suite passed 269 of 270 cases. The Classic desktop history
+case encountered HTTP 429 during pagination and passed on a fresh test server.
+All 68 unit/HTTP/socket tests, lint, dead-code and type/docs checks, both builds,
+and SEO checks passed.
+
+The phone layout follow-up hid the live race settings summary, View room
+shortcut and host badge at phone widths. The toolbar stays below the header and
+uses named icon buttons on phones. Eleven focused Chrome/WebKit race cases
+passed, covering keyboard order, desktop controls, resizing, reconnect and
+replay. The final full browser suite passed 268 of 270 cases, including all race
+cases. The existing history pagination rate limit and WebKit reduced-motion
+caret timing failures passed on a fresh rerun. All 68 unit/HTTP/socket tests,
+lint, dead-code and type/docs checks, both builds, and SEO checks passed for the
+layout follow-up.
+
 ## Mobile practice verification
 
 On **17 November 2026**, mobile practice was updated to center while idle and
@@ -611,19 +677,22 @@ covers hosting controls; [SUPABASE.md](SUPABASE.md) covers schema and Auth setup
 
 ## Current dependency advisories
 
-Fresh `pnpm audit --json` reports **0 critical, 0 high, 1 moderate and 1 low**.
-Both findings are in development tooling. Fresh `pnpm audit --prod --json`
+On **18 November 2026**, `pnpm audit --json` reported **0 critical, 1 high,
+1 moderate and 0 low**. Both findings are in development tooling.
+`pnpm audit --prod --json`
 reports **zero advisories** across 134 production/optional dependency records.
 This is a dependency-registry result, not an operating-system image scan.
 
 | Package | Severity | Current advisory | Follow-up |
 | --- | --- | --- | --- |
 | `minimatch` 10.2.6 | Moderate | [Globparts amplification denial of service](https://github.com/advisories/GHSA-g3hv-75wg-m249), reported affected range `>=7.0.0 <11.0.1`. | Prefer a compatible parent-tool update; evaluate and test any major-version override. The registry reports a patch in `>=11.0.1`. |
-| `deepmerge` 4.3.1 | Low | [Prototype poisoning of returned objects](https://github.com/advisories/GHSA-gcqx-w48m-w2h4), reported affected range `>=4.2.0 <=4.3.1`. | Track the upstream build-tool dependency; the current registry response reports no patched version. |
+| `picomatch` 4.0.7 | High | [Repeated extglob denial of service](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), reported affected range `<=4.0.7`. | The registry reports no patched release. Track the [upstream release issue](https://github.com/micromatch/picomatch/issues/247), then upgrade and remove the CI exception. |
 
-No dependency upgrade or security behavior change was made as part of this
-documentation refresh. CI gates high/critical advisories; moderate/low findings
-still require triage. Re-run the audit whenever dependencies or the registry change.
+CI first runs the production audit with no advisory exclusions. The workspace
+audit then excludes only `GHSA-fc5q-39xc-vjpf` while it remains unpatched and
+development-only. Both checks use the high severity threshold. The exception
+does not patch picomatch, and an unfiltered local audit still reports it.
+The moderate minimatch advisory remains open pending a compatible tooling update.
 
 ## Database controls and verification boundary
 

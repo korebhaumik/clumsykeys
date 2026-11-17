@@ -176,6 +176,14 @@ five-second server countdown. Valid waiting-room settings changes clear votes;
 new racers cannot join a playing or finished round. Joined racers can reset a
 finished room for replay while preserving settings.
 
+The first joined racer is the server-owned host. Unexpected disconnects retain
+that role during recovery; explicit `leaveRoom` removes a racer immediately.
+When the host leaves or expires, the earliest remaining racer becomes host.
+Only the socket owning the host can `endRace` for the matching active round ID.
+Termination freezes an aborted archive once, cancels timers and returns connected
+racers to the lobby with settings preserved and votes/metrics cleared. It never
+opens the completed ranking screen. Other racers can leave individually.
+
 The server owns countdown deadlines, timed completion, sampled history and finish
 timestamps. Client-reported WPM/accuracy/progress still do not prove honest typing.
 Origins, packet limits, quotas and ownership checks are described in the

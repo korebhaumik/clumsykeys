@@ -2553,6 +2553,10 @@
               "playing",
               "finished"
             ]
+          },
+          "hostUserId": {
+            "type": "string",
+            "description": "First joined racer; transfers to the earliest remaining racer when the host leaves or recovery expires. Retained during temporary disconnection."
           }
         },
         "required": [
@@ -2560,7 +2564,8 @@
           "roundId",
           "settings",
           "users",
-          "progress"
+          "progress",
+          "hostUserId"
         ]
       },
       "TimeData": {
@@ -2759,6 +2764,28 @@
           ]
         },
         "description": "Joined racer resets a finished room, preserving settings and redrawing content on the next start."
+      },
+      "endRace": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "roundId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "roundId"
+          ]
+        },
+        "description": "Only the socket owning the current host can abort the matching active round. Identity and room come from the joined socket, never supplied user/room IDs. Captures an aborted archive once, cancels timers, removes disconnected racers, clears live metrics/votes/checkpoints through a waiting roomData snapshot, preserves settings and returns everyone to the lobby. Finished participant reasons remain completed/time-limit; unfinished participants use the existing disconnected reason. Invalid ownership or stale/inactive round emits error. No successful ranking is produced.",
+        "example": {
+          "roundId": "12345678-1234-4234-8234-123456789abc"
+        }
+      },
+      "leaveRoom": {
+        "payload": null,
+        "description": "No data payload. Immediately removes the racer owned by this socket and invalidates their recovery session; optional Socket.IO acknowledgement runs after removal. Transfers host to the earliest remaining racer. Remaining unfinished racers keep playing; ordinary completion/empty-room cleanup still applies. The browser waits for acknowledgement before disconnecting (three-second timeout falls back to normal recovery)."
       }
     },
     "serverToClient": {
@@ -2766,7 +2793,7 @@
         "payload": {
           "$ref": "#/components/schemas/RoomSnapshot"
         },
-        "description": "Room settings/roster/progress snapshot. Final snapshots add speedHistory and finishSeconds when available."
+        "description": "Room settings/roster/progress snapshot. Final snapshots add speedHistory and finishSeconds when available. Includes the server-owned hostUserId in every snapshot."
       },
       "roomSession": {
         "payload": {
@@ -2820,7 +2847,7 @@
     },
     "transportEvents": {
       "connect_error": "Socket.IO connection/authentication failure, represented by an Error object, not the application {msg} payload.",
-      "disconnect": "Socket.IO lifecycle event, no application payload contract. Disconnected racers have a 30-second resume window; explicit leave is implemented by disconnecting."
+      "disconnect": "Socket.IO lifecycle event, no application payload contract. Unexpected disconnection retains the racer and host role for a 30-second resume window; explicit leaveRoom removes the racer immediately."
     },
     "guarantees": "Server owns countdown deadlines and finish timestamps. Invalid/unauthorized vote, progress, patch, finish and reset messages are generally ignored without acknowledgements. Active rooms/timers/resume sessions are in memory and are lost on restart. Persisted result reads use the HTTP history routes."
   }

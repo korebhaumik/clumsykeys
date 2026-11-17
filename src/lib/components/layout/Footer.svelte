@@ -38,7 +38,7 @@
 
 <div class="w-full" class:shortcuts-only={!showCredits}>
 	{#if showShortcuts}
-		<div class="footer-shortcuts" class:active-test={active}>
+		<div class="footer-shortcuts" class:active-test={active} class:room-shortcuts={!!onViewRoom}>
 			{#if onViewRoom}
 				{@render command(["alt", "r"], "View room", onViewRoom)}
 			{:else}
@@ -113,6 +113,7 @@
 	.footer-credits.active-test { opacity: 0; visibility: hidden; }
 	.footer-shortcuts { --key-bg: var(--palette-stone-500); --key-ink: var(--palette-forest-950); display: flex; flex-wrap: wrap; gap: var(--dimension-0_65rem) var(--dimension-2_5rem); margin-bottom: var(--dimension-1_25rem); color: var(--key-bg); font-size: var(--text-0_875rem); line-height: var(--dimension-1_25rem); }
 	.footer-shortcuts.active-test { --key-bg: var(--palette-slate-600); }
+	.footer-shortcuts.room-shortcuts { align-items: center; column-gap: var(--dimension-1rem); }
 	:global([data-theme="classic"]) .footer-shortcuts { --key-bg: var(--palette-black); --key-ink: var(--palette-white); }
 	:global([data-theme="classic"]) .footer-shortcuts.active-test { --key-bg: var(--palette-gray-600); }
 	.footer-command { display: inline-flex; align-items: center; gap: var(--dimension-0_25rem); }
@@ -122,6 +123,8 @@
 	button.footer-command:hover .shortcut-label { color: var(--accent); }
 	@media (max-width: 40rem) {
 		.footer-shortcuts, .desktop-footer-link { display: none; }
+		.footer-shortcuts.room-shortcuts { display: flex; }
+		.room-shortcuts .footer-command { display: none; }
 		.footer-credits { gap: var(--dimension-0_5rem) var(--dimension-1rem); }
 		.footer-credits a { min-height: var(--dimension-2_5rem); }
 		.footer-credits p a { display: inline-flex; align-items: center; }
