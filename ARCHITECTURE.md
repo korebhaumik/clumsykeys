@@ -123,7 +123,11 @@ opens. It coalesces focus/resize work into a frame and does not correct native
 visual-viewport scroll events, which would feed back into keyboard panning.
 `typing-dom.ts` measures the target, viewport and caret before applying scroll
 and caret styles, avoiding repeated geometry reads after style writes.
-Its input sentinel is transient DOM state, excluded from scored text;
+`caret-motion.ts` applies the measured positions and retargets a single 50ms
+transform animation for same-line touch movement using cached positions and
+animation progress, without another geometry read. Reduced motion, scrolling
+and row changes snap; per-element state uses a WeakMap and animations are finite.
+The mobile input sentinel is transient DOM state, excluded from scored text;
 listeners, its resize observer and animation frame are cleaned up on teardown.
 The same module adapts the practice focus overlay: narrow screens require a
 double tap while desktop clicks and keyboard/assistive activation remain single

@@ -62,7 +62,7 @@ starts real ephemeral HTTP/Socket.IO servers; account integration uses a local
 Supabase HTTP fixture without hosted credentials. Playwright runs the full suite
 in installed Google Chrome and focused keyboard/reset coverage in WebKit.
 The focused WebKit suite also covers touch input without physical key events,
-shortened keyboard viewports, double-tap focus, immediate touch caret movement,
+shortened keyboard viewports, double-tap focus, touch caret smoothing,
 viewport-pan stability, manual snippet indentation,
 personal-best notifications and the sign-in mini keyboard's pointer/Enter/Space feedback.
 Install WebKit once with `pnpm exec playwright install webkit`.

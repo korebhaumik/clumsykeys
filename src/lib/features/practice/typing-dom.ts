@@ -1,3 +1,5 @@
+import { placePracticeCaret } from "./caret-motion";
+
 /** Measure first, then scroll and place the caret without interleaved style/layout work. */
 export function alignPracticeCaret(
 	caret: HTMLElement,
@@ -32,8 +34,8 @@ export function alignPracticeCaret(
 	}
 	nextScroll = Math.max(0, Math.min(maxScroll, nextScroll));
 	if (nextScroll !== scrollTop) viewport.scrollTop = nextScroll;
-	if (afterTarget !== undefined) caret.style.left = `${(afterTarget ? targetBounds.right : targetBounds.left) - frame.left}px`;
-	caret.style.top = `${targetBounds.top - frame.top - (nextScroll - scrollTop) + (targetBounds.height - caretHeight) / 2}px`;
+	placePracticeCaret(caret, afterTarget === undefined ? undefined : (afterTarget ? targetBounds.right : targetBounds.left) - frame.left,
+		targetBounds.top - frame.top - (nextScroll - scrollTop) + (targetBounds.height - caretHeight) / 2, nextScroll !== scrollTop);
 }
 
 export type PracticeState = "waiting" | "playing" | "finished";
