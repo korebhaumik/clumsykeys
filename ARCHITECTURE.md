@@ -119,7 +119,11 @@ and use keyed sessions to reset them. Keep calculations, input/DOM work and
 transport side effects separate; reactive per-character rewrites require their
 own regression work. `mobile-typing.ts` adapts touch input deletion/Return and
 keeps the typing frame within the visual viewport as the on-screen keyboard
-opens. Its input sentinel is transient DOM state, excluded from scored text;
+opens. It coalesces focus/resize work into a frame and does not correct native
+visual-viewport scroll events, which would feed back into keyboard panning.
+`typing-dom.ts` measures the target, viewport and caret before applying scroll
+and caret styles, avoiding repeated geometry reads after style writes.
+Its input sentinel is transient DOM state, excluded from scored text;
 listeners, its resize observer and animation frame are cleaned up on teardown.
 The same module adapts the practice focus overlay: narrow screens require a
 double tap while desktop clicks and keyboard/assistive activation remain single

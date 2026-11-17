@@ -56,6 +56,36 @@ dependency advisories and credential scans were not checked in this follow-up.
 The existing pnpm launcher `ENOEXEC` still prevents a frozen install; installed
 dependencies supplied these checks.
 
+## Mobile typing performance investigation
+
+On **17 November 2026**, browser regressions reproduced two input-time issues:
+the 110ms caret transition left the rendered caret 16px behind its requested
+position at the next frame in the recorded Chrome sample; four modeled native
+visual-viewport scroll events triggered four corrective page-scroll calls.
+This establishes an animation delay and a viewport-scroll feedback path, not
+a physical-phone CPU profile or a universal explanation of all device lag.
+
+Touch caret movement now skips the transition; desktop motion is retained.
+Viewport correction runs on focus/viewport resize/passage resize, not native
+viewport scroll. Pending resize work is coalesced and unchanged keyboard padding
+is not rewritten. The caret helper reads geometry before applying scroll and
+position styles; it derives the post-scroll vertical position from the measured
+scroll delta instead of reading geometry again after writes. Existing word/line
+scrolling, indentation, correction and scoring semantics remain unchanged.
+
+The original four Chrome performance cases failed before the fix. Afterward,
+the same next-frame/pan checks passed in Chrome and WebKit; the caret cases now
+exercise prose, snippets and keywords with normal motion enabled. The full
+**256-case run (198 Chrome, 58 WebKit)** passed 254 cases initially; two new
+Chrome multi-mode cases retained an active snippet between identical hash visits.
+After fixing that test setup to reload between modes, both passed a focused
+rerun. No existing browser case failed. Lint/design, dead-code, type/docs checks,
+all **65 unit/HTTP/socket tests**, both builds and SEO checks passed. Palette,
+focus colors, scoring formulas, routes, storage keys and transport contracts
+were not changed. Physical-phone profiling, hosted/database checks, dependency
+advisory scans and credential scans were not performed. The pnpm launcher still
+fails with `ENOEXEC`; checks used installed dependencies.
+
 ## Interactive feedback verification
 
 On **16–17 November 2026**, added compact per-category solo achievement cards with a

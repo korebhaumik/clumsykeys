@@ -107,8 +107,7 @@
 	}
 
 	function positionCaret(target: HTMLElement, afterTarget = false) {
-		caretEl.style.left = `${target.offsetLeft + (afterTarget ? target.offsetWidth : 0)}px`;
-		alignPracticeCaret(caretEl, linesEl, target, target.parentElement!);
+		alignPracticeCaret(caretEl, linesEl, target, target.parentElement!, afterTarget);
 	}
 
 	function activeLetter() {

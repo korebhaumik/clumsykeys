@@ -22,7 +22,8 @@ export function mobileTyping(input: HTMLInputElement, controls: { backspace: () 
 		if (!touch.matches || document.activeElement !== input || (viewport && viewport.scale !== 1)) return;
 		// iOS can shrink only the visual viewport, leaving the layout viewport tall.
 		// Reserve scroll room so the last passage line can still clear the keyboard.
-		shell?.style.setProperty("--typing-keyboard-inset", `${Math.max(0, window.innerHeight - (viewport?.height ?? window.innerHeight))}px`);
+		const keyboardInset = `${Math.max(0, window.innerHeight - (viewport?.height ?? window.innerHeight))}px`;
+		if (shell && shell.style.getPropertyValue("--typing-keyboard-inset") !== keyboardInset) shell.style.setProperty("--typing-keyboard-inset", keyboardInset);
 		const bounds = region.getBoundingClientRect();
 		const inset = parseFloat(getComputedStyle(input).fontSize);
 		const top = (viewport?.offsetTop ?? 0) + inset;
@@ -32,8 +33,7 @@ export function mobileTyping(input: HTMLInputElement, controls: { backspace: () 
 	}
 
 	function schedule() {
-		cancelAnimationFrame(frame);
-		frame = requestAnimationFrame(reveal);
+		if (!disposed && !frame) frame = requestAnimationFrame(reveal);
 	}
 	function focus() { prime(); schedule(); }
 	function blur() { shell?.style.removeProperty("--typing-keyboard-inset"); }
@@ -58,7 +58,8 @@ export function mobileTyping(input: HTMLInputElement, controls: { backspace: () 
 	input.addEventListener("input", normalize, true);
 	input.addEventListener("compositionend", normalize);
 	viewport?.addEventListener("resize", schedule);
-	viewport?.addEventListener("scroll", schedule);
+	// Browser keyboard panning emits scroll too. Correcting that scroll feeds back
+	// into native viewport movement; only focus, resize and content geometry reveal.
 	window.addEventListener("resize", schedule);
 	const observer = new ResizeObserver(schedule);
 	observer.observe(region);
@@ -74,7 +75,7 @@ export function mobileTyping(input: HTMLInputElement, controls: { backspace: () 
 		input.removeEventListener("input", normalize, true);
 		input.removeEventListener("compositionend", normalize);
 		viewport?.removeEventListener("resize", schedule);
-		viewport?.removeEventListener("scroll", schedule);
+
 		window.removeEventListener("resize", schedule);
 	} };
 }
