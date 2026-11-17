@@ -677,19 +677,22 @@ covers hosting controls; [SUPABASE.md](SUPABASE.md) covers schema and Auth setup
 
 ## Current dependency advisories
 
-Fresh `pnpm audit --json` reports **0 critical, 0 high, 1 moderate and 1 low**.
-Both findings are in development tooling. Fresh `pnpm audit --prod --json`
+On **18 November 2026**, `pnpm audit --json` reported **0 critical, 1 high,
+1 moderate and 0 low**. Both findings are in development tooling.
+`pnpm audit --prod --json`
 reports **zero advisories** across 134 production/optional dependency records.
 This is a dependency-registry result, not an operating-system image scan.
 
 | Package | Severity | Current advisory | Follow-up |
 | --- | --- | --- | --- |
 | `minimatch` 10.2.6 | Moderate | [Globparts amplification denial of service](https://github.com/advisories/GHSA-g3hv-75wg-m249), reported affected range `>=7.0.0 <11.0.1`. | Prefer a compatible parent-tool update; evaluate and test any major-version override. The registry reports a patch in `>=11.0.1`. |
-| `deepmerge` 4.3.1 | Low | [Prototype poisoning of returned objects](https://github.com/advisories/GHSA-gcqx-w48m-w2h4), reported affected range `>=4.2.0 <=4.3.1`. | Track the upstream build-tool dependency; the current registry response reports no patched version. |
+| `picomatch` 4.0.7 | High | [Repeated extglob denial of service](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), reported affected range `<=4.0.7`. | The registry reports no patched release. Track the [upstream release issue](https://github.com/micromatch/picomatch/issues/247), then upgrade and remove the CI exception. |
 
-No dependency upgrade or security behavior change was made as part of this
-documentation refresh. CI gates high/critical advisories; moderate/low findings
-still require triage. Re-run the audit whenever dependencies or the registry change.
+CI first runs the production audit with no advisory exclusions. The workspace
+audit then excludes only `GHSA-fc5q-39xc-vjpf` while it remains unpatched and
+development-only. Both checks use the high severity threshold. The exception
+does not patch picomatch, and an unfiltered local audit still reports it.
+The moderate minimatch advisory remains open pending a compatible tooling update.
 
 ## Database controls and verification boundary
 

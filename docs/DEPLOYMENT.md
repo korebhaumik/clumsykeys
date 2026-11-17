@@ -186,9 +186,11 @@ copied to the frontend document unchanged.
 Keep server secrets in backend runtime variables only. Vite rejects privileged
 keys and credential-named `VITE_` variables before building. The security workflow
 checks working files, reachable history and build output for common credentials,
-audits dependencies, and runs lint, types, tests and builds. Its dependency gate
-fails on high/critical advisories; moderate/low advisories remain visible and
-require triage. Enable branch protection to require this job. Review the
+audits dependencies, and runs lint, types, tests and builds. The production
+audit blocks high and critical advisories without exclusions. The workspace
+audit uses the same threshold with a temporary exception for the unpatched
+development-only picomatch advisory. An unfiltered `pnpm audit` lists the
+findings still open for triage. Enable branch protection to require this job. Review the
 [security audit](SECURITY_AUDIT.md) for remaining score-integrity and deployment
 actions.
 
