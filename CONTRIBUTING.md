@@ -61,8 +61,9 @@ npm run build:server
 starts real ephemeral HTTP/Socket.IO servers; account integration uses a local
 Supabase HTTP fixture without hosted credentials. Playwright runs the full suite
 in installed Google Chrome and focused keyboard/reset coverage in WebKit.
-The focused WebKit suite also covers personal-best notifications and the
-sign-in mini keyboard's pointer/Enter/Space feedback.
+The focused WebKit suite also covers touch input without physical key events,
+shortened keyboard viewports, manual snippet indentation, personal-best
+notifications and the sign-in mini keyboard's pointer/Enter/Space feedback.
 Install WebKit once with `pnpm exec playwright install webkit`.
 It starts the frontend on **4193**, backend on **15442**, and
 upstream fixture on **15443**. Run one suite at a time against those ports and

@@ -8,6 +8,38 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Mobile practice verification
+
+On **17 November 2026**, mobile practice was updated to center while idle and
+move beneath the header when the typing input receives focus. Both practice
+modes expose a single Test Settings button on narrow screens; code options,
+including snippet length, remain in the dialog. Desktop controls and footer
+links remain visible. The narrow footer contains GitHub, Support email and the
+developer credit. Touch input supports virtual text, deletion, Return and a
+manual-indent action without scoring the transient input sentinel. Visual
+viewport changes reserve scroll space above the keyboard; listeners, observers,
+frames and pointer-release timers are cleaned up on teardown.
+
+Lint/design checks, dead-code checks, frontend/backend type and documentation
+checks, all **65 unit/HTTP/socket tests**, both production builds and SEO checks
+passed on this working tree. **44 desktop content screenshots** across both
+themes, eleven routes and 1440/1920px widths matched the original pixels.
+Mobile previews were inspected at 320/390/640px. The full **244-case browser
+run (192 Chrome, 52 WebKit)** passed 235 cases initially; the nine affected cases
+passed a focused rerun after adapting mobile dialog/focus assertions and fixing
+the prompt-induced pointer shift. All 20 new touch cases passed in the full run,
+covering idle centering, focus/blur positioning, both keyboard viewport models,
+virtual text/deletion/Return, manual indentation and settings access. Browser
+account and leaderboard flows use the local modeled service, not hosted
+providers or the real database.
+
+Touch input and shortened-layout/visual-viewport-only keyboard behavior are
+modeled in Chrome and WebKit. A physical iPhone keyboard was not exercised.
+No database, hosted deployment, dependency advisory or credential scan is claimed
+for this UI change. Existing contrast limitations remain; palette, background
+roles and focus colors are unchanged. The local pnpm 12.18.0 launcher still
+fails with `ENOEXEC`, so checks use the installed dependencies.
+
 ## Interactive feedback verification
 
 On **16–17 November 2026**, added compact per-category solo achievement cards with a

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { codeLanguages as languages, codeLanguageChoices as languageChoices, snippetLengths } from '../../shared/content/code-catalog';
 import { snippetCatalog } from '../../shared/content/snippet-catalog';
 
-for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440]) {
+for (const theme of ['dark-forest', 'classic']) for (const width of [1440]) {
   test(`snippet length selects complete code in ${theme} at ${width}px`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));

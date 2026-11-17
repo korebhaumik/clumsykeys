@@ -52,6 +52,8 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await page.getByRole('heading', { name: 'Appearance' }).click();
     await expect(page.getByRole('listbox')).not.toBeVisible();
 
+    // Code's inline dropdown is a desktop control; mobile language selection is tested in the settings dialog.
+    await page.setViewportSize({ width: 1440, height: 844 });
     await page.goto('/#/game');
     const language = page.getByRole('combobox', { name: 'Snippet language' });
     const gap = async () => language.evaluate(button => {
@@ -66,12 +68,13 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     expect(await popup.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     const popupBox = await popup.boundingBox();
     expect(popupBox!.x).toBeGreaterThanOrEqual(0);
-    expect(popupBox!.x + popupBox!.width).toBeLessThanOrEqual(width);
+    expect(popupBox!.x + popupBox!.width).toBeLessThanOrEqual(1440);
     await page.getByRole('option', { name: 'JavaScript', exact: true }).click();
     await expect(language).toBeFocused();
     expect(await gap()).toBeLessThanOrEqual(13);
     await expect(page.getByRole('region', { name: 'JavaScript snippet' })).toBeVisible();
 
+    await page.setViewportSize({ width, height: 844 });
     await page.goto('/#/login');
     await page.getByLabel('Username', { exact: true }).fill('Ada');
     await page.getByLabel('Room ID', { exact: true }).fill(`dropdown-${theme}-${width}-${Date.now()}`);

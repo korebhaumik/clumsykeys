@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import DocumentSvg from "../icons/DocumentIcon.svelte";
-	import DollarSvg from "../icons/DollarIcon.svelte";
-	import GithubSvg from "../icons/GithubIcon.svelte";
 	import LockSvg from "../icons/LockIcon.svelte";
 	import MailSvg from "../icons/MailIcon.svelte";
 	import ShieldSvg from "../icons/ShieldIcon.svelte";
+	import DollarSvg from "../icons/DollarIcon.svelte";
+	import GithubSvg from "../icons/GithubIcon.svelte";
 	import { theme } from "../../state/app.store";
 	import cn from "../../utils";
 
@@ -64,43 +64,43 @@
 			<a tabindex="0"
 				aria-label="Contact"
 				href="mailto:bhaumik.kore31@gmail.com"
-				class="flex items-center transition cursor-pointer hover:text-classic-900"
+				class="desktop-footer-link flex items-center transition cursor-pointer hover:text-classic-900"
 			>
 				<MailSvg />
 				<span class="ml-2 text-xs">Contact</span>
 			</a>
 			<a tabindex="0"
 				aria-label="Github"
-				href="http://github.com/korebhaumik/Clumsykeys"
-				target="_blank"
+				href="https://github.com/korebhaumik/Clumsykeys"
+				target="_blank" rel="noreferrer"
 				class="flex items-center"
 			>
 				<GithubSvg />
 				<span class="ml-2 text-xs">Github</span>
 			</a>
-			<a tabindex="0" aria-label="Security" href="#/security" class="flex items-center">
+			<a tabindex="0" aria-label="Security" href="#/security" class="desktop-footer-link flex items-center">
 				<ShieldSvg />
 				<span class="ml-2 text-xs">Security</span>
 			</a>
-			<a tabindex="0" aria-label="Terms" href="#/terms" class="flex items-center">
+			<a tabindex="0" aria-label="Terms" href="#/terms" class="desktop-footer-link flex items-center">
 				<DocumentSvg />
 				<span class="ml-2 text-xs">Terms</span>
 			</a>
-			<a tabindex="0" aria-label="Privacy" href="#/privacy" class="flex items-center">
+			<a tabindex="0" aria-label="Privacy" href="#/privacy" class="desktop-footer-link flex items-center">
 				<LockSvg />
 				<span class="ml-2 text-xs">Privacy</span>
 			</a>
-			<div class="flex items-center">
+			<a tabindex="0" href="mailto:bhaumik.kore31@gmail.com?subject=Support%20Clumsy%20Keys" class="flex items-center">
 				<DollarSvg />
 				<span class="ml-2 text-xs">Support</span>
-			</div>
+			</a>
 		</div>
 		<p class="text-xs">
 			developed by <a tabindex="0"
 				aria-label="Kore Bhaumik"
 				class="text-amber-700 hover:underline"
-				href="http://github.com/korebhaumik"
-				target="_blank">@korebhaumik</a
+				href="https://github.com/korebhaumik"
+				target="_blank" rel="noreferrer">@korebhaumik</a
 			>
 		</p>
 	</div>{/if}
@@ -120,4 +120,10 @@
 	.key-join { font-size: var(--text-1_125rem); }
 	.shortcut-label { margin-inline-start: var(--dimension-0_5rem); }
 	button.footer-command:hover .shortcut-label { color: var(--accent); }
+	@media (max-width: 40rem) {
+		.footer-shortcuts, .desktop-footer-link { display: none; }
+		.footer-credits { gap: var(--dimension-0_5rem) var(--dimension-1rem); }
+		.footer-credits a { min-height: var(--dimension-2_5rem); }
+		.footer-credits p a { display: inline-flex; align-items: center; }
+	}
 </style>

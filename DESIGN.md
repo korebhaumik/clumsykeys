@@ -46,8 +46,11 @@ cannot fit. Keep `min-width: 0` on shrinking grid/flex children. Use horizontal
 overflow regions for wide result tables instead of widening the page.
 
 `App.svelte` adds no outer top/bottom padding and
-renders the single global footer. Security, Terms and Privacy links open local
-policy pages using the shared page shell and `src/styles/legal.css`; the header includes a history shortcut. Practice/live-race layouts add
+renders the single global footer. The desktop footer retains Contact, GitHub,
+Security, Terms, Privacy, Support and
+the developer credit. At widths up to 40rem, only GitHub, a Support email link
+and the developer credit remain. Local Security, Terms and Privacy routes retain the shared page shell and
+`src/styles/legal.css`; the header includes a history shortcut. Practice/live-race layouts add
 only contextual shortcut rows. Preserve footer spacing at the bottom of short
 pages and after long content; avoid viewport-height tricks that overlap content.
 
@@ -58,6 +61,21 @@ Current page patterns:
   settings before generating a passage.
   A signed-in user with no cache sees a practice-settings loading status while
   the first read is pending; cached users can practice during background refresh.
+  On screens up to 40rem, idle practice stays vertically centered with compact
+  spacing and safe-area insets. Focusing the typing input moves practice beneath
+  the header; blurring it restores centering. Other pages use normal document flow.
+  Both prose and code show only the Test Settings button above the passage.
+  Code mode, language, snippet length, indentation, keyword limits and modifiers
+  remain available in the settings dialog.
+  Controls use touch-sized targets. Desktop shortcut rows are hidden at this
+  width, while settings dialogs retain explicit Back/Close buttons without keycaps.
+  Touch devices offer a tap-to-type prompt instead of autofocus; the prompt
+  sits below the readable passage and disappears on focus. The typing input uses
+  a 1rem font to avoid iOS focus zoom,
+  and visual-viewport changes scroll the passage above the on-screen keyboard
+  without fixing the page or preventing ordinary scrolling. Manual snippets
+  provide an on-screen Tab action that preserves input focus.
+  Wider layouts retain their existing sizing, controls and centering.
   Settings and mode controls lead into the typing area. Active
   tests replace configuration controls with live stats and suppress distracting
   chrome; results bring back explicit replay actions and detailed feedback.

@@ -58,7 +58,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await dialog.getByRole('button', { name: 'Back', exact: true }).click();
     await dialog.getByRole('button', { name: 'Close settings' }).click();
     await expect(opener).toBeFocused();
-    await expect(page.getByRole('button', { name: 'Manual Tabs', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    if (width === 1440) await expect(page.getByRole('button', { name: 'Manual Tabs', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
     await opener.click();
     await dialog.getByRole('button', { name: 'Practice Mode', exact: true }).click();
@@ -94,7 +94,10 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
 
     await page.reload();
     await expect(page.getByRole('region', { name: 'JavaScript keywords' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Numbers', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await opener.click();
+    await dialog.getByRole('button', { name: 'Numbers', exact: true }).click();
+    await expect(dialog.getByRole('button', { name: 'On', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await dialog.getByRole('button', { name: 'Close settings' }).click();
     await opener.click();
     await page.mouse.click(1, 1);
     await expect(dialog).not.toBeVisible();

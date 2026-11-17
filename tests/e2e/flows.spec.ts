@@ -171,6 +171,8 @@ for (const theme of ['dark-forest', 'classic']) {
       await expect(page.getByRole('button', { name: 'Snippets', exact: true })).toHaveCSS('text-decoration-line', 'underline');
       await page.setViewportSize({ width: 320, height: 844 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await expect(page.locator('.mode-toggle')).not.toBeVisible();
+      await page.setViewportSize({ width: 1440, height: 844 });
       await page.getByRole('button', { name: 'Keywords', exact: true }).click();
       await expect(page.getByRole('group', { name: 'Indentation' })).toHaveCount(0);
       const input = page.getByRole('textbox', { name: 'Type the practice keywords' });
@@ -208,6 +210,7 @@ for (const theme of ['dark-forest', 'classic']) {
       expect(refreshed).toEqual(original);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
+      await page.setViewportSize({ width: 320, height: 844 });
       const passage = refreshed.join(' ');
       await page.keyboard.type(passage.slice(0, -1));
       expect(await region.locator('.typing-window').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
@@ -217,6 +220,7 @@ for (const theme of ['dark-forest', 'classic']) {
       await expect(page.locator('.result-headline')).toContainText('100%');
       await page.getByRole('button', { name: 'Practice again' }).click();
       await expect(input).toBeFocused();
+      await page.setViewportSize({ width: 1440, height: 844 });
       await page.getByRole('button', { name: 'Snippets', exact: true }).click();
       await expect(page.getByRole('region', { name: 'JavaScript snippet' })).toBeVisible();
       await expect(page.getByRole('group', { name: 'Indentation' })).toBeVisible();

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { mobileTyping } from "./mobile-typing";
  import IndentIcon from "../../components/icons/IndentIcon.svelte";
 	import { onMount, tick } from "svelte";
 	import { get } from "svelte/store";
@@ -78,7 +79,8 @@
 
 	onMount(() => {
 		resetPositions();
-		inputEl.focus();
+		if (window.matchMedia("(pointer: coarse)").matches) isBlur = true;
+		else inputEl.focus();
 		const unsubscribe = codePreferences.subscribe(next => {
 			if (game !== "waiting" || JSON.stringify(next) === JSON.stringify({ mode, language: langChoice, limit: keywordLimit, modifiers })) return;
 			langChoice = next.language; mode = next.mode; keywordLimit = next.limit; modifiers = { ...next.modifiers };
@@ -363,9 +365,23 @@
 		}
 	}
 
+	function advanceLine() {
+		if (mode !== "snippets") return;
+		startSession();
+		const lastWordInLine = wordIndex === codeSnippet[lineIndex].content.length - 1;
+		if (lastWordInLine && letterIndex > 0 && lineIndex < codeSnippet.length - 1) {
+			saveWord();
+			lineIndex += 1;
+			wordIndex = 0;
+			letterIndex = 0;
+			codeScrollEl.scrollLeft = 0;
+			positionAtStart();
+		}
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey || event.altKey) return;
-		const { code } = event;
+		const code = event.code || (event.key === " " ? "Space" : event.key);
 		if (mode === "keywords" && code === "Tab") return;
 		if (code === "Tab" && event.shiftKey) return;
 		if (code === "Space" || code === "Enter" || code === "Tab" || code === "Backspace") event.preventDefault();
@@ -373,7 +389,6 @@
 		if (mode === "snippets") startSession();
 		if (game !== "playing") return;
 
-		const lastWordInLine = wordIndex === codeSnippet[lineIndex].content.length - 1;
 		switch (code) {
 			case "Tab":
 				typedLetter = "\t";
@@ -387,14 +402,7 @@
 				}
 				break;
 			case "Enter":
-				if (lastWordInLine && letterIndex > 0 && lineIndex < codeSnippet.length - 1) {
-					saveWord();
-					lineIndex += 1;
-					wordIndex = 0;
-					letterIndex = 0;
-					codeScrollEl.scrollLeft = 0;
-					positionAtStart();
-				}
+				advanceLine();
 				break;
 			case "Backspace":
 				backspace();
@@ -450,20 +458,20 @@
 						type="text"
 						aria-label={mode === "keywords" ? "Type the practice keywords" : "Type the practice snippet"}
 						autocomplete="off"
+						autocorrect="off"
 						autocapitalize="off"
 						spellcheck={false}
 						bind:this={inputEl}
+						use:mobileTyping={{ backspace, enter: advanceLine }}
 						oninput={(event) => {
+							if (event instanceof window.InputEvent && event.isComposing) return;
 							typedLetter = event.currentTarget.value;
-							if (mode === "keywords" && typedLetter.length === 1) {
+							if (typedLetter.length === 1) {
 								if (typedLetter === " ") {
-									advanceWord();
-									event.currentTarget.value = "";
-									return;
-								}
-								startSession();
+									if (needsIndent()) { startSession(); enterIndent(); }
+									else advanceWord();
+								} else { startSession(); handleInput(); }
 							}
-							if (typedLetter.length === 1) handleInput();
 							event.currentTarget.value = "";
 						}}
 						onkeydown={handleKeydown}
@@ -493,16 +501,19 @@
 			</div>
 			{#if isBlur && game !== "finished"}
 				<button type="button" class="typing-cover font-bold" tabindex="-1" bind:this={focusPrompt} onclick={() => inputEl.focus()}>
-					Click here or press Tab to focus
+					<span class="desktop-focus-hint">Click here or press Tab to focus</span><span class="mobile-focus-hint">Tap to start typing</span>
 				</button>
 			{/if}
 		</section>
 		{/key}
+		{#if mode === "snippets" && !autoTabs}
+			<button type="button" tabindex="0" class="mobile-indent" aria-label="Insert indentation" onpointerdown={(event) => event.preventDefault()} onclick={() => { startSession(); typedLetter = "\t"; handleInput(); inputEl.focus({ preventScroll: true }); }}>Tab ↹</button>
+		{/if}
 		<button type="button" tabindex="0" class="code-reset" aria-label="Reset code practice" title="Reset code practice" onclick={restart}><ResetSvg /></button>
 	</div>
 	{/if}
 
-	<CodeSettingsModal open={settingsOpen} {mode} language={langChoice} bind:autoTabs limit={keywordLimit} {modifiers}
+	<CodeSettingsModal open={settingsOpen} {mode} language={langChoice} bind:autoTabs {snippetLength} onSnippetLengthChange={selectSnippetLength} limit={keywordLimit} {modifiers}
 		onClose={() => { settingsOpen = false; }} onFocusFallback={() => { if (!results) inputEl.focus(); }}
 		onModeChange={selectMode} onLanguageChange={selectLanguage} onLimitChange={selectLimit} onToggleModifier={toggleModifier}
 	/>
@@ -556,4 +567,13 @@
 	.code-reset:hover { color: var(--accent); }
 	:global([data-theme="classic"]) .code-reset { color: var(--ink); }
 	:global([data-theme="classic"]) .code-reset:is(:hover, :focus-visible) { background: var(--accent-wash); }
+	.mobile-indent { display: none; }
+	@media (max-width: 40rem) {
+		.code-toolbar { gap: 0; margin-bottom: var(--dimension-1rem); }
+		.toolbar-row { display: block; }
+		.mode-toggle, .snippet-selector { display: none; }
+		.playing .code-passage { margin-top: var(--dimension-0_5rem); }
+		.mobile-indent { display: block; justify-self: center; min-height: var(--dimension-3rem); padding-inline: var(--dimension-1rem); color: var(--accent); border: var(--dimension-1px) solid var(--line); border-radius: var(--radius-0_5rem); margin-top: var(--dimension-0_5rem); }
+		.code-reset { min-width: var(--dimension-3rem); min-height: var(--dimension-3rem); display: grid; place-items: center; margin-top: var(--dimension-0_5rem); }
+	}
 </style>

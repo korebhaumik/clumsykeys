@@ -1,3 +1,4 @@
+import { codeChoice } from './code-controls';
 import { test, expect, type Locator } from '@playwright/test';
 
 async function expectHighlight(control: Locator, theme: string) {
@@ -128,7 +129,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     const reset = page.getByRole('button', { name: 'reset', exact: true });
     await expectHighlight(reset, theme);
     await page.keyboard.press('Tab');
-    await expectHighlight(page.getByRole('link', { name: 'Contact', exact: true }), theme);
+    await expectHighlight(page.getByRole('link', { name: width === 320 ? 'Github' : 'Contact', exact: true }), theme);
     await page.keyboard.press('Shift+Tab');
     await expect(reset).toBeFocused();
     await page.keyboard.press('Shift+Tab');
@@ -179,7 +180,8 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await expect(page.getByRole('textbox', { name: 'Type the practice snippet' })).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await expectHighlight(page.locator(':focus'), theme);
-    await page.getByRole('button', { name: 'Keywords', exact: true }).click();
+    await codeChoice(page, 'Practice Mode', 'Keywords');
+    if (width === 320) await page.getByRole('textbox', { name: 'Type the practice keywords' }).focus();
     await expect(page.getByRole('textbox', { name: 'Type the practice keywords' })).toBeFocused();
     await page.keyboard.press('Tab');
     await expectHighlight(page.getByRole('button', { name: 'Reset code practice' }), theme);
