@@ -1,3 +1,4 @@
+import { codeChoice } from './code-controls';
 import { test, expect } from '@playwright/test';
 
 for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440]) {
@@ -24,7 +25,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
           await dialog.getByRole('button', { name: 'Short', exact: true }).click();
           await page.keyboard.press('Control+k');
         } else {
-          await page.getByRole('button', { name: 'Keywords', exact: true }).click();
+          await codeChoice(page, 'Practice Mode', 'Keywords');
         }
         const input = page.getByRole('textbox', {
           name: mode === 'prose' ? 'Type the practice passage' : 'Type the practice keywords',
@@ -77,7 +78,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
       page.on('pageerror', error => errors.push(error.message));
       page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
       await page.goto('/#/game');
-      await page.getByRole('button', { name: 'Manual Tabs', exact: true }).click();
+      await codeChoice(page, 'Indentation', 'Manual Tabs');
       const input = page.getByRole('textbox', { name: 'Type the practice snippet' });
       await input.focus();
       const lines = await page.locator('.code-line').evaluateAll(lines => lines.map(line => ({

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { mobileTyping } from "./mobile-typing";
 	import { onMount, tick, untrack } from "svelte";
 	import { get } from "svelte/store";
 	import ResetSvg from "../../components/icons/ResetIcon.svelte";
@@ -42,7 +43,8 @@
 	}
 
 	onMount(() => {
-		inputEl.focus();
+		if (window.matchMedia("(pointer: coarse)").matches) isBlur = true;
+		else inputEl.focus();
 		return () => { game.set("waiting"); practiceBusy.set(false); };
 	});
 
@@ -154,7 +156,7 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		if ($modalConfig.isVisible || event.isComposing || event.keyCode === 229) return;
-		const { code } = event;
+		const code = event.code || (event.key === " " ? "Space" : event.key);
 		if (code === "Space" || code === "Enter" || code === "Backspace") event.preventDefault();
 		if (code === "Enter") {
 			restart();
@@ -204,9 +206,11 @@
 					type="text"
 					aria-label="Type the practice passage"
 					autocomplete="off"
+					autocorrect="off"
 					autocapitalize="off"
 					spellcheck={false}
 					bind:this={inputEl}
+					use:mobileTyping={{ backspace, enter: restart }}
 					oninput={(event) => {
 						if (!(event instanceof window.InputEvent) || event.isComposing) return;
 						const value = event.currentTarget.value;
@@ -233,7 +237,7 @@
 				<div bind:this={caretEl} class="typing-caret bg-blue-300" aria-hidden="true"></div>
 				{#if isBlur}
 					<button class="typing-cover font-bold" tabindex="-1" onclick={() => inputEl.focus()}>
-						Click here or Shift+Tab back to type
+						<span class="desktop-focus-hint">Click here or Shift+Tab back to type</span><span class="mobile-focus-hint">Tap to start typing</span>
 					</button>
 				{/if}
 			</div>

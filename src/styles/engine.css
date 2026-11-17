@@ -254,3 +254,24 @@
 }
 .settings-mode-options button { border-color: transparent; background: transparent; color: var(--muted); }
 .settings-mode-options [aria-pressed="true"] { background: var(--accent-wash); color: var(--accent); }
+
+/* Compact document flow leaves room for the passage and an on-screen keyboard. */
+.mobile-focus-hint { display: none; }
+@media (max-width: 40rem) {
+	.page-shell { padding-top: env(safe-area-inset-top, 0px); }
+	.page-shell > header { margin-top: var(--dimension-2rem); }
+	.page-shell > .page-content { margin-block: 0; padding-block: var(--dimension-1_25rem); }
+	.page-footer { padding-block: var(--dimension-0_75rem) max(var(--dimension-1rem), env(safe-area-inset-bottom, 0px)); }
+	.settings-label { min-height: var(--dimension-3rem); padding: var(--dimension-0_5rem); font-size: var(--text-0_82rem); }
+	.practice { margin-block: var(--dimension-0_75rem) 0; }
+	.practice-reset { min-width: var(--dimension-3rem); min-height: var(--dimension-3rem); margin-top: var(--dimension-0_5rem); }
+	.practice-reset svg { margin-inline: auto; }
+	.typing-frame > input { font-size: var(--text-1rem); }
+	.typing-cover { position: relative; inset: auto; min-height: var(--dimension-3rem); backdrop-filter: none; font-size: var(--text-0_875rem); text-align: center; padding: var(--dimension-0_5rem); }
+	.desktop-focus-hint { display: none; }
+	.mobile-focus-hint { display: inline; }
+	.settings-dialog-footer > span, .settings-dialog-footer kbd { display: none; }
+	.settings-dialog-footer button { min-height: var(--dimension-3rem); }
+	/* Native text controls stay readable without triggering iOS focus zoom. */
+	.page-shell input:not([type="checkbox"]):not([type="radio"]), .page-shell select, .page-shell textarea { font-size: var(--text-1rem); }
+}

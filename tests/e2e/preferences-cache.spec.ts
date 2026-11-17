@@ -1,3 +1,4 @@
+import { codeChoice } from './code-controls';
 import { expect, test, type Page } from '@playwright/test';
 
 async function chooseWords(page: Page, count: number) {
@@ -33,14 +34,22 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await expect(other.locator('.typing-window .typing-word')).toHaveCount(100);
     await expect(other.getByRole('textbox', { name: 'Type the practice passage' })).toBeFocused();
     await page.goto('/#/game');
-    await page.getByRole('group', { name: 'Snippet length', exact: true }).getByRole('button', { name: 'Long', exact: true }).click();
+    await codeChoice(page, 'Snippet length', 'Long');
     await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Indentation', exact: true }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Manual Tabs', exact: true }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Close settings', exact: true }).click();
     await page.reload();
-    await expect(page.getByRole('group', { name: 'Snippet length', exact: true }).getByRole('button', { name: 'Long', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
+    if (width === 320) {
+      await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
+      const dialog = page.getByRole('dialog');
+      await dialog.getByRole('button', { name: 'Snippet length', exact: true }).click();
+      await expect(dialog.getByRole('button', { name: 'Long', exact: true })).toHaveAttribute('aria-pressed', 'true');
+      await dialog.getByRole('button', { name: 'Back', exact: true }).click();
+    } else {
+      await expect(page.getByRole('group', { name: 'Snippet length', exact: true }).getByRole('button', { name: 'Long', exact: true })).toHaveAttribute('aria-pressed', 'true');
+      await page.getByRole('button', { name: 'Test Settings', exact: true }).click();
+    }
     await page.getByRole('dialog').getByRole('button', { name: 'Indentation', exact: true }).click();
     await expect(page.getByRole('dialog').getByRole('button', { name: 'Manual Tabs', exact: true })).toHaveAttribute('aria-pressed', 'true');
   });

@@ -117,7 +117,11 @@ length currently subdivides the public solo board.
 calculation. DOM typing engines intentionally mutate character-feedback nodes
 and use keyed sessions to reset them. Keep calculations, input/DOM work and
 transport side effects separate; reactive per-character rewrites require their
-own regression work. Completion captures one immutable, account-bound result;
+own regression work. `mobile-typing.ts` adapts touch input deletion/Return and
+keeps the typing frame within the visual viewport as the on-screen keyboard
+opens. Its input sentinel is transient DOM state, excluded from scored text;
+listeners, its resize observer and animation frame are cleaned up on teardown.
+Completion captures one immutable, account-bound result;
 network writes do not enter the keyboard loop.
 
 `practice-completion.ts` snapshots the selected category through authenticated

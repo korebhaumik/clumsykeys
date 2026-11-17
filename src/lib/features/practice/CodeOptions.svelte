@@ -70,4 +70,5 @@
 		border-color: color-mix(in srgb, var(--accent-ink) 80%, var(--accent));
 	}
 	:global([data-theme="classic"]) .code-options { --focus-highlight: var(--accent-ink); }
+	@media (max-width: 40rem) { .code-options { display: none; } }
 </style>

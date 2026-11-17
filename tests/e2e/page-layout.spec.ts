@@ -12,12 +12,13 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1920])
       if (policyTitles[route]) await expect(page.getByRole('heading', { level: 1, name: policyTitles[route], exact: true })).toBeVisible();
       const footer = page.getByRole('contentinfo');
       await expect(footer).toHaveCount(1);
-      await expect(footer.getByRole('link', { name: 'Contact', exact: true })).toBeVisible();
+      await expect(footer.getByRole('link', { name: width === 320 ? 'Github' : 'Contact', exact: true })).toBeVisible();
       await expect(footer.getByRole('link', { name: 'Kore Bhaumik', exact: true })).toBeVisible();
-      for (const label of ['Security', 'Terms', 'Privacy']) await expect(footer.getByRole('link', { name: label, exact: true })).toBeVisible();
-      await expect(footer.getByText('Support', { exact: true })).toBeVisible();
-      for (const [label, href] of [['Security', '#/security'], ['Terms', '#/terms'], ['Privacy', '#/privacy']]) {
-        await expect(footer.getByRole('link', { name: label, exact: true })).toHaveAttribute('href', href);
+      await expect(footer.getByRole('link', { name: 'Support', exact: true })).toHaveAttribute('href', /^mailto:/);
+      await expect(footer.getByRole('link')).toHaveCount(width === 320 ? 3 : 7);
+      for (const label of ['Contact', 'Security', 'Terms', 'Privacy']) {
+        if (width === 320) await expect(footer.getByRole('link', { name: label, exact: true })).toHaveCount(0);
+        else await expect(footer.getByRole('link', { name: label, exact: true })).toBeVisible();
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       const bottomSpace = await footer.evaluate(element => {

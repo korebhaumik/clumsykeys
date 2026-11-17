@@ -1,3 +1,4 @@
+import { codeChoice } from './code-controls';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { practiceCategoryKey } from '../../backend/src/practice-category.contract';
@@ -118,7 +119,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
       if (mode === 'prose') await shortProse(page);
       else {
         await page.goto('/#/game');
-        if (mode === 'keywords') await page.getByRole('button', { name: 'Keywords', exact: true }).click();
+        if (mode === 'keywords') await codeChoice(page, 'Practice Mode', 'Keywords');
       }
       await finishPractice(page, mode);
       const popup = page.getByRole('complementary', { name: 'New personal best' });

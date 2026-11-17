@@ -19,7 +19,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: 'reset', exact: true })).toBeFocused();
     await page.keyboard.press('Tab');
-    await expect(page.getByRole('link', { name: 'Contact', exact: true })).toBeFocused();
+    await expect(page.getByRole('link', { name: width === 320 ? 'Github' : 'Contact', exact: true })).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Enter');
     await expect(input).toBeFocused();

@@ -9,12 +9,14 @@
 	import HashtagIcon from "../../components/icons/HashtagIcon.svelte";
 	import TimerIcon from "../../components/icons/TimerIcon.svelte";
 	import ArrowRightIcon from "../../components/icons/ArrowRightIcon.svelte";
-	import { codeLanguages as languages, codeLanguageChoices as languageChoices } from "../../../../shared/content/code-catalog";
+	import { codeLanguages as languages, codeLanguageChoices as languageChoices, snippetLengths, type SnippetLength } from "../../../../shared/content/code-catalog";
 	import { raceDurations, raceWordCounts } from "../../../../backend/src/race.settings";
 	import type { KeywordLimit, KeywordModifiers } from "./code-keywords";
 
-	let { open, mode, language, autoTabs = $bindable(true), limit, modifiers,
+	let { open, mode, language, autoTabs = $bindable(true), limit, modifiers, snippetLength, onSnippetLengthChange,
 		onClose, onFocusFallback, onModeChange, onLanguageChange, onLimitChange, onToggleModifier }: {
+		snippetLength: SnippetLength;
+		onSnippetLengthChange: (length: SnippetLength) => void;
 		open: boolean;
 		mode: "snippets" | "keywords";
 		language: keyof typeof languages;
@@ -35,13 +37,14 @@
 		punctuation: { title: "Punctuations", icon: AtIcon },
 		numbers: { title: "Numbers", icon: HashtagIcon },
 		testType: { title: "Test Type", icon: ToolsIcon },
+		length: { title: "Snippet length", icon: ToolsIcon },
 		indentation: { title: "Indentation", icon: IndentIcon },
 	};
 	let selected = $state<keyof typeof panels | "main">("main");
 	let panel = $derived(selected === "main" ? undefined : panels[selected]);
 	let entries = $derived<(keyof typeof panels)[]>(mode === "keywords"
 		? ["language", "punctuation", "numbers", "testType", "mode"]
-		: ["language", "mode", "indentation"]);
+		: ["language", "mode", "indentation", "length"]);
 
 	$effect(() => {
 		if (!open) selected = "main";
@@ -57,7 +60,7 @@
 		<div class="settings-list">
 			{#each entries as key (key)}
 				{@const item = panels[key]}
-				<button tabindex="0" class="settings-choice" type="button" onclick={() => { selected = key; }}>
+				<button tabindex="0" class="settings-choice" class:mobile-length={key === "length"} type="button" onclick={() => { selected = key; }}>
 					<item.icon /><span>{item.title}</span><ArrowRightIcon />
 				</button>
 			{/each}
@@ -72,6 +75,12 @@
 		<div class="settings-list" role="group" aria-label="Practice mode">
 			<button tabindex="0" class="settings-choice" type="button" aria-pressed={mode === "snippets"} onclick={() => onModeChange("snippets")}><CodeIcon /><span>Snippets</span></button>
 			<button tabindex="0" class="settings-choice" type="button" aria-pressed={mode === "keywords"} onclick={() => onModeChange("keywords")}><span aria-hidden="true">Aa</span><span>Keywords</span></button>
+		</div>
+	{:else if selected === "length"}
+		<div class="settings-list" role="group" aria-label="Snippet length">
+			{#each snippetLengths as length (length)}
+				<button tabindex="0" class="settings-choice" type="button" aria-pressed={snippetLength === length} onclick={() => onSnippetLengthChange(length)}>{length.charAt(0).toUpperCase() + length.slice(1)}</button>
+			{/each}
 		</div>
 	{:else if selected === "indentation"}
 		<div class="settings-list" role="group" aria-label="Indentation">
@@ -101,3 +110,8 @@
 		</div>
 	{/if}
 </SettingsDialog>
+
+<style>
+	.mobile-length { display: none; }
+	@media (max-width: 40rem) { .mobile-length { display: flex; } }
+</style>
