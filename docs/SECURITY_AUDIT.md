@@ -40,6 +40,22 @@ for this UI change. Existing contrast limitations remain; palette, background
 roles and focus colors are unchanged. The local pnpm 12.18.0 launcher still
 fails with `ENOEXEC`, so checks use the installed dependencies.
 
+The **17 November 2026 double-tap overlay follow-up** puts the mobile focus
+prompt over the blurred passage in both solo modes. A single pointer tap leaves
+the input unfocused; a deliberate second tap focuses it synchronously. Keyboard
+and assistive activation remain single actions, and desktop prompt copy and
+single-click focus are preserved. The label uses an opaque inset backing;
+[CONTRAST.md](CONTRAST.md#mobile-double-tap-focus-overlay) records fresh source
+ratios. Both-theme overlays were visually inspected in local Chrome captures.
+Lint/design, dead-code, type/docs checks, all **65 unit/HTTP/socket tests**, both
+production builds and SEO checks passed. The full **248-case suite passed
+cleanly: 194 Chrome and 54 WebKit**, including first-tap rejection, double-tap
+focus, overlay geometry/blur, Enter/Space, centering, keyboard viewport changes,
+reset/replay and virtual input. A physical iPhone, hosted services, real database,
+dependency advisories and credential scans were not checked in this follow-up.
+The existing pnpm launcher `ENOEXEC` still prevents a frozen install; installed
+dependencies supplied these checks.
+
 ## Interactive feedback verification
 
 On **16–17 November 2026**, added compact per-category solo achievement cards with a

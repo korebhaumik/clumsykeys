@@ -1,5 +1,5 @@
 import { codeChoice } from './code-controls';
-import { expect, test, type Locator } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 // Virtual keyboards can send input/beforeinput without physical keydown events.
 async function text(input: Locator, value: string) {
@@ -10,6 +10,12 @@ async function text(input: Locator, value: string) {
 }
 async function edit(input: Locator, inputType: string) {
   await input.evaluate((element, inputType) => element.dispatchEvent(new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType })), inputType);
+}
+
+async function doubleTapPrompt(page: Page) {
+  const prompt = page.getByRole('button', { name: 'Double tap here to start playing', exact: true });
+  await prompt.tap();
+  await prompt.tap();
 }
 
 for (const theme of ['dark-forest', 'classic']) {
@@ -30,7 +36,17 @@ for (const theme of ['dark-forest', 'classic']) {
           return Math.abs((box.top + box.bottom) / 2 - (header.bottom + shell.bottom) / 2) < 3;
         });
         await expect.poll(centered).toBe(true);
-        await page.getByText('Tap to start typing', { exact: true }).tap();
+        const prompt = page.getByRole('button', { name: 'Double tap here to start playing', exact: true });
+        await expect(prompt).toHaveCSS('backdrop-filter', 'blur(3px)');
+        const overlay = await prompt.boundingBox();
+        const passage = await page.locator('.typing-window').boundingBox();
+        expect(overlay!.y).toBeCloseTo(passage!.y, 0);
+        expect(overlay!.height).toBeCloseTo(passage!.height, 0);
+        await prompt.tap();
+        await expect(page.locator('#boss')).not.toBeFocused();
+        await expect.poll(centered).toBe(true);
+        await prompt.tap();
+        await expect(page.locator('#boss')).toBeFocused();
         await expect.poll(() => page.locator('.practice-content').evaluate(element =>
           element.getBoundingClientRect().top - document.querySelector('.page-shell > header')!.getBoundingClientRect().bottom < 20)).toBe(true);
         await page.locator('#boss').evaluate((element: HTMLInputElement) => element.blur());
@@ -38,9 +54,20 @@ for (const theme of ['dark-forest', 'classic']) {
       }
     });
 
+    test('focus overlay retains Enter and Space activation', async ({ page }) => {
+      for (const route of ['/', '/#/game']) for (const key of ['Enter', 'Space']) {
+        await page.goto(route);
+        await page.locator('#boss').evaluate((element: HTMLInputElement) => element.blur());
+        const prompt = page.getByRole('button', { name: 'Double tap here to start playing', exact: true });
+        await prompt.focus();
+        await prompt.press(key);
+        await expect(page.locator('#boss')).toBeFocused();
+      }
+    });
+
     test('visual-viewport-only keyboard changes leave the code passage visible', async ({ page }) => {
       await page.goto('/#/game');
-      await page.getByText('Tap to start typing', { exact: true }).tap();
+      await doubleTapPrompt(page);
       await page.evaluate(() => {
         Object.defineProperty(window.visualViewport!, 'height', { configurable: true, get: () => 320 });
         window.visualViewport!.dispatchEvent(new Event('resize'));
@@ -58,13 +85,13 @@ for (const theme of ['dark-forest', 'classic']) {
       const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
       for (const route of ['/', '/#/game']) {
         await page.goto(route);
-        await expect(page.getByText('Tap to start typing', { exact: true })).toBeVisible();
+        await expect(page.getByText('Double tap here to start playing', { exact: true })).toBeVisible();
         await expect(page.locator('.footer-shortcuts')).not.toBeVisible();
         if (route.includes('game')) {
           const box = await page.locator('.code-toolbar').boundingBox();
           expect(box!.height).toBeLessThanOrEqual(160);
         }
-        await page.getByText('Tap to start typing', { exact: true }).tap();
+        await doubleTapPrompt(page);
         const input = page.locator('#boss');
         await expect(input).toBeFocused();
         await expect(input).toHaveCSS('font-size', '16px');
@@ -77,7 +104,7 @@ for (const theme of ['dark-forest', 'classic']) {
         const expected = await first.textContent();
         await text(input, expected!);
         await expect(page.locator('.typing-window .text-white')).toHaveCount(1);
-        await expect(page.getByText('Tap to start typing', { exact: true })).not.toBeVisible();
+        await expect(page.getByText('Double tap here to start playing', { exact: true })).not.toBeVisible();
         await edit(input, 'deleteContentBackward');
         await expect(page.locator('.typing-window .text-white')).toHaveCount(0);
         await text(input, expected!);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mobileTyping } from "./mobile-typing";
+	import { mobileTyping, practiceFocusPrompt } from "./mobile-typing";
  import IndentIcon from "../../components/icons/IndentIcon.svelte";
 	import { onMount, tick } from "svelte";
 	import { get } from "svelte/store";
@@ -500,8 +500,8 @@
 				</div>
 			</div>
 			{#if isBlur && game !== "finished"}
-				<button type="button" class="typing-cover font-bold" tabindex="-1" bind:this={focusPrompt} onclick={() => inputEl.focus()}>
-					<span class="desktop-focus-hint">Click here or press Tab to focus</span><span class="mobile-focus-hint">Tap to start typing</span>
+				<button type="button" class="typing-cover font-bold" tabindex="-1" bind:this={focusPrompt} use:practiceFocusPrompt={() => inputEl.focus()}>
+					<span class="desktop-focus-hint">Click here or press Tab to focus</span><span class="mobile-focus-hint">Double tap here to start playing</span>
 				</button>
 			{/if}
 		</section>
