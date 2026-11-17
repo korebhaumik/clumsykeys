@@ -247,23 +247,20 @@
 	}
 
 	function positionCaret(target: Element, afterTarget = false) {
-		const frame = caretEl.parentElement!.getBoundingClientRect();
-		const bounds = target.getBoundingClientRect();
-		const x = (afterTarget ? bounds.right : bounds.left) - frame.left;
-		caretEl.style.left = `${x}px`;
 		if (mode === "keywords") {
-			alignPracticeCaret(caretEl, linesEl, target, activeWord());
+			alignPracticeCaret(caretEl, linesEl, target, activeWord(), afterTarget);
 			return;
 		}
-		alignPracticeCaret(caretEl, linesEl, activeRow());
-
 		const viewport = codeScrollEl.getBoundingClientRect();
+		const bounds = target.getBoundingClientRect();
+		const scrollLeft = codeScrollEl.scrollLeft;
+		const caretX = afterTarget ? bounds.right : bounds.left;
+		alignPracticeCaret(caretEl, linesEl, target, activeRow(), afterTarget);
 		const inset = 18;
-		const caretX = frame.left + x;
 		if (caretX < viewport.left + inset) {
-			codeScrollEl.scrollLeft += caretX - viewport.left - inset;
+			codeScrollEl.scrollLeft = scrollLeft + caretX - viewport.left - inset;
 		} else if (caretX > viewport.right - inset) {
-			codeScrollEl.scrollLeft += caretX - viewport.right + inset;
+			codeScrollEl.scrollLeft = scrollLeft + caretX - viewport.right + inset;
 		}
 	}
 

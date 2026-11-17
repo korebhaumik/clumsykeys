@@ -275,3 +275,8 @@
 	/* Native text controls stay readable without triggering iOS focus zoom. */
 	.page-shell input:not([type="checkbox"]):not([type="radio"]), .page-shell select, .page-shell textarea { font-size: var(--text-1rem); }
 }
+
+/* A touch caret must follow input immediately, without a 110ms position transition. */
+@media (pointer: coarse) {
+	.typing-caret { transition: none; }
+}
