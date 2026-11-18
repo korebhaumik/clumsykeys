@@ -149,3 +149,124 @@ test('the next racer gains host controls when the host leaves an active race', a
     await expect(peer.getByRole('button', { name: 'Leave room', exact: true })).toBeFocused();
   } finally { await other.close(); }
 });
+
+test('timed race places eligible racers at the deadline and shows who exceeded the threshold', async ({ page, browser }) => {
+  const other = await browser.newContext();
+  try {
+    await page.setViewportSize({ width: 320, height: 844 });
+    const peer = await other.newPage();
+    const room = `timed-score-${Date.now()}`;
+    await join(page, room, 'Ada');
+    await join(peer, room, 'Lin');
+    await page.getByRole('combobox', { name: 'Test type' }).click();
+    await page.getByRole('option', { name: 'Time', exact: true }).click();
+    await page.getByRole('combobox', { name: 'Time limit' }).click();
+    await page.getByRole('option', { name: '15 seconds', exact: true }).click();
+    await expect(peer.getByRole('combobox', { name: 'Time limit' })).toHaveText('15 seconds');
+    await start(page, peer);
+    for (const racer of [page, peer]) await expect(racer.getByRole('textbox', { name: 'Type the race passage' })).toBeFocused();
+    const words = (await page.locator('.race-passage .typing-word').allTextContents()).slice(0, 4).join(' ');
+    const errors = words.replace(/[^ ]/g, character => character === 'x' ? 'z' : 'x');
+    await Promise.all([page.keyboard.type(errors), peer.keyboard.type(words)]);
+    await expect(page.getByText(/more errors to qualify \(5% allowed\)/)).toBeVisible();
+    const scores = page.getByRole('table', { name: 'Racer scores' });
+    await expect(scores).toBeVisible({ timeout: 18000 });
+    await expect(scores.getByRole('row').nth(1)).toContainText('Lin');
+    await expect(scores.getByRole('row').nth(2)).toContainText('Over error limit');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  } finally { await other.close(); }
+});
+
+for (const { theme, width } of [{ theme: 'dark-forest', width: 1440 }, { theme: 'classic', width: 320 }]) {
+  test(`race error allowance and composite placements in ${theme} at ${width}px`, async ({ page, browser }) => {
+    const other = await browser.newContext();
+    const errors: string[] = [];
+    try {
+      const peer = await other.newPage();
+      for (const player of [page, peer]) {
+        player.on('pageerror', error => errors.push(error.message));
+        await player.setViewportSize({ width, height: 844 });
+        await player.addInitScript(value => localStorage.setItem('theme', value), theme);
+      }
+      const room = `score-${theme}-${Date.now()}`;
+      await join(page, room, 'Ada');
+      await join(peer, room, 'Lin');
+      const language = page.getByRole('combobox', { name: 'Language', exact: true });
+      const threshold = page.getByRole('combobox', { name: 'Error threshold' });
+      const mode = page.getByRole('combobox', { name: 'Test type' });
+      await expect(mode).toHaveText('Words');
+      await expect(page.getByRole('combobox', { name: 'Word count' })).toHaveText('25 words');
+      await expect(language).toHaveText('English');
+      await expect(page.getByRole('checkbox', { name: 'Punctuation' })).toBeChecked();
+      await expect(threshold).toHaveAccessibleDescription('*Extra characters also count as errors.');
+      await expect(threshold).toHaveText('5%');
+      await mode.click();
+      await page.getByRole('option', { name: 'Time', exact: true }).click();
+      await expect(page.getByRole('combobox', { name: 'Time limit' })).toBeVisible();
+      await threshold.click();
+      await expect(page.getByRole('listbox', { name: 'Error threshold' }).getByRole('option')).toHaveText([/^5%/, /^10%/, /^15%/]);
+      await page.getByRole('option', { name: '10%', exact: true }).click();
+      await expect(peer.getByRole('combobox', { name: 'Error threshold' })).toHaveText('10%');
+      await mode.click();
+      await page.getByRole('option', { name: 'Quotes', exact: true }).click();
+      const quoteLength = page.getByRole('combobox', { name: 'Quote length' });
+      await expect(quoteLength).toHaveText('Medium');
+      await expect(mode).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(quoteLength).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(mode).toBeFocused();
+      await mode.click();
+      await page.getByRole('option', { name: 'Words', exact: true }).click();
+      await language.focus();
+      await page.keyboard.press('Tab');
+      await expect(threshold).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(language).toBeFocused();
+      await page.keyboard.press('Tab');
+      for (const key of ['Enter', 'End', 'Enter']) await page.keyboard.press(key);
+      await expect(threshold).toHaveText('15%');
+      await expect(threshold).toBeFocused();
+      await expect(peer.getByRole('combobox', { name: 'Error threshold' })).toHaveText('15%');
+      await start(page, peer);
+      const input = page.getByRole('textbox', { name: 'Type the race passage' });
+      await expect(input).toBeFocused();
+      const words = await page.locator('.race-passage .typing-word').allTextContents();
+      const passage = words.join(' ');
+      const last = passage.at(-1)!;
+      const wrong = (character: string) => character === 'x' ? 'z' : 'x';
+      const allowed = Math.floor(passage.length * 0.15);
+      let substitutions = allowed - 1;
+      const mistyped = words.map((word, index) => [...word].map((character, position) => {
+        if (index === words.length - 1 && position === word.length - 1) return wrong(character);
+        return substitutions-- > 0 ? wrong(character) : character;
+      }).join('') + (index === 0 ? 'x' : '')).join(' ');
+      await page.keyboard.type(mistyped);
+      const hint = page.getByText('Correct 1 more error to finish (15% allowed).', { exact: true });
+      await expect(hint).toBeVisible();
+      await page.reload();
+      await expect(hint).toBeVisible();
+      await expect(input).toBeFocused();
+      await page.keyboard.press('Backspace');
+      await page.keyboard.type(last);
+      await expect(page.getByText(/Finished · Waiting for racers/)).toBeVisible();
+      await peer.getByRole('textbox', { name: 'Type the race passage' }).focus();
+      await peer.keyboard.type(passage);
+      const letters = words.join('').length;
+      const accuracyAfterCorrection = Math.round(100 * (letters - allowed + 1) / (letters + 2));
+      for (const player of [page, peer]) {
+        await expect(player.getByRole('heading', { name: 'Race results' })).toBeVisible();
+        await expect(player.getByRole('columnheader', { name: 'Precision Pace' })).toBeVisible();
+        const rows = player.getByRole('table', { name: 'Racer scores' }).locator('tbody tr');
+        await expect(rows).toHaveCount(2);
+        await expect(rows.filter({ hasText: 'Ada' }).getByRole('cell').last()).toHaveText(`${accuracyAfterCorrection}%`);
+        const scores = await rows.evaluateAll(results => results.map(row => [...row.querySelectorAll('td')].map(cell => parseFloat(cell.textContent ?? ''))));
+        expect(scores.map(([place]) => place)).toEqual([1, 2]);
+        expect(scores[0][1]).toBeGreaterThanOrEqual(scores[1][1]);
+        for (const [, score, wpm, accuracy] of scores) expect(score).toBeCloseTo(wpm * accuracy / 100, 2);
+        expect(await player.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      }
+      expect(errors).toEqual([]);
+    } finally { await other.close(); }
+  });
+}

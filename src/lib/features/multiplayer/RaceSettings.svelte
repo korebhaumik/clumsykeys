@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { quoteLengths } from "../../../../shared/content/quote-length";
 	import type { Snippet } from "svelte";
 	import Dropdown from "../../components/Dropdown.svelte";
 	import { scrollFocus } from "../../components/scroll-focus";
@@ -8,7 +9,7 @@
 	import HashSvg from "../../components/icons/HashIcon.svelte";
 	import LangSvg from "../../components/icons/LangIcon.svelte";
 	import {
-		raceDurations, raceLanguages, raceModes, raceWordCounts,
+		raceDurations, raceErrorThresholds, raceLanguages, raceModes, raceWordCounts,
 		type RaceSettings,
 	} from "../../../../backend/src/race.settings";
 
@@ -19,10 +20,14 @@
 		actions?: Snippet;
 	} = $props();
 
+	const errorHelpId = $props.id();
+	const thresholdOptions = raceErrorThresholds.map(value => ({ value, label: `${value}%` }));
+	const quoteOptions = quoteLengths.map(value => ({ value, label: value[0].toUpperCase() + value.slice(1) }));
+	let quoteLabel = $derived(quoteOptions.find(option => option.value === settings.quoteLength)?.label ?? "");
 	let modeLabel = $derived(
 		settings.mode === "time" ? `Time · ${settings.duration} s`
 			: settings.mode === "words" ? `${settings.wordCount} words`
-			: raceModes[settings.mode]
+			: `${quoteLabel} quotes`
 	);
 </script>
 
@@ -45,12 +50,24 @@
 					<span>Word count</span>
 					<Dropdown label="Word count" value={settings.wordCount} options={raceWordCounts.map(value => ({ value, label: `${value} words` }))} {disabled} onchange={(wordCount) => onChange?.({ wordCount })} />
 				</div>
+			{:else}
+				<div class="field">
+					<span>Quote length</span>
+					<Dropdown label="Quote length" value={settings.quoteLength} options={quoteOptions} {disabled} onchange={(quoteLength) => onChange?.({ quoteLength })} />
+				</div>
+			{/if}
+			{#if settings.mode !== "quotes"}
+				<div class="field">
+					<span>Language</span>
+					<Dropdown label="Language" value={settings.language} options={Object.entries(raceLanguages).map(([value, label]) => ({ value: value as RaceSettings["language"], label }))} {disabled} onchange={(language) => onChange?.({ language })} />
+				</div>
 			{/if}
 			<div class="field">
-				<span>Language</span>
-				<Dropdown label="Language" value={settings.language} options={Object.entries(raceLanguages).map(([value, label]) => ({ value: value as RaceSettings["language"], label }))} {disabled} onchange={(language) => onChange?.({ language })} />
+				<span>Error threshold</span>
+				<Dropdown label="Error threshold" describedBy={errorHelpId} value={settings.errorThreshold} options={thresholdOptions} {disabled} onchange={(errorThreshold) => onChange?.({ errorThreshold })} />
 			</div>
 		</div>
+		<p id={errorHelpId} class="muted threshold-note">*Extra characters also count as errors.</p>
 		<div class="settings-toggles">
 			<label>
 				Punctuation
@@ -98,7 +115,7 @@
 				</div>
 				<div class="preview-divider selected">
 					<dt class="sr-only">Language</dt>
-					<dd><span aria-hidden="true"><LangSvg /></span>{raceLanguages[settings.language]}</dd>
+					<dd><span aria-hidden="true"><LangSvg /></span>{raceLanguages[settings.mode === "quotes" ? "english" : settings.language]}</dd>
 				</div>
 			</dl>
 		</section>
@@ -111,6 +128,7 @@
 	.settings-intro { margin-block: var(--dimension-0_3rem) var(--dimension-1rem); font-size: var(--text-0_85rem); }
 	.settings-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--dimension-9rem)), 1fr)); gap: var(--dimension-0_75rem); }
 	.settings-fields > :last-child:nth-child(3) { grid-column: 1 / -1; }
+	.threshold-note { margin-top: var(--dimension-0_45rem); font-size: var(--text-0_8rem); }
 	.settings-toggles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--dimension-8rem)), 1fr)); gap: var(--dimension-0_75rem); margin-top: var(--dimension-0_85rem); font-size: var(--text-0_875rem); }
 	.settings-toggles label { display: flex; justify-content: space-between; align-items: center; gap: var(--dimension-0_45rem); min-height: var(--settings-control-height); padding-inline: var(--dimension-0_75rem); border: var(--dimension-1px) solid var(--line); border-radius: var(--radius-0_55rem); background: var(--inset); cursor: pointer; }
 	.settings-toggles label:has(input:checked) { background: var(--accent-wash); }

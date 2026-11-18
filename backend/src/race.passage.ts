@@ -3,11 +3,9 @@ import type { RaceSettings } from "./race.settings";
 import { generateTokens } from "../../shared/content/passages";
 
 export function makeRacePassage(settings: RaceSettings) {
-	const count = settings.mode === "time" ? settings.duration * 5
-		: settings.mode === "words" ? settings.wordCount : 9;
 	return generateTokens({
-		source: settings.mode === "quotes" ? { kind: "quote", preservePunctuation: settings.punctuation }
-			: { kind: "prose", language: settings.language, count },
+		source: settings.mode === "quotes" ? { kind: "quote", preservePunctuation: settings.punctuation, length: settings.quoteLength }
+			: { kind: "prose", language: settings.language, count: settings.mode === "time" ? settings.duration * 5 : settings.wordCount },
 		modifiers: settings.mode === "quotes" ? {
 			numbers: settings.numbers ? { every: 8, placement: "insert" } : undefined,
 		} : {

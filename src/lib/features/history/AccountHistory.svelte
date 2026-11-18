@@ -149,7 +149,7 @@
 								<tr><td class="wpm">{row.wpm}</td>
 									{#if "id" in row}<td>{row.raw}</td>{/if}<td>{row.accuracy.toFixed(1)}%</td>
 									{#if "id" in row}<td>{Number(row.deviation.toFixed(2))}</td><td aria-label={`${row.correct} correct, ${row.incorrect} incorrect, ${row.extra} extra`}>{row.correct}<span class="separator">/</span>{row.incorrect}<span class="separator">/</span>{row.extra}</td><td class="mode-cell">{modeLabel(row)}</td><td>{testLanguage(row.language)}</td>
-									{:else}<td>{row.typed_chars}</td><td>{row.reason === "completed" ? "Completed" : row.reason === "time-limit" ? "Time limit" : "Disconnected"}</td>{/if}
+									{:else}<td>{row.typed_chars}</td><td>{row.reason === "completed" ? "Completed" : row.reason === "time-limit" ? "Time limit" : row.reason === "error-limit" ? "Over error limit" : "Disconnected"}</td>{/if}
 									<td><time datetime={row.created_at}>{date(row.created_at)}</time></td>
 									<td><button tabindex="0" class="history-row" aria-label={`View ${modeLabel(row)} result from ${date(row.created_at)}`} title="View result details" disabled={opening || loading} onclick={event => open(row, event.currentTarget)}><ArrowRightIcon /></button></td>
 								</tr>

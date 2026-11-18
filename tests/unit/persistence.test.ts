@@ -158,7 +158,7 @@ async function racingPair(roomId: string, timed = false) {
   await waitFor(() => state?.users.length === 1);
   b.emit('joinRoom', { userId: roomId + '-b', username: 'Guest', roomId });
   await waitFor(() => state?.users.length === 2);
-  if (timed) { a.emit('updateRaceSettings', { mode: 'time', duration: 15 }); await waitFor(() => state.settings.mode === 'time'); }
+  if (timed) { a.emit('updateRaceSettings', { mode: 'time', duration: 15, errorThreshold: 10 }); await waitFor(() => state.settings.mode === 'time'); }
   a.emit('startVote', { roomId, userId: roomId + '-a' }); b.emit('startVote', { roomId, userId: roomId + '-b' });
   await waitFor(() => state?.progress === 'playing');
   return { a, b, snapshot: () => state };
@@ -175,12 +175,15 @@ test('race archives survive an immediate replay reset and expose only participan
     const finished = once(a, 'roomData');
     a.emit('finishGame', { roomId, userId: roomId + '-a' }); b.emit('finishGame', { roomId, userId: roomId + '-b' });
     await finished; await waitFor(() => snapshot().progress === 'finished');
+    const livePlaces = snapshot().results.map(({ userId, score, place }: any) => [userId, score, place]);
+    assert.deepEqual(livePlaces, [[roomId + '-b', 60, 1], [roomId + '-a', 57, 2]]);
     a.emit('resetGame', { roomId }); await waitFor(() => snapshot().progress === 'waiting');
     a.emit('updateRaceSettings', { mode: 'words', wordCount: 100 });
     await waitFor(() => snapshot().settings.mode === 'words');
     await waitFor(async () => (await request('/api/race-results/' + roundId)).status === 200);
     const saved = await (await request('/api/race-results/' + roundId)).json();
     assert.deepEqual(saved.round.settings, archivedSettings);
+    assert.deepEqual(saved.results.map(({ racer_id, score, place }: any) => [racer_id, score, place]), livePlaces);
     const own = saved.results.find((r: any) => r.racer_id === roomId + '-a');
     assert.equal(saved.results.length, 2); assert.equal(own.wpm, 60);
     assert.ok(own.speed_history.length > 0); assert.ok(own.finish_seconds > 0);
@@ -189,18 +192,24 @@ test('race archives survive an immediate replay reset and expose only participan
     assert.equal((await (await request('/api/race-results/latest')).json()).round.id, roundId);
   } finally { a.disconnect(); b.disconnect(); }
 });
-test('timed races persist the deadline outcome without fabricating passage finish times', { timeout: 26000 }, async () => {
+test('timed races apply the error allowance to entered text and preserve timed qualification in the archive', { timeout: 26000 }, async () => {
   const { a, b, snapshot } = await racingPair('archive-timed', true);
   try {
     const roundId = snapshot().roundId;
-    a.emit('timeData', { roomId: 'archive-timed', userId: 'archive-timed-a', wpm: 60, accuracy: 100, typedChars: snapshot().text.length });
+    const sample = { roomId: 'archive-timed', enteredChars: 100, typedChars: 90 };
+    a.emit('timeData', { ...sample, userId: 'archive-timed-a', wpm: 60, accuracy: 85 });
+    b.emit('timeData', { ...sample, userId: 'archive-timed-b', wpm: 110, accuracy: 95, uncorrectedExtras: 1 });
     a.emit('finishGame', { roomId: 'archive-timed', userId: 'archive-timed-a' });
     await new Promise(resolve => setTimeout(resolve, 80));
     assert.equal(snapshot().users.find((r: { userId: string }) => r.userId === 'archive-timed-a').finished, false);
     await waitFor(() => snapshot().progress === 'finished', 18000);
     await waitFor(async () => (await request('/api/race-results/' + roundId)).status === 200);
     const saved = await (await request('/api/race-results/' + roundId)).json();
-    assert.ok(saved.results.every((r: any) => r.reason === 'time-limit' && r.finish_seconds === null));
+    assert.equal(saved.round.settings.errorThreshold, 10);
+    assert.ok(saved.results.every((r: any) => r.finish_seconds === null));
+    const outcomes = [['time-limit', 51, 1], ['error-limit', null, null]];
+    assert.deepEqual(snapshot().results.map(({ reason, score, place }: any) => [reason, score, place]), outcomes);
+    assert.deepEqual(saved.results.map(({ reason, score, place }: any) => [reason, score, place]), outcomes);
   } finally { a.disconnect(); b.disconnect(); }
 });
 test('abandoned races retain disconnected participants after recovery expires', { timeout: 42000 }, async () => {
@@ -229,6 +238,7 @@ test('host termination freezes an aborted original roster with finished and part
     assert.equal(saved.round.outcome, 'aborted');
     assert.deepEqual(saved.round.settings, archivedSettings);
     assert.equal(saved.results.length, 2);
+    assert.ok(saved.results.every((r: any) => r.score === null && r.place === null));
     const finished = saved.results.find((r: any) => r.racer_id === roomId + '-a');
     const partial = saved.results.find((r: any) => r.racer_id === roomId + '-b');
     assert.equal(finished.reason, 'completed'); assert.equal(finished.wpm, 75); assert.ok(finished.finish_seconds > 0);

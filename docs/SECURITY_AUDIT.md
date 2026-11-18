@@ -8,6 +8,58 @@ source/build/browser checks listed below; it did not repeat credential scans,
 dependency auditing, SQL/Auth verification or hosted checks. This is a maintained
 assessment of current controls and remaining work.
 
+## Multiplayer error allowance and ranking verification
+
+On **19 November 2026**, the server verified that the current socket owns the
+unfinished racer, that the last sample reached the end of the passage, and that
+the reported substitutions and extras fit the room's error allowance. Reported
+progress and typing metrics still depend on the client. Composite places come
+from the same server calculation for live and saved scoreboards. Players who
+leave unfinished and racers in aborted rounds receive no placement.
+
+All **70 unit/HTTP/Socket.IO tests** passed, including the finish boundary,
+score ordering, reconnect, replay, timeout and archive parity. Lint and design
+audit, dead-code checks, frontend and backend types, documentation coverage,
+Redocly validation, both builds and SEO checks passed. The frozen pnpm 12.18.0
+install completed from the local package store using its JavaScript launcher.
+
+The real local Supabase stack passed all **86 pgTAP assertions** and the
+Auth/Data API integration check. A disposable local race confirmed saved
+threshold and score order, owner isolation and the privacy projection. The
+test account and race were removed. No hosted deployment or provider check was
+run. New race text contrast is recorded in
+[CONTRAST.md](CONTRAST.md#multiplayer-error-allowance-and-score).
+
+The full browser run passed **273 of 274 cases**. The Classic desktop history
+test hit the existing request limit and passed on a fresh fixture server.
+All **10 focused rerun cases** passed. These verified the final score layout,
+keyboard selection, correction and reconnect in Chrome and WebKit, plus replay
+and saved results in Chrome. Multiplayer coverage included both themes,
+320px and 1440px layouts, and no captured page errors in the new flows.
+
+The follow-up on **19 November 2026** applies the timed threshold to entered
+positions in the last accepted sample at the deadline. An over-limit racer
+keeps their WPM and accuracy in the archive with reason `error-limit`.
+All **70 unit and HTTP/Socket.IO tests** passed, including an at-limit timer
+finish and an over-limit timer outcome with an extra character. The local
+migration, **86 pgTAP assertions**, Auth/Data API integration, lint, dead-code,
+types, contract validation, both builds and SEO checks passed.
+The full browser run passed **273 of 276 cases**, including the new threshold
+and Precision Pace flows in Chrome and WebKit. Two host-end keyboard cases and
+one WebKit reduced-motion caret case failed initially. All **six targeted
+reruns** passed on fresh fixtures across the two browsers. The original timing
+causes remain unconfirmed.
+
+The quote-selection follow-up on **19 November 2026** rejects retired
+Passage mode and invalid quote lengths in live room patches. Saved Passage
+rounds retain their label. New quote rounds archive the chosen category with
+their other settings. All **71 unit and HTTP/Socket.IO tests** passed, including
+full-quote generation in each category. Lint, dead-code checks, frontend and
+backend types, OpenAPI validation, both builds and SEO checks passed.
+All **276 browser cases** passed across Chrome and WebKit. The quote flow
+covered shared settings, completion, reconnect, replay, keyboard selection
+and archived Passage and quote details.
+
 ## Multiplayer termination verification
 
 On **18 November 2026**, the first joined racer became the server-owned room

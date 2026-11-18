@@ -94,8 +94,8 @@ both sides. Never pass the secret key as a frontend build variable or Docker
 build argument. The Docker context excludes `.env` files; configure secrets on
 the deployment service. Migration/CLI credentials do not belong in the runtime
 image. Apply reviewed migrations with `npm run db:plan` then `npm run db:push`
-before releasing code that depends on them. All eight migrations listed in [Supabase setup](SUPABASE.md#migration-inventory)
-are needed for the current accounts, dashboard and public solo leaderboards.
+before releasing code that depends on them. See the migration inventory in
+[Supabase setup](SUPABASE.md#migration-inventory).
 Configure Auth callbacks for the real
 frontend URL as described in [Supabase setup](SUPABASE.md). Same-origin proxies
 must forward `/api/` in addition to the existing room and Socket.IO routes.
@@ -132,6 +132,13 @@ the backend supplies `hostUserId`, authorizes `endRace` against the active round
 and acknowledges explicit `leaveRoom` requests. No database migration is needed;
 terminated rounds reuse the existing aborted archive contract. See
 [the live multiplayer design](../ARCHITECTURE.md#live-multiplayer).
+
+Apply `20261119000100_timed_race_error_limit.sql` before releasing timed-race
+error thresholds. Release the frontend and backend together. The backend
+validates reported passage position and remaining errors, supplies the
+Precision Pace scoreboard, and archives any timed-race `error-limit` outcomes.
+Release multiplayer quote lengths in the frontend and backend together so the
+client and server agree on available test types and quote-length settings.
 
 For contract changes, run the local coverage/link check and an independent
 OpenAPI syntax/example validator:

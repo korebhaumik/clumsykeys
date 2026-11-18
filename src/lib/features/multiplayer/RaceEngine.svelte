@@ -1,26 +1,25 @@
 <script lang="ts">
-	import { onDestroy, onMount, untrack } from "svelte";
+	import { onMount, untrack } from "svelte";
 	import {
-		createTimer, game, raceMetricsCheckpoint, restoreRaceMetrics, sampleRace,
-		timeDataArr, totalChars, typedChars, wordsArr,
+		createTimer, enteredChars, game, raceMetricsCheckpoint, restoreRaceMetrics, sampleRace,
+		timeDataArr, totalChars, typedChars, uncorrectedExtras, wordsArr,
 	} from "./race.store";
 	import { alignPracticeCaret } from "../practice/typing-dom";
 	import socket from "./socket";
+	import { raceErrorsToCorrect, type RaceSettings } from "../../../../backend/src/race.settings";
 
-	let { ready = true, checkpointKey, roundId }: {
+	let { ready = true, settings, checkpointKey, roundId }: {
 		ready?: boolean;
+		settings: RaceSettings;
 		checkpointKey?: string;
 		roundId?: string;
 	} = $props();
-
-	let typedLetter = "";
 
 	let currentIndex = {
 		word: 0,
 		letter: 0,
 	};
 
-	let multiplayerToggle = true;
 	let caretEl = $state<HTMLDivElement>()!;
 	let linesEl = $state<HTMLDivElement>()!;
 
@@ -35,24 +34,13 @@
 	let lineH = 0;
 	let lineNum = 0;
 
-	let tick = false;
-
 	let isBlur = $state(false);
 
-	let wordsLog: { word: string; index: number }[] = [];
-
-	const reLog = () => {
-		wordsLog = $wordsArr.map((word) => {
-			return {
-				word: word,
-				index: 0,
-			};
-		});
-	};
-
 	let mounted = $state(false);
-	let intervalId: number | undefined;
 	let reportedFinish = false;
+	const atPassageEnd = $derived(settings.mode !== "time" && $totalChars > 0 && $enteredChars === $totalChars);
+	const errorsToCorrect = $derived(raceErrorsToCorrect(settings.mode === "time" ? $enteredChars : $totalChars,
+		$typedChars, $uncorrectedExtras, settings.errorThreshold));
 
 	onMount(() => {
 		restoreCheckpoint();
@@ -73,9 +61,6 @@
 		return () => observer.disconnect();
 	});
 
-	const unsubscribeWords = wordsArr.subscribe(reLog);
-	onDestroy(unsubscribeWords);
-
 	$effect(() => {
 		if (!ready) {
 			reportedFinish = false;
@@ -85,241 +70,106 @@
 
 		inputEl.focus();
 		isBlur = false;
-		const timer = createTimer(saveCheckpoint);
-		intervalId = timer;
+		const timer = createTimer(saveCheckpoint, settings.mode === "time");
 		untrack(saveCheckpoint);
 		return () => window.clearInterval(timer);
 	});
 
 	$effect(() => {
-		if (!mounted || !ready || $game !== "playing" || reportedFinish ||
-			$totalChars === 0 || $totalChars !== $typedChars) return;
+		if (!mounted || !ready || $game !== "playing" || !atPassageEnd || errorsToCorrect || reportedFinish) return;
 		untrack(() => {
 			reportedFinish = true;
-			window.clearInterval(intervalId);
 			const roomId = localStorage.getItem("roomId");
 			const userId = localStorage.getItem("userId");
-			sampleRace(true);
+			sampleRace("finish");
 			saveCheckpoint();
 			socket.emit("finishGame", { roomId, userId });
 		});
 	});
 
-	const updateGameState = () => {
+	function selectLetter() {
+		wordEl = linesEl.children[currentIndex.word] as HTMLSpanElement;
+		nextwordEl = linesEl.children[currentIndex.word + 1] as HTMLSpanElement;
+		letterEl = wordEl.children[Math.min(currentIndex.letter, wordEl.children.length - 1)] as HTMLSpanElement;
+		nextLetterEl = (letterEl.nextElementSibling ?? nextwordEl?.firstElementChild) as HTMLSpanElement | null;
+	}
+
+	function advanceWord() {
+		if (currentIndex.letter !== $wordsArr[currentIndex.word].length || currentIndex.word + 1 >= $wordsArr.length) return;
+		selectLetter();
+		currentIndex.word += 1;
+		currentIndex.letter = 0;
+		$typedChars += 1;
+		$enteredChars += 1;
+		moveCaret("space");
+		saveCheckpoint();
+	}
+
+	function typeCharacter(character: string) {
 		if (!ready || $game !== "playing" || reportedFinish) return;
-		setLetter();
-		checkLetter();
-		nextLetter();
-		resetLetter();
+		if (character === " ") {
+			advanceWord();
+			return;
+		}
+		selectLetter();
+		const sample = $timeDataArr.at(-1)!;
+		if (currentIndex.letter === $wordsArr[currentIndex.word].length) {
+			if (letterEl.children.length > 10) return;
+			const extra = document.createElement("span");
+			extra.className = "text-red-500";
+			extra.textContent = character === "\t" ? "_" : character;
+			letterEl.appendChild(extra);
+			sample.extraChars += 1;
+			$uncorrectedExtras += 1;
+		} else {
+			const feedback = letterEl.firstElementChild!;
+			if (feedback.textContent === character) {
+				feedback.className = "text-white";
+				sample.correctChars += 1;
+				$typedChars += 1;
+			} else {
+				feedback.className = "text-red-500 underline";
+				sample.incorrectChars += 1;
+			}
+			currentIndex.letter += 1;
+			$enteredChars += 1;
+		}
+		sample.rawChars += 1;
 		moveCaret("forward");
 		saveCheckpoint();
-	};
+	}
 
-	const setLetter = () => {
-		const isLastLetterCompleted = currentIndex.letter > $wordsArr[currentIndex.word].length - 1;
-		const isLastLetter = currentIndex.letter === $wordsArr[currentIndex.word].length - 1;
-
-
-
-		if (tick) {
-			if (letterEl.children.length > 10) return;
-			const extraLetter = document.createElement("span");
-			extraLetter.className = "text-red-500";
-			if (typedLetter === "\t") {
-				extraLetter.textContent = "_";
+	function eraseCharacter() {
+		if ($enteredChars === 0) return;
+		selectLetter();
+		if (currentIndex.letter === $wordsArr[currentIndex.word].length && letterEl.children.length > 1) {
+			letterEl.lastElementChild!.remove();
+			$uncorrectedExtras -= 1;
+		} else {
+			if (currentIndex.letter === 0) {
+				currentIndex.word -= 1;
+				currentIndex.letter = $wordsArr[currentIndex.word].length;
+				selectLetter();
+				$typedChars -= 1;
 			} else {
-				extraLetter.textContent = typedLetter;
+				currentIndex.letter -= 1;
+				selectLetter();
+				const feedback = letterEl.firstElementChild!;
+				if (feedback.className === "text-white") $typedChars -= 1;
+				feedback.className = "text-zinc-600";
 			}
-			letterEl.appendChild(extraLetter);
-			return;
+			$enteredChars -= 1;
 		}
-
-		wordEl = linesEl.children[currentIndex.word] as HTMLSpanElement;
-
-		nextwordEl = linesEl.children[currentIndex.word + 1] as HTMLSpanElement;
-
-		letterEl = wordEl.children[currentIndex.letter] as HTMLSpanElement;
-
-		nextLetterEl = wordEl.children[currentIndex.letter + 1] as HTMLSpanElement;
-
-		if (isLastLetter || isLastLetterCompleted) {
-
-			letterEl = wordEl.children[wordEl.children.length - 1] as HTMLSpanElement;
-
-			nextLetterEl = nextwordEl?.children[0] as HTMLSpanElement;
-		}
-
-		if (isLastLetterCompleted) {
-			tick = true;
-		}
-
-
-
-	};
-
-	const checkLetter = () => {
-		if (letterEl.children.length > 1) {
-			letterEl.children[letterEl.children.length - 1].className = "text-red-500";
-			$timeDataArr.at(-1)!.extraChars += 1;
-			$timeDataArr.at(-1)!.rawChars += 1;
-			return;
-		}
-
-		if (letterEl.textContent?.charAt(0) === typedLetter) {
-			letterEl.children[letterEl.children.length - 1].className = `text-white`;
-			$timeDataArr.at(-1)!.correctChars += 1;
-			$timeDataArr.at(-1)!.rawChars += 1;
-			typedChars.update((n) => n + 1);
-		}
-
-		if (letterEl.children[letterEl.children.length - 1].textContent !== typedLetter) {
-			letterEl.children[letterEl.children.length - 1].className = "text-red-500 underline";
-			$timeDataArr.at(-1)!.incorrectChars += 1;
-			$timeDataArr.at(-1)!.rawChars += 1;
-
-		}
-	};
-
-	function nextWord() {
-		const isNotFirstLetter = currentIndex.letter !== 0;
-		const isOneLetterWord = $wordsArr[currentIndex.word].length === 1;
-
-		if (isNotFirstLetter || isOneLetterWord) {
-			tick = false;
-			currentIndex.word += 1;
-			currentIndex.letter = 0;
-		}
+		moveCaret("backward");
+		saveCheckpoint();
 	}
 
-	const nextLetter = () => {
-		const isLastLetter = currentIndex.letter === $wordsArr[currentIndex.word].length - 1;
-
-		const isLastLetterCompleted = currentIndex.letter === $wordsArr[currentIndex.word].length;
-
-		if (isLastLetterCompleted) {
-			return;
-		}
-		currentIndex.letter += 1;
-
-		if (isLastLetter) {
-			tick = true;
-		}
-
-	};
-
-	const prevWord = () => {
-		if (currentIndex.word === 0) return;
-		currentIndex.word -= 1;
-		assignLog();
-	};
-
-	const prevletter = () => {
-		if (currentIndex.letter === 0) return;
-		currentIndex.letter -= 1;
-
-	};
-
-	function resetMissedLetters() {
-		const wordLength = $wordsArr[currentIndex.word].length;
-		for (let i = 0; i < wordLength; i++) {
-			let prevClass = wordEl.children[i].children[0].className;
-			wordEl.children[i].children[0].className = `${prevClass.replace(
-				"decoration-red-500 underline",
-				""
-			)}`;
-		}
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.code === "Space" || event.code === "Enter") event.preventDefault();
+		if (!ready || $game !== "playing" || reportedFinish) return;
+		if (event.code === "Space") advanceWord();
+		if (event.code === "Backspace") eraseCharacter();
 	}
-
-	const checkMissedLetters = () => {
-		const wordLength = $wordsArr[currentIndex.word].length;
-		if (wordLength !== wordsLog[currentIndex.word].index) {
-			for (let i = 0; i < wordLength; i++) {
-				let prevClass = wordEl.children[i].children[0].className;
-				wordEl.children[i].children[0].className = `${prevClass} decoration-red-500 underline`;
-			}
-		}
-	};
-
-	const resetLetter = () => {
-		typedLetter = "";
-	};
-
-	const updateLog = () => {
-		wordsLog[currentIndex.word]["index"] = currentIndex.letter;
-	};
-	const assignLog = () => {
-		currentIndex.letter = wordsLog[currentIndex.word]["index"];
-	};
-
-	const handleKeydown = (e: KeyboardEvent) => {
-		if (e.code === "Space") {
-			e.preventDefault();
-		}
-		if (e.code === "Enter") {
-			e.preventDefault();
-		}
-
-		if (ready && $game === "playing" && !reportedFinish) {
-
-			if (e.code === "Space") {
-				const isLastWord = currentIndex.word + 1 >= $wordsArr.length;
-
-				const isFirstLetter = currentIndex.letter === 0;
-				const isLastLetter = currentIndex.letter === $wordsArr[currentIndex.word].length;
-
-				const isVeryFirstLetter = currentIndex.word === 0 && currentIndex.letter === 0;
-
-				if (isVeryFirstLetter) return;
-				if (isFirstLetter) return;
-				if (isLastWord) return;
-				if (!isLastLetter && multiplayerToggle) return;
-				typedChars.update((n) => n + 1);
-				updateLog();
-				checkMissedLetters();
-				nextWord();
-				moveCaret("space");
-			}
-			if (e.code === "Backspace") {
-
-				const isFirstWord = currentIndex.word === 0;
-				const isFirstLetter = currentIndex.letter === 0;
-
-				const isLastLetterCompleted = currentIndex.letter === $wordsArr[currentIndex.word].length;
-
-				const hasExtras = letterEl.children.length > 1;
-
-				if (isFirstWord && isFirstLetter) return;
-
-				if (isLastLetterCompleted && hasExtras) {
-					letterEl.removeChild(letterEl.children[letterEl.children.length - 1]);
-					tick = true;
-					moveCaret("backward");
-					return;
-				}
-
-				if (!isFirstLetter) {
-					prevletter();
-					tick = false;
-					setLetter();
-					if (letterEl!.children[0].className === `text-white`) {
-						typedChars.update((n) => n - 1);
-					}
-					letterEl.children[letterEl.children.length - 1].className = `text-zinc-600`;
-					moveCaret("backward");
-
-				}
-
-				if (isFirstLetter) {
-					prevWord();
-					setLetter();
-					resetMissedLetters();
-					moveCaret("backward");
-					typedChars.update((n) => n - 1);
-
-				}
-			}
-		}
-	};
 
 	type RaceCheckpoint = {
 		roundId: string;
@@ -358,10 +208,12 @@
 		}
 		if (checkpoint?.roundId !== roundId) return;
 
+		let extrasCount = 0;
 		checkpoint.words.forEach((word, wordIndex) => {
 			word.forEach(({ feedback, extras }, letterIndex) => {
 				const letter = linesEl.children[wordIndex].children[letterIndex];
 				letter.children[0].className = feedback;
+				extrasCount += extras.length;
 				for (const extra of extras) {
 					const element = document.createElement("span");
 					element.className = "text-red-500";
@@ -371,26 +223,25 @@
 			});
 		});
 
-		// Rebuild scroll and the backspace history for the current viewport.
+		// Rebuild scroll for the current viewport.
 		for (let word = 0; word < checkpoint.position.word; word++) {
 			currentIndex.word = word;
 			currentIndex.letter = $wordsArr[word].length;
-			updateLog();
-			tick = false;
-			setLetter();
+			selectLetter();
 			moveCaret("space");
 		}
 		currentIndex = checkpoint.position;
-		tick = false;
-		setLetter();
-		if (tick) {
+		selectLetter();
+		if (currentIndex.letter === $wordsArr[currentIndex.word].length) {
 			moveCaret("forward");
 		} else {
 			caretEl.style.left = `${letterEl.offsetLeft}px`;
 			caretEl.style.top = `${letterEl.offsetTop - lineH + 2}px`;
 		}
 		restoreRaceMetrics(checkpoint.metrics);
-		typedChars.set(checkpoint.typedChars);
+		$typedChars = checkpoint.typedChars;
+		$enteredChars = $wordsArr.slice(0, currentIndex.word).reduce((count, word) => count + word.length + 1, currentIndex.letter);
+		$uncorrectedExtras = extrasCount;
 	}
 
 	let tempFirstLine = 0;
@@ -401,19 +252,6 @@
 
 		if (type === "forward") {
 			caretEl.style.left = `${letterEl.offsetLeft + letterEl.offsetWidth}px`;
-		}
-		if (type === "backward") {
-			if (letterEl.children.length > 1) {
-				caretEl.style.left = `${
-					(letterEl.children[letterEl.children.length - 1] as HTMLSpanElement).offsetLeft +
-					(letterEl.children[letterEl.children.length - 1] as HTMLSpanElement).offsetWidth
-				}px`;
-			}
-			if (currentIndex.letter === $wordsArr[currentIndex.word].length) {
-				caretEl.style.left = `${letterEl.offsetLeft + letterEl.offsetWidth}px`;
-			} else {
-				caretEl.style.left = `${letterEl.offsetLeft}px`;
-			}
 		}
 		if (type === "space") {
 			caretEl.style.left = `${nextwordEl!.offsetLeft}px`;
@@ -462,14 +300,11 @@
 			disabled={!ready}
 			bind:this={inputEl}
 			oninput={(event) => {
-				typedLetter = event.currentTarget.value;
-				if (typedLetter.length === 1) updateGameState();
+				const value = event.currentTarget.value;
+				if (value.length === 1) typeCharacter(value);
 				event.currentTarget.value = "";
 			}}
-			onkeydown={(event) => {
-				handleKeydown(event);
-				if (event.code === "Space" || event.code === "Backspace") saveCheckpoint();
-			}}
+			onkeydown={handleKeydown}
 			onblur={() => { isBlur = true; }}
 			onfocus={() => { isBlur = false; }}
 		/>
@@ -491,10 +326,14 @@
 			</button>
 		{/if}
 	</div>
+	{#if ready && $game === "playing" && (atPassageEnd || settings.mode === "time") && errorsToCorrect}
+		<p class="finish-hint" aria-live={settings.mode === "time" ? "off" : "polite"}>Correct {errorsToCorrect} more {errorsToCorrect === 1 ? "error" : "errors"} to {settings.mode === "time" ? "qualify" : "finish"} ({settings.errorThreshold}% allowed).</p>
+	{/if}
 </section>
 
 <style>
 	.race-passage .typing-frame { font-family: inherit; }
 	.race-passage .typing-window { font-size: clamp(var(--text-1rem), var(--text-2vw), var(--text-1_25rem)); }
 	.race-passage .typing-cover { background: transparent; color: var(--muted); }
+	.finish-hint { color: var(--ink); font-size: var(--text-0_875rem); margin-top: var(--dimension-0_75rem); }
 </style>

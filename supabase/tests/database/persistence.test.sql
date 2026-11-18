@@ -39,7 +39,7 @@ create temporary table fixture_round as select '{
   "startedAt":"2026-11-12T00:00:00Z", "endedAt":"2026-11-12T00:00:30Z", "outcome":"completed",
   "results":[
     {"participantId":"40000000-0000-4000-8000-000000000001","accountId":"10000000-0000-4000-8000-000000000001","userId":"legacy-owner","username":"Owner","wpm":60,"accuracy":100,"typedChars":40,"finishSeconds":10,"reason":"completed","speedHistory":[]},
-    {"participantId":"40000000-0000-4000-8000-000000000002","accountId":null,"userId":"legacy-guest","username":"Guest","wpm":50,"accuracy":90,"typedChars":30,"finishSeconds":null,"reason":"time-limit","speedHistory":[]}
+    {"participantId":"40000000-0000-4000-8000-000000000002","accountId":null,"userId":"legacy-guest","username":"Guest","wpm":50,"accuracy":90,"typedChars":30,"finishSeconds":null,"reason":"error-limit","speedHistory":[]}
   ]
 }'::jsonb as data;
 select is(public.save_race_round((select data from fixture_round)), '30000000-0000-4000-8000-000000000001'::uuid, 'round and participant write succeeds');

@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { Server, Socket } from "socket.io";
-import { type Room, rooms } from "./store";
-import { applyRaceSettings, defaultRaceSettings } from "./race.settings";
+import { type Room, type RoomSnapshot, rooms } from "./store";
+import { applyRaceSettings, defaultRaceSettings, raceErrorsToCorrect } from "./race.settings";
+import { rankRaceResults } from "./race.scoring";
 import { makeRacePassage } from "./race.passage";
 import type { RaceArchive } from "./persistence.contract";
 
@@ -43,6 +44,8 @@ type StreamData = {
 	userId: string;
 	wpm: number;
 	typedChars: number;
+	enteredChars: number;
+	uncorrectedExtras: number;
 	accuracy: number;
 	io: Server;
 };
@@ -75,7 +78,7 @@ const archives = new WeakMap<Room, { round: RaceArchive; racers: Map<Racer, Race
 function captureRacer(room: Room, racer: Racer, reason: RaceArchive["results"][number]["reason"]) {
 	const entry = archives.get(room)?.racers.get(racer);
 	if (!entry || archives.get(room)?.finalized) return;
-	if (entry.reason === "completed" || entry.reason === "time-limit") return;
+	if (entry.reason !== "disconnected") return;
 	Object.assign(entry, { wpm: racer.wpm, accuracy: racer.accuracy, typedChars: racer.typedChars,
 		finishSeconds: finishTimes.get(racer) ?? null, reason,
 		speedHistory: (speedHistory.get(racer) ?? []).map(point => ({ ...point })) });
@@ -91,10 +94,15 @@ function finalizeArchive(room: Room, outcome: RaceArchive["outcome"]) {
 	writers.get(room)?.(structuredClone(archive.round));
 }
 
-function roomSnapshot(room: Room) {
+function roomSnapshot(room: Room): RoomSnapshot {
 	if (room.progress !== "finished") return room;
+	const archive = archives.get(room);
 	return {
 		...room,
+		results: rankRaceResults((archive?.round.results ?? []).map(racer => ({
+			userId: racer.userId, username: racer.username, wpm: racer.wpm, accuracy: racer.accuracy,
+			reason: racer.reason, finishSeconds: racer.finishSeconds, speedHistory: racer.speedHistory,
+		})), true),
 		users: room.users.map((racer) => ({
 			...racer,
 			speedHistory: speedHistory.get(racer) ?? [],
@@ -146,6 +154,8 @@ export const joinRoom = async ({ username, roomId, userId, resumeToken, socket, 
 		vote: false,
 		wpm: 0,
 		typedChars: 0,
+		enteredChars: 0,
+		uncorrectedExtras: 0,
 		accuracy: 100,
 		finished: false,
 		isPlaying: false,
@@ -290,7 +300,8 @@ export const finishGame = async ({ roomId, userId, socket, io }: FinishGameReq) 
 	const room = rooms.get(roomId);
 	const user = socketOwnsRacer(room, userId, socket);
 	if (!room || room.progress !== "playing" || !user || user.finished ||
-		room.settings.mode === "time" || user.typedChars !== room.text.length) return;
+		room.settings.mode === "time" || user.enteredChars !== room.text.length ||
+		raceErrorsToCorrect(room.text.length, user.typedChars, user.uncorrectedExtras, room.settings.errorThreshold)) return;
 	user.finished = true;
 	const startedAt = roundStarts.get(room);
 	if (startedAt !== undefined) finishTimes.set(user, (performance.now() - startedAt) / 1000);
@@ -340,12 +351,14 @@ export function endRace(roundId: unknown, socket: Socket, io: Server) {
 	io.to(roomId).emit("roomData", room);
 }
 
-export const streamData = async ({ roomId, userId, wpm, typedChars, accuracy, socket, io }: StreamData) => {
+export const streamData = async ({ roomId, userId, wpm, typedChars, enteredChars, uncorrectedExtras, accuracy, socket, io }: StreamData) => {
 	const room = rooms.get(roomId);
 	const user = socketOwnsRacer(room, userId, socket);
-	if (!room || room.progress !== "playing" || !user || user.finished || typedChars > room.text.length) return;
+	if (!room || room.progress !== "playing" || !user || user.finished || enteredChars > room.text.length) return;
 	user.wpm = wpm;
 	user.typedChars = typedChars;
+	user.enteredChars = enteredChars;
+	user.uncorrectedExtras = uncorrectedExtras;
 	user.accuracy = accuracy;
 	const startedAt = roundStarts.get(room);
 	if (startedAt !== undefined) {
@@ -399,7 +412,11 @@ function startGame(roomId: string, io: Server) {
 	});
 	if (room.settings.mode === "time") {
 		const timer = setTimeout(() => {
-			room.users.forEach((racer) => { if (!racer.finished) captureRacer(room, racer, "time-limit"); racer.finished = true; });
+			for (const racer of room.users) {
+				const errorsToCorrect = raceErrorsToCorrect(racer.enteredChars, racer.typedChars, racer.uncorrectedExtras, room.settings.errorThreshold);
+				captureRacer(room, racer, errorsToCorrect ? "error-limit" : "time-limit");
+				racer.finished = true;
+			}
 			finishRoomIfComplete(room, roomId, io);
 			io.to(roomId).emit("roomData", roomSnapshot(room));
 		}, room.settings.duration * 1000);
@@ -422,6 +439,8 @@ function resetData(roomId: string) {
 		speedHistory.delete(user);
 		finishTimes.delete(user);
 		user.typedChars = 0;
+		user.enteredChars = 0;
+		user.uncorrectedExtras = 0;
 		user.accuracy = 100;
 		user.isPlaying = false;
 	});

@@ -109,7 +109,13 @@ Current page patterns:
   is scripted illustration, not a live room or fabricated player statistics.
   The guest explanation and sign-in link appear only after session restoration
   confirms the visitor is signed out.
-- **Multiplayer:** the lobby labels its host. Live races expose Leave race for
+- **Multiplayer:** the lobby labels its host and offers Time, Words and Quotes.
+  Quotes use the English catalog and show a Short, Medium or Long selector in
+  place of the language control. Every test type has an Error threshold
+  dropdown. The typing area gives the number of errors
+  to correct when a racer reaches the end over the limit, or while a timed
+  racer is over the limit. Results show place, Precision Pace, WPM and accuracy,
+  with the score formula next to the table. Live races expose Leave race for
   every racer and End race for the host on the Race Settings row. The summary
   moves below the toolbar at intermediate widths and is hidden on phones.
   The host name sits beside View room on larger screens. Phones hide both

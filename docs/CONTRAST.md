@@ -47,6 +47,18 @@ uses the existing 3px blur token and changes no palette or focus colors. These
 label-source measurements do not certify all pixels in the blurred passage;
 all previously recorded failures below remain open.
 
+## Multiplayer error allowance and score
+
+On **19 November 2026**, source ratios for the new race text were recalculated
+from the shared tokens. Dark Forest / Classic ratios are **6.16/7.00:1** for
+lobby help on the settings panel, **12.45/19.08:1** for the correction message
+on the page, and **7.41/5.70:1** for the score rule on its results card. The
+personal composite score is **8.89/15.52:1** on the card with its 6% accent mix.
+Score cells are **12.95/14.60:1** on the plot and **10.94/11.96:1** over the
+9% local-racer accent mix. The threshold uses the shared dropdown, with
+**12.45/19.08:1** text contrast against the inset and **7.94/21.00:1** focus
+contrast against the settings panel.
+
 ## Text and primary actions
 
 | Theme | Current use | Foreground / background | Ratio | Normal text (4.5:1) |

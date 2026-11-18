@@ -1,41 +1,22 @@
 import { writable } from "svelte/store";
-import { defaultRaceSettings, type RaceSettings } from "../../../../backend/src/race.settings";
-import type { SpeedPoint } from "../../components/charts/result-chart";
+import { defaultRaceSettings } from "../../../../backend/src/race.settings";
+import type { RoomSnapshot } from "../../../../backend/src/store";
 
-type User = {
-	userId: string;
-	username: string;
-	typedChars: number;
-	wpm: number;
-	speedHistory?: SpeedPoint[];
-	finishSeconds?: number;
-	accuracy: number;
-	vote: boolean;
-	finished: boolean;
-    isPlaying: boolean;
-};
-export type Room = {
-	hostUserId: string;
-	text: string;
-	roundId: string | null;
-	startsAt?: number;
-	settings: RaceSettings;
-	users: User[];
-	progress: "waiting" | "playing" | "finished";
-};
-
-export const emptyRoom: Room = { hostUserId: "", text: "", roundId: null, users: [], progress: "waiting", settings: defaultRaceSettings };
-export const roomInfo = writable<Room>(emptyRoom);
+export const emptyRoom: RoomSnapshot = { hostUserId: "", text: "", roundId: null, users: [], progress: "waiting", settings: defaultRaceSettings };
+export const roomInfo = writable<RoomSnapshot>(emptyRoom);
 
 export const resetRoom = () => {
 	roomInfo.update((prev) => {
 		return {
 			...prev,
 			roundId: null,
+			results: undefined,
 			users: prev.users.map((user) => {
 				return {
 					...user,
 					typedChars: 0,
+					enteredChars: 0,
+					uncorrectedExtras: 0,
 					wpm: 0,
 					speedHistory: undefined,
 					finishSeconds: undefined,

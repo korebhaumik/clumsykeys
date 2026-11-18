@@ -3,6 +3,7 @@ import { endRace, finishGame, joinRoom, leaveRoom, leaveRoomPermanently, resetRo
 import type { Persistence } from "./persistence";
 import { createRaceWriter } from "./race.persistence";
 import { createRateLimit } from "./security";
+import { maximumRaceWpm } from "./race.settings";
 
 export function registerSocketHandlers(io: Server, persistence?: Persistence) {
 const writeRace = createRaceWriter(io, persistence);
@@ -70,10 +71,11 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("timeData", (payload) => {
-		const { roomId, userId, typedChars, wpm, accuracy } = payload ?? {};
+		const { roomId, userId, typedChars, enteredChars = typedChars, uncorrectedExtras = 0, wpm, accuracy } = payload ?? {};
 		if (![typedChars, wpm, accuracy].every((value) => Number.isFinite(value) && value >= 0) || accuracy > 100 ||
-			!Number.isSafeInteger(typedChars) || typedChars > 1_000_000 || wpm > 1500) return;
-		streamData({ roomId, userId, typedChars, wpm, accuracy, socket, io });
+			![typedChars, enteredChars, uncorrectedExtras].every(value => Number.isSafeInteger(value) && value >= 0 && value <= 1_000_000) ||
+			typedChars > enteredChars || wpm > maximumRaceWpm) return;
+		streamData({ roomId, userId, typedChars, enteredChars, uncorrectedExtras, wpm, accuracy, socket, io });
 	});
 
 	socket.on("disconnect", () => { clearTimeout(expiry); leaveRoom(socket, io); });

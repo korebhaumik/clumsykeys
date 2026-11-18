@@ -106,8 +106,9 @@ injects `crypto.randomInt`. Formatting policies intentionally differ by mode.
 See the [content guide](shared/content/README.md) for catalog rules and provenance.
 
 Quotes are never truncated to a word preset. Solo quote length is an optional
-preference/result setting with a medium fallback; multiplayer uses its unfiltered
-quote pool. Snippet restart avoids the previous ID when the category has an
+preference/result setting with a medium fallback. Multiplayer rooms can select
+short, medium or long English quotes from the same categories and start with
+medium. Snippet restart avoids the previous ID when the category has an
 alternative. Snippet length and auto-indent are cached as device-local UI choices; snippet
 length is not part of account preferences; new snippet results archive it for
 category-specific personal bests. Neither quote nor snippet
@@ -185,7 +186,24 @@ racers to the lobby with settings preserved and votes/metrics cleared. It never
 opens the completed ranking screen. Other racers can leave individually.
 
 The server owns countdown deadlines, timed completion, sampled history and finish
-timestamps. Client-reported WPM/accuracy/progress still do not prove honest typing.
+timestamps. The live race client tracks passage position independently from correct
+characters and reconstructs position and remaining extras from its checkpoint.
+Word-count and quote races require reaching the end with at most the
+configured share of uncorrected errors, including extras. The setting defaults to
+5% and offers 5%, 10% and 15%. New rooms start with 25 English words,
+punctuation on and numbers off. The server rounds the allowance
+down to a whole character. Correcting an error restores finish eligibility at the
+end while its attempt still counts toward accuracy. At the timed-race deadline,
+the server applies the threshold to the entered positions in the latest accepted
+sample. Timed clients send progress every 250ms. Racers above the limit receive
+an `error-limit` result and stay visible without a place or Precision Pace.
+
+The server ranks the original roster by Precision Pace, WPM multiplied by accuracy as a
+fraction, rounded to two decimals. Higher accuracy and then earlier passage
+finish time break ties. Exact ties share a place. Racers who leave before
+finishing are unplaced. The same scoring function ranks archived results using
+stored metrics and finish reasons. Aborted rounds are unplaced.
+Client-reported WPM, accuracy and progress do not prove honest typing.
 Origins, packet limits, quotas and ownership checks are described in the
 [API spec](docs/api.openapi.json) and [security audit](docs/SECURITY_AUDIT.md).
 
@@ -241,7 +259,7 @@ Public output contains display names and score fields with pseudonymous player
 keys, not account UUIDs, preferences or per-word history. Runtime failures are
 shown as failures; synthetic scores belong only in tests.
 
-The [Supabase guide](docs/SUPABASE.md) lists all eight migrations, setup, grants,
+The [Supabase guide](docs/SUPABASE.md) lists the migrations, setup, grants,
 callbacks and database verification. Plausibility checks are not cheat resistance.
 
 ## Build and verification boundaries

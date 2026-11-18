@@ -2,6 +2,7 @@ import { quoteLengths, type QuoteLength } from "../../shared/content/quote-lengt
 import { snippetLengths } from "../../shared/content/code-catalog";
 // Browser-safe persistence contract. No transport, environment, or SDK imports.
 import type { Database, Json } from "./database.types";
+import type { RaceStanding } from "./race.scoring";
 export type { Json } from "./database.types";
 export type CodePreferences = {
 	mode: "snippets" | "keywords";
@@ -39,12 +40,18 @@ export type RaceArchive = {
 	results: {
 		participantId: string; userId: string; accountId: string | null; username: string;
 		wpm: number; accuracy: number; typedChars: number; finishSeconds: number | null;
-		reason: "completed" | "time-limit" | "disconnected";
+		reason: RaceStanding["reason"];
 		speedHistory: { seconds: number; wpm: number }[];
 	}[];
 };
 export type PracticeSummary = Database["public"]["Tables"]["practice_results"]["Row"];
 export type RaceResult = Database["public"]["Tables"]["race_results"]["Row"];
+export type SavedRace = {
+	round: Database["public"]["Tables"]["race_rounds"]["Row"];
+	ownRacerId: string;
+	results: (Pick<RaceResult, "racer_id" | "username" | "wpm" | "accuracy" | "finish_seconds" | "speed_history"> &
+		Pick<RaceStanding, "reason" | "score" | "place">)[];
+};
 export type AccountData = { displayName: string; handle: string | null; preferences: Preferences | null; revision: number };
 export type AccountDashboard = {
 	stats: { tests: number; seconds: number; characters: number; averageWpm: number; averageRaw: number; averageAccuracy: number; bestWpm: number };
