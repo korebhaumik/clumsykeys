@@ -45,11 +45,15 @@ test('saved race configuration displays archived values and only the active limi
     { label: 'Mode', value: 'Time' }, { label: 'Language', value: 'Hinglish' },
     { label: 'Time limit', value: '60 seconds' }, { label: 'Punctuation', value: 'Off' }, { label: 'Numbers', value: 'On' },
   ]);
-  const words = savedRaceSettings({ ...settings, mode: 'words', language: 'english-2k' });
+  const words = savedRaceSettings({ ...settings, mode: 'words', language: 'english-2k', errorThreshold: 11 });
   assert.ok(words.some(field => field.label === 'Word count' && field.value === '100 words'));
   assert.ok(words.some(field => field.label === 'Language' && field.value === 'English 2k'));
+  assert.ok(words.some(field => field.label === 'Error threshold' && field.value === '11%'));
   assert.ok(!words.some(field => field.label === 'Time limit'));
   for (const mode of ['quotes', 'passage']) assert.equal(savedRaceSettings({ ...settings, mode }).length, 4);
+  assert.equal(savedRaceSettings({ ...settings, mode: 'passage' })[0].value, 'Passage');
+  const quotes = savedRaceSettings({ ...settings, mode: 'quotes', quoteLength: 'long' });
+  assert.ok(quotes.some(field => field.label === 'Quote length' && field.value === 'Long'));
 });
 
 test('missing or malformed archived settings never become current lobby defaults', () => {

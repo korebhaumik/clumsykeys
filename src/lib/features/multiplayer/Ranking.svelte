@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { push, router } from "svelte-spa-router";
+	import { push } from "svelte-spa-router";
 	import { onMount } from "svelte";
 	import { finalRanking } from "./race.store";
 	import socket from "./socket";
@@ -8,43 +8,43 @@
 	import { account } from "../../state/account.store";
 	import { accountApi } from "../../services/account-api";
 	import { racePersistence, raceRoundId } from "../../state/race-persistence.store";
-	import type { SpeedPoint } from "../../components/charts/result-chart";
+	import type { SavedRace } from "../../../../backend/src/persistence.contract";
+	import type { RaceStanding } from "../../../../backend/src/race.scoring";
 
 	const userId = localStorage.getItem("userId");
 	let archivedOwnId = $state<string>();
 	let historyError = $state("");
-	let leaderboard = $derived(router.location === "/leaderboard");
+	let ownId = $derived(archivedOwnId ?? userId);
 	const colors = ["var(--result-accent)", "var(--racer-blue)", "var(--racer-orange)", "var(--racer-violet)", "var(--racer-pink)", "var(--racer-teal)"];
-	let ownScore = $derived($finalRanking.find((racer) => racer.userId === (archivedOwnId ?? userId)));
+	let ownScore = $derived($finalRanking.find((racer) => racer.userId === ownId));
 	let racers = $derived($finalRanking.map((racer, index) => ({
 		...racer,
 		color: colors[index % colors.length],
 		dashed: index >= colors.length,
 	})));
-	let scores = $derived(leaderboard
-		? racers.toSorted((a, b) => b.wpm - a.wpm || b.accuracy - a.accuracy)
-		: racers);
-	let series = $derived(racers.filter((racer) => racer.speedHistory.length || racer.finishSeconds !== undefined).map((racer) => ({
+	let series = $derived(racers.filter((racer) => racer.speedHistory.length || racer.finishSeconds !== null).map((racer) => ({
 		label: racer.username,
 		color: racer.color,
 		dashed: racer.dashed,
-		finishSeconds: racer.finishSeconds,
+		finishSeconds: racer.finishSeconds ?? undefined,
 		points: [{ seconds: 0, wpm: 0 }, ...racer.speedHistory],
 	})));
 
 	onMount(() => {
 		let active = true;
 		if (!$finalRanking.length && $account.session) {
-			void accountApi<{ round: { id: string }; ownRacerId: string; results: { racer_id: string; username: string; wpm: number; accuracy: number; speed_history: SpeedPoint[]; finish_seconds: number | null }[] }>("/api/race-results/latest")
+			void accountApi<SavedRace>("/api/race-results/latest")
 				.then(result => {
 					if (!active) return;
 					archivedOwnId = result.ownRacerId;
 					raceRoundId.set(result.round.id); racePersistence.set({ roundId: result.round.id, state: "saved" });
-					finalRanking.set(result.results.map(racer => ({ userId: racer.racer_id, username: racer.username, wpm: racer.wpm,
-						accuracy: racer.accuracy, speedHistory: racer.speed_history, finishSeconds: racer.finish_seconds ?? undefined })));
+					finalRanking.set(result.results.map(racer => ({
+						userId: racer.racer_id, username: racer.username, wpm: racer.wpm,
+						accuracy: racer.accuracy, reason: racer.reason, score: racer.score, place: racer.place,
+						speedHistory: racer.speed_history as RaceStanding["speedHistory"], finishSeconds: racer.finish_seconds,
+					})));
 				}).catch(error => { if (active && error.status !== 404) historyError = error.message; });
 		}
-		if (leaderboard) return () => { active = false; };
 		const roomId = localStorage.getItem("roomId");
 		resetRoom();
 		socket.emit("resetGame", { roomId });
@@ -59,19 +59,15 @@
 <section class="test-results race-results" aria-labelledby="ranking-title">
 	<header class="results-heading">
 		<div>
-			<p class="eyebrow">Multiplayer · {leaderboard ? "Latest race" : racers.length ? "Round complete" : "Results"}</p>
-			<h1 id="ranking-title">{leaderboard ? "Leaderboard" : "Race results"}</h1>
+			<p class="eyebrow">Multiplayer</p>
+			<h1 id="ranking-title">Race results</h1>
 			{#if racers.length}
 				<p class="summary">{racers.length} {racers.length === 1 ? "racer" : "racers"}</p>
 			{/if}
 		</div>
-		{#if leaderboard}
-			<a tabindex="0" class="replay" href="#/race">Multiplayer <span aria-hidden="true">↗</span></a>
-		{:else}
-			<button tabindex="0" class="replay" onclick={replay}>
-				{racers.length ? "Race again" : "Back to room"} <span aria-hidden="true">↗</span>
-			</button>
-		{/if}
+		<button tabindex="0" class="replay" onclick={replay}>
+			{racers.length ? "Race again" : "Back to room"} <span aria-hidden="true">↗</span>
+		</button>
 	</header>
 	{#if $account.session}
 		<p class="persistence-note" role="status">{historyError || ($racePersistence?.state === "pending" ? "Saving race…" : $racePersistence?.state === "failed" ? "Race could not be saved. Live results remain available here." : $racePersistence?.state === "saved" ? "Race saved to your account." : "")} <a tabindex="0" href="#/history">Your history</a></p>
@@ -92,6 +88,7 @@
 					<h2 id="personal-title">Your result</h2>
 					<p class="player-name">{ownScore.username}</p>
 					<dl class="personal-metrics">
+						<div><dt>Precision Pace</dt><dd>{ownScore.score?.toFixed(2) ?? "—"}</dd></div>
 						<div><dt>Speed</dt><dd>{ownScore.wpm} <small>WPM</small></dd></div>
 						<div><dt>Accuracy</dt><dd>{ownScore.accuracy}%</dd></div>
 					</dl>
@@ -101,18 +98,21 @@
 
 		<section class="race-card scores" aria-labelledby="scores-title">
 			<h2 id="scores-title">Racer scores</h2>
-			<table aria-labelledby="scores-title">
-				<thead><tr><th scope="col">Racer</th><th scope="col">WPM</th><th scope="col">Accuracy</th></tr></thead>
+			<p id="score-rule">Precision Pace = WPM × accuracy. For example, 100 WPM at 95% earns 95.00.</p>
+			<table aria-labelledby="scores-title" aria-describedby="score-rule">
+				<thead><tr><th scope="col">Racer</th><th scope="col">Place</th><th scope="col">Precision Pace</th><th scope="col">WPM</th><th scope="col">Accuracy</th></tr></thead>
 				<tbody>
-					{#each scores as racer (racer.userId)}
-						<tr class:local={racer.userId === userId}>
+					{#each racers as racer (racer.userId)}
+						<tr class:local={racer.userId === ownId}>
 							<th scope="row">
 								<span class="racer-label">
-									{#if racer.speedHistory.length || racer.finishSeconds !== undefined}<i class:dashed={racer.dashed} style:color={racer.color} aria-hidden="true"></i>{/if}
+									{#if racer.speedHistory.length || racer.finishSeconds !== null}<i class:dashed={racer.dashed} style:color={racer.color} aria-hidden="true"></i>{/if}
 									<span>{racer.username}</span>
-									{#if racer.userId === userId}<span class="you">You</span>{/if}
+									{#if racer.userId === ownId}<span class="you">You</span>{/if}
 								</span>
 							</th>
+							<td>{#if racer.reason === "disconnected"}<abbr title="Did not finish">DNF</abbr>{:else if racer.reason === "error-limit"}Over error limit{:else}{racer.place ?? "—"}{/if}</td>
+							<td>{racer.score?.toFixed(2) ?? "—"}</td>
 							<td>{racer.wpm}</td>
 							<td>{racer.accuracy}%</td>
 						</tr>
@@ -133,7 +133,7 @@
 	.results-heading .eyebrow { color: var(--result-accent); margin-bottom: var(--dimension-0_35rem); }
 	h1 { font-size: clamp(var(--text-1_8rem), var(--text-4vw), var(--text-2_8rem)); line-height: var(--leading-1_12); }
 	h2 { font-size: var(--text-1rem); font-weight: var(--weight-600); }
-	.summary, .chart-card p, .player-name, .empty { color: var(--result-muted); font-size: var(--text-0_85rem); }
+	.summary, .chart-card p, .player-name, .empty, .scores p { color: var(--result-muted); font-size: var(--text-0_85rem); }
 	.summary { margin-top: var(--dimension-0_35rem); }
 	.replay { display: inline-flex; align-items: center; gap: var(--dimension-0_65rem); padding: var(--dimension-0_6rem) var(--dimension-0_9rem); border-radius: var(--radius-0_5rem); background: var(--result-accent); color: var(--accent-ink); font-size: var(--text-0_85rem); font-weight: var(--weight-700); }
 	.replay:hover { filter: brightness(.93); }
@@ -167,5 +167,9 @@
 		.race-overview.with-score { grid-template-columns: minmax(0, 1fr); }
 		.personal-card { grid-row: 1; }
 		.personal-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.personal-metrics > :first-child { grid-column: 1 / -1; }
+		table { table-layout: fixed; }
+		th, td { overflow-wrap: anywhere; }
+		.racer-label { flex-wrap: wrap; }
 	}
 </style>

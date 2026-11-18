@@ -12,7 +12,7 @@ A focused typing application for everyday practice, real code snippets, and race
 
 - **Practise prose your way.** Timed tests, word counts, and complete quotes in three lengths; English and Hinglish vocabulary, plus punctuation and number modifiers.
 - **Build fluency with code.** Snippets and keyword practice for Python, JavaScript, TypeScript, Java, C++, and C, with automatic or manual indentation.
-- **Race with friends.** Share a room invite, choose a shared test, vote to start, and follow live progress through results and replay.
+- **Race with friends.** Invite racers, choose a shared test and error allowance, and vote to start. Results rank finishers by Precision Pace, which combines WPM and accuracy.
 - **Understand each result.** Review WPM, raw WPM, accuracy, character counts, speed charts, and feedback for individual words. Celebrate personal bests for each language and test category.
 - **Keep your progress.** Optional email/password or GitHub sign-in, saved history with filters and CSV export, synced preferences, and public solo rankings with unique handles.
 - **Make it comfortable.** Dark Forest and Classic themes, keyboard shortcuts, reduced-motion support, and layouts that adapt to smaller screens.

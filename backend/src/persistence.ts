@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
-import type { AccountDashboard, AccountData, Json, PracticeSubmission, PracticeSummary, RaceArchive, RaceResult } from "./persistence.contract";
+import type { AccountDashboard, AccountData, Json, PracticeSubmission, PracticeSummary, RaceArchive, RaceResult, SavedRace } from "./persistence.contract";
 import { parsePreferences } from "./persistence.contract";
 import type { PracticeCategory } from "./practice-category.contract";
+import { rankRaceResults, type RaceStanding } from "./race.scoring";
 
 export class PersistenceError extends Error {
 	constructor(public status: number, message: string) { super(message); }
@@ -22,7 +23,7 @@ export type Persistence = {
 	practiceHistory(userId: string, offset: number): Promise<PracticeSummary[]>;
 	practiceDetail(userId: string, id: string): Promise<{ summary: PracticeSummary; samples: Json; history: Json } | null>;
 	raceHistory(userId: string, offset: number): Promise<RaceResult[]>;
-	raceDetail(userId: string, id?: string): Promise<{ round: Json; results: Json; ownRacerId: string } | null>;
+	raceDetail(userId: string, id?: string): Promise<SavedRace | null>;
 	saveRace(round: RaceArchive): Promise<void>;
 };
 
@@ -121,7 +122,11 @@ export function createSupabasePersistence(config: { url: string; secret: string 
 				client.from("race_results").select("racer_id, username, wpm, accuracy, finish_seconds, reason, speed_history").eq("round_id", roundId),
 			]);
 			check(round.error); check(results.error);
-			return { round: round.data as unknown as Json, results: results.data as unknown as Json, ownRacerId: owned.data.racer_id };
+			const ranked = rankRaceResults((results.data ?? []).map(({ finish_seconds, ...racer }) => ({
+				...racer, reason: racer.reason as RaceStanding["reason"], finishSeconds: finish_seconds,
+			})), round.data!.outcome === "completed");
+			return { round: round.data!, results: ranked.map(({ finishSeconds, ...racer }) => ({ ...racer, finish_seconds: finishSeconds })),
+				ownRacerId: owned.data.racer_id };
 		},
 		async saveRace(round) {
 			const { error } = await client.rpc("save_race_round", { p_round: round as unknown as Json }); check(error);

@@ -354,10 +354,23 @@ test('two browsers join, configure, vote, race, reconnect, see results and repla
     const room = 'e2e-' + Date.now();
     await join(a, 'Ada', room); await join(b, 'Lin', room);
     await expect(a.getByRole('button', { name: 'Vote to start' })).toBeEnabled();
+    await a.getByRole('combobox', { name: 'Test type' }).click();
+    await expect(a.getByRole('listbox', { name: 'Test type' }).getByRole('option')).toHaveText([/^Time/, /^Words/, /^Quotes/]);
+    await a.getByRole('option', { name: 'Quotes', exact: true }).click();
+    const length = a.getByRole('combobox', { name: 'Quote length' });
+    await expect(length).toHaveText('Medium');
+    await expect(a.getByRole('combobox', { name: 'Language' })).toHaveCount(0);
+    await length.focus();
+    for (const key of ['Enter', 'End', 'Enter']) await a.keyboard.press(key);
+    await expect(b.getByRole('combobox', { name: 'Quote length' })).toHaveText('Long');
+    await length.click();
+    await a.getByRole('option', { name: 'Short', exact: true }).click();
+    await expect(b.getByRole('combobox', { name: 'Quote length' })).toHaveText('Short');
     await a.getByRole('button', { name: 'Vote to start' }).click();
     await b.getByRole('button', { name: 'Vote to start' }).click();
     await expect(a.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled({ timeout: 10000 });
     const settingsPreview = a.getByRole('region', { name: 'Race settings preview' });
+    await expect(settingsPreview).toContainText('Short quotes');
     await expect(settingsPreview).toHaveAttribute('tabindex', '-1');
     await a.setViewportSize({ width: 390, height: 900 });
     await expect(settingsPreview).toHaveCount(0);
@@ -366,6 +379,7 @@ test('two browsers join, configure, vote, race, reconnect, see results and repla
     await expect(settingsPreview).toHaveAttribute('tabindex', '-1');
     await a.getByRole('textbox', { name: 'Type the race passage' }).focus();
     const words = await a.locator('.race-passage .typing-word').allTextContents();
+    expect(words.join(' ').length).toBeLessThanOrEqual(100);
     await a.keyboard.type(words[0] + ' ');
     await a.reload();
     await expect(a.getByRole('textbox', { name: 'Type the race passage' })).toBeEnabled();
@@ -377,6 +391,7 @@ test('two browsers join, configure, vote, race, reconnect, see results and repla
     await expect(a.locator('tbody tr')).toHaveCount(2);
     await a.getByRole('button', { name: 'Race again' }).click();
     await expect(a.getByRole('heading', { name: 'Race lobby' })).toBeVisible();
+    await expect(a.getByRole('combobox', { name: 'Quote length' })).toHaveText('Short');
     expect(errors).toEqual([]);
   } finally { await Promise.all(contexts.map(c => c.close())); }
 });

@@ -1,5 +1,6 @@
+import { quoteLengths, type QuoteLength } from "../../shared/content/quote-length";
+
 export const raceModes = {
-	passage: "Passage",
 	time: "Time",
 	words: "Words",
 	quotes: "Quotes",
@@ -15,23 +16,33 @@ export const raceLanguages = {
 
 export const raceDurations: readonly number[] = [15, 30, 60, 120];
 export const raceWordCounts: readonly number[] = [25, 50, 100, 200];
+export const raceErrorThresholds: readonly number[] = [5, 10, 15];
+export const maximumRaceWpm = 1500;
+
+export function raceErrorsToCorrect(length: number, correct: number, extras: number, threshold: number) {
+	return Math.max(0, length - correct + extras - Math.floor(length * threshold / 100));
+}
 
 export type RaceSettings = {
 	mode: keyof typeof raceModes;
 	language: keyof typeof raceLanguages;
 	duration: number;
 	wordCount: number;
+	quoteLength: QuoteLength;
 	punctuation: boolean;
 	numbers: boolean;
+	errorThreshold: number;
 };
 
 export const defaultRaceSettings: RaceSettings = {
-	mode: "passage",
+	mode: "words",
 	language: "english",
 	duration: 30,
 	wordCount: 25,
+	quoteLength: "medium",
 	punctuation: true,
 	numbers: false,
+	errorThreshold: 5,
 };
 
 export function applyRaceSettings(settings: RaceSettings, patch: unknown): RaceSettings | undefined {
@@ -43,6 +54,8 @@ export function applyRaceSettings(settings: RaceSettings, patch: unknown): RaceS
 	if (typeof next.mode !== "string" || !Object.hasOwn(raceModes, next.mode) ||
 		typeof next.language !== "string" || !Object.hasOwn(raceLanguages, next.language) ||
 		!raceDurations.includes(next.duration) || !raceWordCounts.includes(next.wordCount) ||
+		!quoteLengths.includes(next.quoteLength) ||
+		!raceErrorThresholds.includes(next.errorThreshold) ||
 		typeof next.punctuation !== "boolean" || typeof next.numbers !== "boolean") return;
 
 	if (keys.some((key) => settings[key] !== next[key])) return next;

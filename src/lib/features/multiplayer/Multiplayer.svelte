@@ -4,6 +4,7 @@
 	import socket from "./socket";
 	import RaceSettings from "./RaceSettings.svelte";
 	import { defaultRaceSettings, type RaceSettings as Settings } from "../../../../backend/src/race.settings";
+	import type { RoomSnapshot } from "../../../../backend/src/store";
 	import Footer from "../../components/layout/Footer.svelte";
 	import ClipboardSvg from "../../components/icons/ClipboardIcon.svelte";
 	import SignOutIcon from "../../components/icons/SignOutIcon.svelte";
@@ -12,7 +13,7 @@
 	import { Toaster, toast } from "svelte-sonner";
 	import Game from "./RaceEngine.svelte";
 	import {
-		typedChars,
+		enteredChars,
 		totalChars,
 		timeDataArr,
 		setGameState,
@@ -22,8 +23,7 @@
 		wordsArr,
 	} from "./race.store";
 	import { push } from "svelte-spa-router";
-	import { type Rank } from "./race.store";
-	import { type Room, roomInfo, emptyRoom } from "./room.store";
+	import { roomInfo, emptyRoom } from "./room.store";
 	import { racePersistence, raceRoundId } from "../../state/race-persistence.store";
 
 	const userId = localStorage.getItem("userId");
@@ -116,22 +116,6 @@
 		return () => window.clearInterval(timer);
 	});
 
-	async function endGame() {
-		const ranking: Rank[] = $roomInfo.users.map((user) => {
-			return {
-				username: user.username,
-				userId: user.userId,
-				speedHistory: user.speedHistory ?? [],
-				finishSeconds: user.finishSeconds,
-				wpm: user.wpm,
-				accuracy: user.accuracy,
-			};
-		});
-		finalRanking.set(ranking);
-		resetTest();
-		await push("/ranking");
-	}
-
 	onMount(() => {
 		if (!username || !userId || !roomId) {
 			push("/login");
@@ -150,7 +134,7 @@
 			if (reason === "io server disconnect") socket.connect();
 		};
 		const onConnectError = () => { ready = false; toast("Could not connect. Check your account session and rejoin the room."); };
-		const onRoomData = (room: Room) => {
+		const onRoomData = (room: RoomSnapshot) => {
 			const returnedToLobby = $roomInfo.progress === "playing" && room.progress === "waiting";
 			if (room.roundId && room.roundId !== $raceRoundId) { raceRoundId.set(room.roundId); racePersistence.set(null); }
 			const user = room.users.find((member) => member.userId === userId);
@@ -164,7 +148,11 @@
 			if (room.progress === "waiting" || room.progress === "finished") {
 				localStorage.removeItem(checkpointKey);
 			}
-			if (room.progress === "finished") void endGame();
+			if (room.progress === "finished") {
+				finalRanking.set(room.results ?? []);
+				resetTest();
+				void push("/ranking");
+			}
 			if (returnedToLobby) {
 				roomDialog.close();
 				lobbyFocusFrame = window.requestAnimationFrame(() => {
@@ -223,7 +211,7 @@
 		{#each $roomInfo.users as user (user.userId)}
 			{@const local = user.userId === userId}
 			<ProgressBar
-				value={local ? $typedChars : user.typedChars}
+				value={user.finished ? $totalChars : local ? $enteredChars : user.enteredChars ?? user.typedChars}
 				max={$totalChars}
 				userName={user.username}
 				{local}
@@ -233,7 +221,7 @@
 
 	{#if $roomInfo.roundId}
 		{#key $roomInfo.roundId}
-			<Game {ready} {checkpointKey} roundId={$roomInfo.roundId} />
+			<Game {ready} {settings} {checkpointKey} roundId={$roomInfo.roundId} />
 		{/key}
 	{/if}
 

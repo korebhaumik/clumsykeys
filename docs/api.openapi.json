@@ -688,7 +688,7 @@
           "History"
         ],
         "summary": "Read a saved race scoreboard as a participant",
-        "description": "Participation is resolved from the verified account. room IDs and browser racer IDs do not authorize reads. Opponent account UUIDs and participant IDs are excluded from shared results.",
+        "description": "Participation is resolved from the verified account. Room IDs and browser racer IDs do not authorize reads. The scoreboard includes composite score and place, and omits opponent account UUIDs and participant IDs.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1950,6 +1950,7 @@
             "enum": [
               "completed",
               "time-limit",
+              "error-limit",
               "disconnected"
             ]
           },
@@ -2013,6 +2014,7 @@
             "enum": [
               "completed",
               "time-limit",
+              "error-limit",
               "disconnected"
             ]
           },
@@ -2021,6 +2023,12 @@
             "items": {
               "$ref": "#/components/schemas/SpeedPoint"
             }
+          },
+          "score": {
+            "$ref": "#/components/schemas/CompositeRaceScore"
+          },
+          "place": {
+            "$ref": "#/components/schemas/RacePlace"
           }
         },
         "required": [
@@ -2030,7 +2038,9 @@
           "accuracy",
           "finish_seconds",
           "reason",
-          "speed_history"
+          "speed_history",
+          "score",
+          "place"
         ]
       },
       "RaceRound": {
@@ -2044,7 +2054,8 @@
             "type": "string"
           },
           "settings": {
-            "$ref": "#/components/schemas/RaceSettings"
+            "type": "object",
+            "description": "Archived room settings. Older snapshots may omit fields and may use whole-number error thresholds from 5 to 15. Legacy Passage rounds and quote rounds without a quoteLength remain readable."
           },
           "started_at": {
             "type": "string",
@@ -2080,7 +2091,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RaceScoreboardEntry"
-            }
+            },
+            "description": "Ordered by placement, followed by unplaced racers. Aborted rounds have no placements."
           },
           "ownRacerId": {
             "type": "string"
@@ -2364,7 +2376,6 @@
         "properties": {
           "mode": {
             "enum": [
-              "passage",
               "time",
               "words",
               "quotes"
@@ -2402,6 +2413,18 @@
           },
           "numbers": {
             "type": "boolean"
+          },
+          "errorThreshold": {
+            "$ref": "#/components/schemas/RaceErrorThreshold"
+          },
+          "quoteLength": {
+            "type": "string",
+            "enum": [
+              "short",
+              "medium",
+              "long"
+            ],
+            "description": "Category of the original English quote before modifiers. Short is up to 100 characters, Medium is 101–300, and Long is over 300."
           }
         },
         "required": [
@@ -2410,8 +2433,11 @@
           "duration",
           "wordCount",
           "punctuation",
-          "numbers"
-        ]
+          "numbers",
+          "errorThreshold",
+          "quoteLength"
+        ],
+        "description": "New rooms start with 25 English words, punctuation on, numbers off, and a 5% error threshold. Quote length starts at medium and is used in quotes mode."
       },
       "RoomIdentity": {
         "type": "object",
@@ -2480,7 +2506,8 @@
           },
           "typedChars": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Correct characters currently in the passage, including accepted spaces."
           },
           "accuracy": {
             "type": "number",
@@ -2502,6 +2529,16 @@
           "finishSeconds": {
             "type": "number",
             "minimum": 0
+          },
+          "enteredChars": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Position reached in the passage, including substitutions and spaces."
+          },
+          "uncorrectedExtras": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Extra characters still present beyond expected word lengths."
           }
         },
         "required": [
@@ -2512,7 +2549,9 @@
           "typedChars",
           "accuracy",
           "finished",
-          "isPlaying"
+          "isPlaying",
+          "enteredChars",
+          "uncorrectedExtras"
         ]
       },
       "RoomSnapshot": {
@@ -2557,6 +2596,14 @@
           "hostUserId": {
             "type": "string",
             "description": "First joined racer; transfers to the earliest remaining racer when the host leaves or recovery expires. Retained during temporary disconnection."
+          },
+          "results": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/LiveRaceStanding"
+            },
+            "description": "Present in finished snapshots. Includes the original roster and is ordered by placement, followed by unplaced racers."
           }
         },
         "required": [
@@ -2580,7 +2627,8 @@
           "typedChars": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 1000000
+            "maximum": 1000000,
+            "description": "Correct characters currently in the passage, including accepted spaces."
           },
           "wpm": {
             "type": "number",
@@ -2591,6 +2639,19 @@
             "type": "number",
             "minimum": 0,
             "maximum": 100
+          },
+          "enteredChars": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Position reached in the passage, including substitutions and spaces."
+          },
+          "uncorrectedExtras": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Extra characters still present beyond expected word lengths.",
+            "default": 0
           }
         },
         "required": [
@@ -2600,7 +2661,7 @@
           "wpm",
           "accuracy"
         ],
-        "description": "Only the current socket owner may update an unfinished playing racer. typedChars cannot exceed the passage length; updates failing checks are ignored."
+        "description": "Only the current socket owner may update an unfinished playing racer. The counts must satisfy 0 <= typedChars <= enteredChars <= passage length. For older senders, omitted enteredChars defaults to typedChars and omitted uncorrectedExtras defaults to 0. Invalid updates are ignored."
       },
       "SocketMessage": {
         "type": "object",
@@ -2618,7 +2679,6 @@
         "properties": {
           "mode": {
             "enum": [
-              "passage",
               "time",
               "words",
               "quotes"
@@ -2656,11 +2716,23 @@
           },
           "numbers": {
             "type": "boolean"
+          },
+          "errorThreshold": {
+            "$ref": "#/components/schemas/RaceErrorThreshold"
+          },
+          "quoteLength": {
+            "type": "string",
+            "enum": [
+              "short",
+              "medium",
+              "long"
+            ],
+            "description": "Category of the original English quote before modifiers. Short is up to 100 characters, Medium is 101–300, and Long is over 300."
           }
         },
         "required": [],
         "additionalProperties": false,
-        "description": "A valid changed subset is accepted only from a joined racer while waiting. Changes clear all votes and cancel the countdown. Empty, unchanged, invalid or unknown-field patches are ignored."
+        "description": "A valid changed subset is accepted from a joined racer while waiting and before countdown. Changes clear all votes. Empty, unchanged, invalid or unknown-field patches are ignored."
       },
       "Handle": {
         "type": "string",
@@ -2668,6 +2740,97 @@
         "minLength": 3,
         "maxLength": 24,
         "description": "Unique public handle stored in lowercase, without the @ prefix."
+      },
+      "RaceErrorThreshold": {
+        "type": "integer",
+        "enum": [
+          5,
+          10,
+          15
+        ],
+        "description": "Maximum percentage of remaining errors for every test type. Timed races apply it to entered positions at the deadline."
+      },
+      "CompositeRaceScore": {
+        "type": [
+          "number",
+          "null"
+        ],
+        "minimum": 0,
+        "description": "Precision Pace is WPM multiplied by accuracy divided by 100, rounded to two decimal places. Null for unranked racers and aborted rounds.",
+        "examples": [
+          93.1,
+          null
+        ]
+      },
+      "RacePlace": {
+        "type": [
+          "integer",
+          "null"
+        ],
+        "minimum": 1,
+        "description": "Place in a completed round. Order is descending score, descending accuracy, and then earlier finish time when available. Exact ties share a place. Unplaced racers have null. A timed racer whose last accepted sample exceeds the error allowance has reason error-limit and no placement."
+      },
+      "LiveRaceStanding": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "wpm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "finishSeconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "enum": [
+              "completed",
+              "time-limit",
+              "error-limit",
+              "disconnected"
+            ]
+          },
+          "speedHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpeedPoint"
+            }
+          },
+          "score": {
+            "$ref": "#/components/schemas/CompositeRaceScore"
+          },
+          "place": {
+            "$ref": "#/components/schemas/RacePlace"
+          }
+        },
+        "required": [
+          "userId",
+          "username",
+          "wpm",
+          "accuracy",
+          "finishSeconds",
+          "reason",
+          "speedHistory",
+          "score",
+          "place"
+        ]
       }
     }
   },
@@ -2749,7 +2912,7 @@
         "payload": {
           "$ref": "#/components/schemas/RoomIdentity"
         },
-        "description": "Complete an owned racer only after reported typedChars equals text length. Ignored for time mode, whose completion is server-owned."
+        "description": "Complete an owned racer in words or quotes mode. The last accepted sample must reach the passage end. Characters still wrong, plus extra characters still present, must be at or below the floor of passage length times errorThreshold divided by 100. The server ignores this event in time mode, which ends at its deadline. At that deadline, the server applies the same error rule to entered positions in the latest accepted sample. A racer over the limit remains on the scoreboard without a score or place."
       },
       "resetGame": {
         "payload": {
@@ -2793,7 +2956,7 @@
         "payload": {
           "$ref": "#/components/schemas/RoomSnapshot"
         },
-        "description": "Room settings/roster/progress snapshot. Final snapshots add speedHistory and finishSeconds when available. Includes the server-owned hostUserId in every snapshot."
+        "description": "Room settings, roster and progress. Finished snapshots include the original roster with composite scores and placements in results, plus available speedHistory and finishSeconds on remaining users. Every snapshot includes the server-owned hostUserId."
       },
       "roomSession": {
         "payload": {

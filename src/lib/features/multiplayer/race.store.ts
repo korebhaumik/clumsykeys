@@ -1,6 +1,7 @@
 import { writable, get } from "svelte/store";
 import socket from "./socket";
-import type { SpeedPoint } from "../../components/charts/result-chart";
+import type { RaceStanding } from "../../../../backend/src/race.scoring";
+import { maximumRaceWpm } from "../../../../backend/src/race.settings";
 
 // ----------------- Game State -----------------
 
@@ -20,6 +21,8 @@ export const wordsArr = writable<string[]>(data.split(" "));
 
 export const totalChars = writable<number>(data.split("").length);
 export const typedChars = writable<number>(0);
+export const enteredChars = writable(0);
+export const uncorrectedExtras = writable(0);
 
 // ----------------- Timer -----------------
 
@@ -72,24 +75,29 @@ export function restoreRaceMetrics(checkpoint: ReturnType<typeof raceMetricsChec
 	timeDataArr.set(checkpoint.samples);
 }
 
-export function createTimer(onSample: () => void) {
+export function createTimer(onSample: () => void, timed: boolean) {
 	raceStartedAt ??= raceClock();
+	let tick = 0;
 	return window.setInterval(() => {
+		if (timed && ++tick % 4 !== 0) {
+			sampleRace("progress");
+			return;
+		}
 		sampleRace();
 		onSample();
-	}, 1000);
+	}, timed ? 250 : 1000);
 }
 
-export function sampleRace(final = false) {
+export function sampleRace(kind: "interval" | "progress" | "finish" = "interval") {
 	timeDataArr.update((samples) => {
 		const sample = samples.at(-1)!;
 		const rawCharsPerMinute = (sample.rawChars / 4) * 60;
 
 		const correctAttempts = totalCorrectChars + sample.correctChars;
-		const incorrectAttempts = totalIncorrectChars + sample.incorrectChars;
+		const incorrectAttempts = totalIncorrectChars + sample.incorrectChars + sample.extraChars;
 
 		const elapsedSeconds = raceStartedAt === null ? 0 : (raceClock() - raceStartedAt) / 1000;
-		if (final) sample.finishSeconds = elapsedSeconds;
+		if (kind === "finish") sample.finishSeconds = elapsedSeconds;
 		sample.wpm = elapsedSeconds > 0 ? Math.floor((correctAttempts / 4) * 60 / elapsedSeconds) : 0;
 		sample.raw = samples.length > 1
 			? Math.floor((rawCharsPerMinute + samples[samples.length - 2].raw) / 2)
@@ -98,7 +106,7 @@ export function sampleRace(final = false) {
 		const totalAttempts = correctAttempts + incorrectAttempts;
 		sample.accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
 
-		if (!final) {
+		if (kind === "interval") {
 			totalCorrectChars = correctAttempts;
 			totalIncorrectChars = incorrectAttempts;
 			samples.push({
@@ -117,7 +125,9 @@ export function sampleRace(final = false) {
 			roomId: localStorage.getItem("roomId"),
 			userId: localStorage.getItem("userId"),
 			typedChars: get(typedChars),
-			wpm: sample.wpm,
+			enteredChars: get(enteredChars),
+			uncorrectedExtras: get(uncorrectedExtras),
+			wpm: Math.min(sample.wpm, maximumRaceWpm),
 			accuracy: sample.accuracy,
 		});
 
@@ -127,6 +137,8 @@ export function sampleRace(final = false) {
 
 export function resetTest() {
 	typedChars.set(0);
+	enteredChars.set(0);
+	uncorrectedExtras.set(0);
 
 	raceStartedAt = null;
 	totalCorrectChars = 0;
@@ -147,13 +159,4 @@ export function resetTest() {
 	]);
 }
 
-export type Rank = {
-	userId: string;
-	speedHistory: SpeedPoint[];
-	finishSeconds?: number;
-	username: string;
-	wpm: number;
-	accuracy: number;
-};
-
-export const finalRanking = writable<Rank[]>([]);
+export const finalRanking = writable<RaceStanding[]>([]);

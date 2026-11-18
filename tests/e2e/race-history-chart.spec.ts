@@ -21,11 +21,13 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     const roundId = randomUUID();
     const racers = ['Ada', 'Grace', 'Lin', 'Sam', 'Jo', 'Alex'].map((username, index) => ({
       racer_id: `racer-${index}`, participant_id: `participant-${index}`, round_id: roundId, username,
-      wpm: 50 + index * 5, accuracy: 98, typed_chars: 100, reason: 'completed', created_at: new Date().toISOString(),
-      finish_seconds: 10 + index * 2, speed_history: [{ seconds: 1, wpm: 0 }, { seconds: 5, wpm: 60 + index * 3 }, { seconds: 10 + index * 2, wpm: 50 + index * 5 }],
+      wpm: 75 - index * 5, accuracy: 98, typed_chars: 100, reason: 'completed', created_at: new Date().toISOString(),
+      place: index + 1, score: (75 - index * 5) * 0.98,
+      finish_seconds: 10 + index * 2, speed_history: [{ seconds: 1, wpm: 0 }, { seconds: 5, wpm: 60 + index * 3 }, { seconds: 10 + index * 2, wpm: 75 - index * 5 }],
     }));
     const mode = theme === 'dark-forest' ? width === 320 ? 'time' : 'words' : width === 320 ? 'quotes' : 'passage';
-    const settings = { mode, language: 'english-2k', duration: 60, wordCount: 100, punctuation: false, numbers: true };
+    const settings = { mode, language: 'english-2k', duration: 60, wordCount: 100, punctuation: false, numbers: true, errorThreshold: 12,
+      ...(mode === 'quotes' ? { quoteLength: 'short' } : {}) };
     const archive = { round: { id: roundId, room_id: 'saved-race', settings: settings as Record<string, unknown> | undefined }, ownRacerId: racers[0].racer_id, results: racers };
     await page.route('**/api/history?**', route => route.fulfill({ json: { results: new URL(route.request().url()).searchParams.get('kind') === 'race' ? [racers[0]] : [], nextOffset: null } }));
     await page.route('**/api/race-results/*', route => route.fulfill({ json: archive }));
@@ -58,17 +60,21 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await expect(configuration.getByText('Saved with this round', { exact: true })).toHaveCount(0);
     const field = (label: string) => configuration.locator('dl > div').filter({ has: page.getByText(label, { exact: true }) }).locator('dd');
     await expect(field('Mode')).toHaveText(({ time: 'Time', words: 'Words', quotes: 'Quotes', passage: 'Passage' })[mode]);
-    await expect(field('Language')).toHaveText('English 2k');
+    await expect(field('Language')).toHaveText(mode === 'quotes' ? 'English' : 'English 2k');
     await expect(field('Punctuation')).toHaveText('Off');
     await expect(field('Numbers')).toHaveText('On');
     await expect(configuration.locator('input, button, select')).toHaveCount(0);
     if (mode === 'time') {
       await expect(field('Time limit')).toHaveText('60 seconds');
       await expect(field('Word count')).toHaveCount(0);
+      await expect(field('Error threshold')).toHaveText('12%');
     } else if (mode === 'words') {
       await expect(field('Word count')).toHaveText('100 words');
       await expect(field('Time limit')).toHaveCount(0);
-    } else await expect(configuration.locator('dl > div')).toHaveCount(4);
+    } else if (mode === 'quotes') {
+      await expect(field('Quote length')).toHaveText('Short');
+    } else await expect(configuration.locator('dl > div')).toHaveCount(5);
+    if (mode !== 'time') await expect(field('Error threshold')).toHaveText('12%');
     await page.screenshot({ path: testInfo.outputPath(`saved-race-settings-${theme}-${width}.png`), fullPage: true });
     await chart.screenshot({ path: testInfo.outputPath(`saved-race-chart-${theme}-${width}.png`) });
     await page.getByRole('button', { name: 'Back to history' }).click();
@@ -80,6 +86,7 @@ for (const theme of ['dark-forest', 'classic']) for (const width of [320, 1440])
     await checkChart();
     await page.goto('/#/ranking');
     await expect(page.getByRole('heading', { name: 'Race results', exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Your result' }).getByText('73.50', { exact: true })).toBeVisible();
     await checkChart();
     expect(errors).toEqual([]);
     expect(await page.evaluate(() => (window as typeof window & { savedRaceChartErrors: string[] }).savedRaceChartErrors)).toEqual([]);

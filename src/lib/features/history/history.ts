@@ -1,5 +1,6 @@
 import { isRecord, type PracticeSummary, type RaceResult } from "../../../../backend/src/persistence.contract";
 import { raceLanguages, raceModes } from "../../../../backend/src/race.settings";
+import { quoteLengths } from "../../../../shared/content/quote-length";
 import { practiceModes, testLabel, testLanguage } from "../auth/dashboard";
 
 export type HistoryRow = PracticeSummary | RaceResult;
@@ -40,15 +41,20 @@ export type SavedRaceSetting = { label: string; value: string };
 export function savedRaceSettings(value: unknown): SavedRaceSetting[] {
 	if (!isRecord(value) || !["mode", "language", "duration", "wordCount", "punctuation", "numbers"].some(key => Object.hasOwn(value, key))) return [];
 	const mode = typeof value.mode === "string" && Object.hasOwn(raceModes, value.mode) ? value.mode as keyof typeof raceModes : undefined;
-	const language = typeof value.language === "string" && Object.hasOwn(raceLanguages, value.language) ? raceLanguages[value.language as keyof typeof raceLanguages] : "Unavailable";
+	const language = mode === "quotes" ? raceLanguages.english
+		: typeof value.language === "string" && Object.hasOwn(raceLanguages, value.language) ? raceLanguages[value.language as keyof typeof raceLanguages] : "Unavailable";
+	const quoteLength = quoteLengths.find(length => length === value.quoteLength);
 	const limit = (count: unknown, unit: string) => typeof count === "number" && Number.isSafeInteger(count) && count > 0 ? `${count} ${unit}` : "Unavailable";
 	const toggle = (enabled: unknown) => typeof enabled === "boolean" ? enabled ? "On" : "Off" : "Unavailable";
 	return [
-		{ label: "Mode", value: mode ? raceModes[mode] : "Unavailable" },
+		{ label: "Mode", value: value.mode === "passage" ? "Passage" : mode ? raceModes[mode] : "Unavailable" },
 		{ label: "Language", value: language },
 		...(mode === "time" ? [{ label: "Time limit", value: limit(value.duration, "seconds") }]
-			: mode === "words" ? [{ label: "Word count", value: limit(value.wordCount, "words") }] : []),
+			: mode === "words" ? [{ label: "Word count", value: limit(value.wordCount, "words") }]
+			: quoteLength && mode === "quotes" ? [{ label: "Quote length", value: quoteLength[0].toUpperCase() + quoteLength.slice(1) }] : []),
 		{ label: "Punctuation", value: toggle(value.punctuation) },
 		{ label: "Numbers", value: toggle(value.numbers) },
+		...(typeof value.errorThreshold === "number" && Number.isInteger(value.errorThreshold) && value.errorThreshold >= 5 && value.errorThreshold <= 15
+			? [{ label: "Error threshold", value: `${value.errorThreshold}%` }] : []),
 	];
 }

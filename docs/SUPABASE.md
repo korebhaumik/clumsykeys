@@ -64,8 +64,8 @@ an actionable startup error. Keep all `.env` files out of source control.
 
 ## Migration inventory
 
-Apply all eight versioned migrations in order; do not stop after the original
-account tables. `npm run db:plan` shows pending changes without applying them.
+Apply all nine versioned migrations in order. `npm run db:plan` shows pending
+changes without applying them.
 `npm run db:push` applies changes to the configured hosted project and is an
 operator action, not an application startup task.
 
@@ -79,6 +79,7 @@ operator action, not an application startup task.
 | `20261115000100_account_display_names.sql` | Synchronize public profile names on Auth metadata updates and repair blank OAuth profiles. |
 | `20261115000200_unique_account_handles.sql` | Nullable unique handles, a service-only claim RPC, and handle projection in solo rankings. |
 | `20261115000300_seed_existing_handles.sql` | Seed existing unclaimed handles from public names, preserving claims and resolving collisions. |
+| `20261119000100_timed_race_error_limit.sql` | Allow saved timed-race participants to record that they exceeded the error threshold. |
 
 The SQL source defines owner-only reads, no anonymous table access, and
 backend-only result/preference writes. Auth signup and metadata updates maintain
@@ -123,15 +124,21 @@ See [Supabase's GitHub setup guide](https://supabase.com/docs/guides/auth/social
 - `race_rounds` and `race_results` store the original roster, bounded samples,
   server finish times, guest participants, disconnects, aborted rounds and the
   round’s settings snapshot. History displays that snapshot with the race chart;
-  only the active time or word limit is shown. Missing values are marked
-  unavailable without substituting current lobby defaults. The
+  only the active time, word limit or quote length is shown. Older Passage
+  rounds retain their mode label, and older unfiltered quote rounds omit
+  the length field. All modes display their archived error threshold when present.
+  Missing values use
+  the saved history view's unavailable state or are omitted. The
   server captures results before replay or disconnect cleanup can erase them.
   Restricted RPC functions write parent/child rows atomically. Host-ended races
   reuse `outcome: aborted` with the original roster and latest server-held
   metrics captured before returning to the lobby. Completed racers retain their
   completion reason; unfinished racers use the existing `disconnected` reason
   (the legacy schema does not distinguish host cancellation per participant).
-  No database migration is required.
+  Timed racers above the allowance are saved with reason `error-limit`. The
+  scoreboard derives Precision Pace and places at read time from
+  recorded WPM, accuracy, finish time and outcome, including for older completed
+  rounds.
 - Every application table has RLS and explicit grants. Browser users can read
   only their own records; write RPC functions are callable only by the server
   role. The backend verifies access tokens and checks ownership independently.

@@ -12,8 +12,8 @@ Settings adapter → catalog → selection → modifiers → renderer.
 - `prose-catalog.ts`: word catalogs. The 2K list remains the first
   2,000 alphabetic entries from the filtered 5K list; preserve its ordering.
 - `quote-catalog.ts`: complete English quotes, classified from original text by
-  `quote-length.ts`: short ≤100 characters, medium 101–300, long >300. Solo defaults
-  to medium; multiplayer retains its unfiltered quote pool.
+  `quote-length.ts`: short ≤100 characters, medium 101–300, long >300.
+  Solo and multiplayer both default to medium.
 - `keyword-catalog.ts`: all six languages use JSON word arrays.
 - `snippet-catalog.ts`: complete snippets with stable IDs, language, authored
   `short` / `medium` / `long` category, source metadata and indentation-preserving lines.
